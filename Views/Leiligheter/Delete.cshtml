@@ -1,0 +1,60 @@
+﻿@model DugnadAppMvc.Models.Leilighet
+
+@{
+    ViewData["Title"] = "Slett leilighet";
+}
+
+<h2>Slett leilighet</h2>
+
+@if (Model.Beboere.Any())
+{
+    <div class="alert alert-warning">
+        Denne leiligheten kan ikke slettes fordi den har registrerte beboere.
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+
+        <dl class="row">
+            <dt class="col-sm-4">
+                Seksjonsnummer
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Seksjonsnummer
+            </dd>
+
+            <dt class="col-sm-4">
+                Leilighetsnummer
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Leilighetsnummer
+            </dd>
+
+            <dt class="col-sm-4">
+                Antall beboere
+            </dt>
+            <dd class="col-sm-8">
+                @Model.Beboere.Count
+            </dd>
+        </dl>
+
+    </div>
+</div>
+
+<form asp-action="Delete" method="post">
+
+    <input type="hidden" asp-for="Id" />
+
+    @if (!Model.Beboere.Any())
+    {
+        <button type="submit" class="btn btn-danger">
+            Slett
+        </button>
+    }
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Tilbake
+    </a>
+
+</form>

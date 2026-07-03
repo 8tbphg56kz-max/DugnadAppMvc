@@ -1,0 +1,80 @@
+﻿@model IEnumerable<DugnadAppMvc.Models.Dugnad>
+
+@{
+    ViewData["Title"] = "Dugnader";
+}
+
+<h2>Dugnader</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Ny dugnad
+    </a>
+</p>
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th>Tittel</th>
+            <th>Start</th>
+            <th>Slutt</th>
+            <th>Påmelding</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var dugnad in Model)
+        {
+            <tr>
+
+                <td>@dugnad.Tittel</td>
+
+                <td>
+                    @dugnad.StartDato.ToString("dd.MM.yyyy")
+                </td>
+
+                <td>
+                    @dugnad.SluttDato.ToString("dd.MM.yyyy")
+                </td>
+
+                <td>
+                    @(dugnad.KreverPamelding ? "Ja" : "Nei")
+                </td>
+
+                <td>
+                    @if (dugnad.ErSynlig)
+                    {
+                        <span class="badge bg-success">Synlig</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Skjult</span>
+                    }
+                </td>
+
+                <td>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@dugnad.Id"
+                       class="btn btn-sm btn-outline-primary">
+                        Rediger
+                    </a>
+
+                    <a asp-action="Hide"
+                       asp-route-id="@dugnad.Id"
+                       class="btn btn-sm btn-outline-warning">
+                        Skjul
+                    </a>
+
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

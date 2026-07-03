@@ -1,0 +1,28 @@
+﻿@model DugnadAppMvc.ViewModels.VerifyCodeViewModel
+
+<h2>Logg inn</h2>
+
+<p>
+    Vi har sendt en 6-sifret kode til e-postadressen din.
+</p>
+
+<form asp-action="VerifyCode" method="post">
+
+    <input asp-for="Epost" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="Kode"></label>
+        <input asp-for="Kode" class="form-control" autocomplete="one-time-code" />
+        <span asp-validation-for="Kode" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Logg inn
+    </button>
+
+</form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

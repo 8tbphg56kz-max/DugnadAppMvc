@@ -1,0 +1,31 @@
+﻿@model DugnadAppMvc.Models.Leilighet
+
+@{
+    ViewData["Title"] = "Ny leilighet";
+}
+
+<h2>Ny leilighet</h2>
+
+<form asp-action="Create" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Seksjonsnummer" class="form-label"></label>
+        <input asp-for="Seksjonsnummer" class="form-control" />
+        <span asp-validation-for="Seksjonsnummer" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Leilighetsnummer" class="form-label"></label>
+        <input asp-for="Leilighetsnummer" class="form-control" />
+        <span asp-validation-for="Leilighetsnummer" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Lagre
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Avbryt
+    </a>
+
+</form>

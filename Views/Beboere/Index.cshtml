@@ -1,0 +1,66 @@
+﻿@model IEnumerable<DugnadAppMvc.Models.Beboer>
+
+@{
+    ViewData["Title"] = "Beboere";
+}
+
+<h2>Beboere</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Ny beboer
+    </a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Fornavn</th>
+            <th>Etternavn</th>
+            <th>E-post</th>
+            <th>Seksjonsnr</th>
+            <th>Leilighet</th>
+            <th>Administrator</th>
+            <th>Aktiv</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var beboer in Model)
+        {
+            <tr>
+                <td>@beboer.Fornavn</td>
+                <td>@beboer.Etternavn</td>
+                <td>@beboer.Epost</td>
+                <td>@beboer.Leilighet.Seksjonsnummer</td>
+                <td>@beboer.Leilighet.Leilighetsnummer</td>
+                <td>@(beboer.ErAdmin ? "Ja" : "Nei")</td>
+                <td>
+                    @if (beboer.Aktiv)
+                    {
+                        <span class="badge bg-success">Aktiv</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inaktiv</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@beboer.Id"
+                       class="btn btn-sm btn-outline-primary">
+                        Rediger
+                    </a>
+
+                    <a asp-action="Deactivate"
+                       asp-route-id="@beboer.Id"
+                       class="btn btn-sm btn-outline-warning">
+                        Deaktiver
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>

@@ -1,0 +1,73 @@
+﻿@model DugnadAppMvc.Models.Beboer
+
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Rediger beboer";
+}
+
+<h2>Rediger beboer</h2>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Fornavn" class="form-label"></label>
+        <input asp-for="Fornavn" class="form-control" />
+        <span asp-validation-for="Fornavn" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Etternavn" class="form-label"></label>
+        <input asp-for="Etternavn" class="form-control" />
+        <span asp-validation-for="Etternavn" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Epost" class="form-label"></label>
+        <input asp-for="Epost" class="form-control" />
+        <span asp-validation-for="Epost" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="LeilighetId" class="form-label">Leilighet</label>
+
+        <select asp-for="LeilighetId"
+                class="form-select"
+                asp-items="@(new SelectList(ViewBag.Leiligheter, "Id", "Visningsnavn"))">
+        </select>
+
+        <span asp-validation-for="LeilighetId" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-2">
+        <input asp-for="ErAdmin" class="form-check-input" />
+        <label asp-for="ErAdmin" class="form-check-label">
+            Administrator for DugnadApp
+        </label>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="Aktiv" class="form-check-input" />
+        <label asp-for="Aktiv" class="form-check-label">
+            Aktiv beboer
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Lagre
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Avbryt
+    </a>
+
+</form>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

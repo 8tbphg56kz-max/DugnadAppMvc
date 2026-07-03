@@ -1,0 +1,47 @@
+﻿@model IEnumerable<DugnadAppMvc.Models.Leilighet>
+
+@{
+    ViewData["Title"] = "Leiligheter";
+}
+
+<h2>Leiligheter</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Ny leilighet
+    </a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Seksjonsnummer</th>
+            <th>Leilighetsnummer</th>
+            <th>Antall beboere</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var leilighet in Model)
+        {
+            <tr>
+                <td>@leilighet.Seksjonsnummer</td>
+                <td>@leilighet.Leilighetsnummer</td>
+                <td>@leilighet.Beboere.Count</td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@leilighet.Id"
+                       class="btn btn-sm btn-outline-primary">
+                        Rediger
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@leilighet.Id"
+                       class="btn btn-sm btn-outline-danger">
+                        Slett
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
