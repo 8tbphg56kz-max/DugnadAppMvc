@@ -1,6 +1,8 @@
 ﻿using DugnadAppMvc.Data;
 using DugnadAppMvc.Models;
+using DugnadAppMvc.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +12,17 @@ namespace DugnadAppMvc.Controllers
     public class BeboereController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserProvisioningService _userProvisioningService;
 
-        public BeboereController(ApplicationDbContext context)
+        public BeboereController(
+    ApplicationDbContext context,
+    UserManager<ApplicationUser> userManager,
+    UserProvisioningService userProvisioningService)
         {
             _context = context;
+            _userManager = userManager;
+            _userProvisioningService = userProvisioningService;
         }
 
         public async Task<IActionResult> Index()
@@ -52,6 +61,8 @@ namespace DugnadAppMvc.Controllers
 
             _context.Beboere.Add(beboer);
             await _context.SaveChangesAsync();
+
+            //await _userProvisioningService.CreateUserAsync(beboer);            
 
             return RedirectToAction(nameof(Index));
 

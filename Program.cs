@@ -40,6 +40,8 @@ namespace DugnadAppMvc
 
             builder.Services.AddScoped<EmailService>();
 
+            builder.Services.AddScoped<UserProvisioningService>();
+
             builder.Services.AddScoped<LoginCodeService>();
 
             var app = builder.Build();            
