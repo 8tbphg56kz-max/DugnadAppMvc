@@ -55,10 +55,6 @@ namespace DugnadAppMvc.Controllers
 
             return RedirectToAction(nameof(Index));
 
-            _context.Beboere.Add(beboer);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
