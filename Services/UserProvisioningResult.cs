@@ -9,4 +9,5 @@ public class UserProvisioningResult
     public bool IsNewUser { get; set; }
 
     public string? ResetPasswordToken { get; set; }
+    public string? ActivationLink { get; set; }
 }

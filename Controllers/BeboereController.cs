@@ -60,7 +60,20 @@ namespace DugnadAppMvc.Controllers
             _context.Beboere.Add(beboer);
             await _context.SaveChangesAsync();
 
-            //await _userProvisioningService.CreateUserAsync(beboer);            
+            var provisioningResult =
+                await _userProvisioningService.CreateUserAsync(beboer);
+
+            var activationLink = Url.Action(
+                "Activate",
+                "Account",
+                new
+                {
+                    userId = provisioningResult.User.Id,
+                    token = provisioningResult.ResetPasswordToken
+                },
+                Request.Scheme);
+
+            TempData["ActivationLink"] = activationLink;
 
             return RedirectToAction(nameof(Index));
 
