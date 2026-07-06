@@ -15,7 +15,6 @@ namespace DugnadAppMvc.Data
         public DbSet<Leilighet> Leiligheter => Set<Leilighet>();
         public DbSet<Dugnad> Dugnader => Set<Dugnad>();
         public DbSet<Deltakelse> Deltakelser => Set<Deltakelse>();
-        public DbSet<LoginCode> LoginCodes => Set<LoginCode>();
         public DbSet<Sameie> Sameier { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)

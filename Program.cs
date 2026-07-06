@@ -16,10 +16,19 @@ namespace DugnadAppMvc
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            // Identity
             builder.Services
-                .AddIdentity<ApplicationUser, IdentityRole>()
+                .AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    // Passordkrav
+                    options.Password.RequiredLength = 8;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+
+                    // Brukernavn
+                    options.User.RequireUniqueEmail = true;
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -28,6 +37,10 @@ namespace DugnadAppMvc
                 options.LoginPath = "/Account/Login";
                 options.LogoutPath = "/Account/Logout";
                 options.AccessDeniedPath = "/Account/AccessDenied";
+
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                options.SlidingExpiration = true;
+                options.Cookie.HttpOnly = true;
             });
 
             // MVC
@@ -41,8 +54,6 @@ namespace DugnadAppMvc
             builder.Services.AddScoped<EmailService>();
 
             builder.Services.AddScoped<UserProvisioningService>();
-
-            builder.Services.AddScoped<LoginCodeService>();
 
             var app = builder.Build();            
 

@@ -15,12 +15,16 @@ namespace DugnadAppMvc.Controllers
    
         private readonly UserProvisioningService _userProvisioningService;
 
+        private readonly EmailService _emailService;
+
         public BeboereController(
-      ApplicationDbContext context,
-      UserProvisioningService userProvisioningService)
+     ApplicationDbContext context,
+     UserProvisioningService userProvisioningService,
+     EmailService emailService)
         {
             _context = context;
             _userProvisioningService = userProvisioningService;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index()
@@ -64,16 +68,18 @@ namespace DugnadAppMvc.Controllers
                 await _userProvisioningService.CreateUserAsync(beboer);
 
             var activationLink = Url.Action(
-                "Activate",
-                "Account",
-                new
-                {
-                    userId = provisioningResult.User.Id,
-                    token = provisioningResult.ResetPasswordToken
-                },
-                Request.Scheme);
+    "Activate",
+    "Account",
+    new
+    {
+        userId = provisioningResult.User.Id,
+        token = provisioningResult.ResetPasswordToken
+    },
+    Request.Scheme);
 
-            TempData["ActivationLink"] = activationLink;
+            await _emailService.SendActivationEmailAsync(
+                beboer.Epost,
+                activationLink!);
 
             return RedirectToAction(nameof(Index));
 
