@@ -20,15 +20,23 @@ public class UserProvisioningService
     /// <summary>
     /// Oppretter en Identity-bruker for en beboer hvis den ikke finnes.
     /// </summary>
-    public async Task<ApplicationUser> CreateUserAsync(Beboer beboer)
+    /// <summary>
+    /// Oppretter en Identity-bruker for en beboer hvis den ikke finnes.
+    /// </summary>
+    public async Task<UserProvisioningResult> CreateUserAsync(Beboer beboer)
     {
-        // Finnes brukeren allerede?
-        var user = await _userManager.FindByEmailAsync(beboer.Epost);
+        var existingUser = await _userManager.FindByEmailAsync(beboer.Epost);
 
-        if (user != null)
-            return user;
+        if (existingUser != null)
+        {
+            return new UserProvisioningResult
+            {
+                User = existingUser,
+                IsNewUser = false
+            };
+        }
 
-        user = new ApplicationUser
+        var user = new ApplicationUser
         {
             UserName = beboer.Epost,
             Email = beboer.Epost,
@@ -37,7 +45,6 @@ public class UserProvisioningService
             EmailConfirmed = false
         };
 
-        // Opprettes uten passord.
         var result = await _userManager.CreateAsync(user);
 
         if (!result.Succeeded)
@@ -52,6 +59,13 @@ public class UserProvisioningService
 
         await _context.SaveChangesAsync();
 
-        return user;
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+        return new UserProvisioningResult
+        {
+            User = user,
+            IsNewUser = true,
+            ResetPasswordToken = token
+        };
     }
 }

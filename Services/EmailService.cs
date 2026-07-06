@@ -98,4 +98,30 @@ DugnadApp
             "Innloggingskode",
             body);
     }
+
+    public async Task SendActivationEmailAsync(
+    string email,
+    string activationLink)
+    {
+        var body = $"""
+Hei!
+
+Velkommen til DugnadApp.
+
+Klikk på lenken nedenfor for å aktivere kontoen din og velge passord.
+
+{activationLink}
+
+Hvis du ikke forventet denne e-posten, kan du se bort fra den.
+
+Hilsen
+DugnadApp
+""";
+
+        await SendAsync(
+            email,
+            "Aktiver kontoen din",
+            body);
+    }
 }
+

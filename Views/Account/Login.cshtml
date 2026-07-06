@@ -1,19 +1,43 @@
 ﻿@model DugnadAppMvc.ViewModels.LoginViewModel
 
+@{
+    ViewData["Title"] = "Logg inn";
+}
+
 <h2>Logg inn</h2>
 
 <form asp-action="Login" method="post">
-    <div class="mb-3">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
 
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label">
+            Husk meg
+        </label>
+    </div>
+
     <button type="submit" class="btn btn-primary">
-        Send innloggingslenke
+        Logg inn
     </button>
+
 </form>
+
+<p class="mt-3">
+    <a asp-action="ForgotPassword">
+        Glemt passord?
+    </a>
+</p>
 
 @section Scripts
 {

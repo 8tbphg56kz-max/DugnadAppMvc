@@ -1,0 +1,39 @@
+﻿@model DugnadAppMvc.ViewModels.ActivateViewModel
+
+@{
+    ViewData["Title"] = "Aktiver konto";
+}
+
+<h2>Velkommen til DugnadApp</h2>
+
+<p class="mb-4">
+    Velg et passord for kontoen din.
+</p>
+
+<form asp-action="Activate" method="post">
+
+    <input asp-for="UserId" type="hidden" />
+    <input asp-for="Token" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ConfirmPassword" class="form-label"></label>
+        <input asp-for="ConfirmPassword" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Aktiver konto
+    </button>
+
+</form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
