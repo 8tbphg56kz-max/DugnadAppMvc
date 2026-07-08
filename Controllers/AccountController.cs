@@ -4,7 +4,9 @@ using DugnadAppMvc.Services;
 using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace DugnadAppMvc.Controllers
 {
@@ -45,8 +47,22 @@ namespace DugnadAppMvc.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Feil e-postadresse eller passord.");
+                return View(model);
+            }
+
+            if (!user.IsActivated)
+            {
+                ModelState.AddModelError("", "Kontoen er ikke aktivert. Velg 'Aktiver konto' for å aktivere kontoen.");
+                return View(model);
+            }
+
             var result = await _signInManager.PasswordSignInAsync(
-                model.Email,
+                user,
                 model.Password,
                 model.RememberMe,
                 lockoutOnFailure: false);
@@ -59,12 +75,73 @@ namespace DugnadAppMvc.Controllers
             ModelState.AddModelError("", "Feil e-postadresse eller passord.");
 
             return View(model);
-        }       
-        
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActivateAccount(ActivateAccountViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null && !user.IsActivated)
+            {
+                // Lager en sikker token
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                token = WebEncoders.Base64UrlEncode(
+                    Encoding.UTF8.GetBytes(token));
+
+                var activationLink = Url.Action(
+                    "Activate",
+                    "Account",
+                    new
+                    {
+                        userId = user.Id,
+                        token = token
+                    },
+                    Request.Scheme);
+
+                await _emailService.SendActivationEmailAsync(
+                    user.Email!,
+                    activationLink!);
+            }
+
+            // Vis alltid samme melding
+            ViewBag.Message =
+                "Hvis e-postadressen er registrert hos oss, har vi sendt deg en e-post med instruksjoner.";
+
+            return View();
+        }
 
         [HttpGet]
-        public IActionResult Activate(string userId, string token)
+        public async Task<IActionResult> Activate(string userId, string token)
         {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (user.IsActivated)
+            {
+                TempData["Info"] = "Kontoen er allerede aktivert.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            token = Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(token));
+
             var model = new ActivateViewModel
             {
                 UserId = userId,
@@ -88,6 +165,15 @@ namespace DugnadAppMvc.Controllers
                 return NotFound();
             }
 
+            model.Token = Encoding.UTF8.GetString(
+            WebEncoders.Base64UrlDecode(model.Token));
+
+            if (user.IsActivated)
+            {
+                TempData["Info"] = "Kontoen er allerede aktivert.";
+                return RedirectToAction(nameof(Login));
+            }
+
             var result = await _userManager.ResetPasswordAsync(
                 user,
                 model.Token,
@@ -103,9 +189,22 @@ namespace DugnadAppMvc.Controllers
                 return View(model);
             }
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            user.IsActivated = true;
+            user.ActivatedDate = DateTime.UtcNow;
 
-            return RedirectToAction("Index", "Home");
+            await _userManager.UpdateAsync(user);
+
+            TempData["Success"] = "Kontoen er aktivert. Du kan nå logge inn.";
+
+            return RedirectToAction(nameof(Login));
+        }
+
+        [HttpGet]
+        public IActionResult ActivationEmailSent(string email)
+        {
+            ViewBag.Email = email;
+
+            return View();
         }
 
         [HttpGet]
@@ -115,5 +214,11 @@ namespace DugnadAppMvc.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+
+        [HttpGet]
+        public IActionResult ActivateAccount()
+        {
+            return View();
+        }       
     }
 }

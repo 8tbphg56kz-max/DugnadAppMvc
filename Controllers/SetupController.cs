@@ -1,6 +1,7 @@
 ﻿using DugnadAppMvc.Data;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.Models.ViewModels;
+using DugnadAppMvc.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,13 +12,19 @@ namespace DugnadAppMvc.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserProvisioningService _userProvisioningService;
+        private readonly EmailService _emailService;
 
         public SetupController(
-            ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager)
+    ApplicationDbContext context,
+    UserManager<ApplicationUser> userManager,
+    UserProvisioningService userProvisioningService,
+    EmailService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _userProvisioningService = userProvisioningService;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -57,28 +64,6 @@ namespace DugnadAppMvc.Controllers
             _context.Leiligheter.Add(leilighet);
             await _context.SaveChangesAsync();
 
-            // Opprett Identity-bruker
-            var user = new ApplicationUser
-            {
-                UserName = model.Epost,
-                Email = model.Epost,
-                EmailConfirmed = true,
-                FirstName = model.Fornavn,
-                LastName = model.Etternavn
-            };
-
-            var result = await _userManager.CreateAsync(user);
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-
-                return View(model);
-            }
-
             // Opprett beboer
             var beboer = new Beboer
             {
@@ -87,14 +72,33 @@ namespace DugnadAppMvc.Controllers
                 Epost = model.Epost,
                 ErAdmin = true,
                 Aktiv = true,
-                LeilighetId = leilighet.Id,
-                ApplicationUserId = user.Id
+                LeilighetId = leilighet.Id
             };
 
             _context.Beboere.Add(beboer);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Login", "Account");
+            var provisioningResult =
+                await _userProvisioningService.CreateUserAsync(beboer);
+
+            var activationLink = Url.Action(
+    "Activate",
+    "Account",
+    new
+    {
+        userId = provisioningResult.User.Id,
+        token = provisioningResult.ResetPasswordToken
+    },
+    protocol: "https");
+
+            await _emailService.SendActivationEmailAsync(
+                beboer.Epost,
+                activationLink!);
+
+            return RedirectToAction(
+    "ActivationEmailSent",
+    "Account",
+    new { email = beboer.Epost });
         }
     }
 }

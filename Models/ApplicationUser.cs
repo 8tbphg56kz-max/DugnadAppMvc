@@ -9,5 +9,9 @@ namespace DugnadAppMvc.Models
         public string? LastName { get; set; }
 
         public DateTime Created { get; set; } = DateTime.UtcNow;
+
+        public bool IsActivated { get; set; } = false;
+
+        public DateTime? ActivatedDate { get; set; }
     }
 }

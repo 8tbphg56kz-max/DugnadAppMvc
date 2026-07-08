@@ -3,6 +3,7 @@ using DugnadAppMvc.Models;
 using DugnadAppMvc.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace DugnadAppMvc
 {
@@ -55,6 +56,13 @@ namespace DugnadAppMvc
 
             builder.Services.AddScoped<UserProvisioningService>();
 
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor |
+                    ForwardedHeaders.XForwardedProto;
+            });
+
             var app = builder.Build();            
 
             // Configure the HTTP request pipeline.
@@ -63,6 +71,8 @@ namespace DugnadAppMvc
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+
+            app.UseForwardedHeaders();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

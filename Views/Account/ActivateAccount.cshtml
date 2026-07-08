@@ -1,0 +1,38 @@
+﻿@model DugnadAppMvc.ViewModels.ActivateAccountViewModel
+
+@{
+    ViewData["Title"] = "Aktiver konto";
+}
+
+<h2>Aktiver konto</h2>
+
+<p>
+    Skriv inn e-postadressen som er registrert av styret.
+</p>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">
+        @ViewBag.Message
+    </div>
+}
+
+<form asp-action="ActivateAccount" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Send aktiveringslenke
+    </button>
+
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

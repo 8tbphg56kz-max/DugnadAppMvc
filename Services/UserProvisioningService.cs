@@ -64,8 +64,12 @@ public class UserProvisioningService
         return new UserProvisioningResult
         {
             User = user,
-            IsNewUser = true,
-            ResetPasswordToken = token
+            IsNewUser = true
         };
+    }
+
+    public async Task<string> GenerateActivationTokenAsync(ApplicationUser user)
+    {
+        return await _userManager.GeneratePasswordResetTokenAsync(user);
     }
 }

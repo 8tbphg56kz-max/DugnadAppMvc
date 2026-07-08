@@ -64,22 +64,7 @@ namespace DugnadAppMvc.Controllers
             _context.Beboere.Add(beboer);
             await _context.SaveChangesAsync();
 
-            var provisioningResult =
-                await _userProvisioningService.CreateUserAsync(beboer);
-
-            var activationLink = Url.Action(
-    "Activate",
-    "Account",
-    new
-    {
-        userId = provisioningResult.User.Id,
-        token = provisioningResult.ResetPasswordToken
-    },
-    Request.Scheme);
-
-            await _emailService.SendActivationEmailAsync(
-                beboer.Epost,
-                activationLink!);
+            await _userProvisioningService.CreateUserAsync(beboer);
 
             return RedirectToAction(nameof(Index));
 
