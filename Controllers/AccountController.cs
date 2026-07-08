@@ -106,6 +106,8 @@ namespace DugnadAppMvc.Controllers
                     },
                     Request.Scheme);
 
+                Console.WriteLine("Sender aktiveringsmail...");
+
                 await _emailService.SendActivationEmailAsync(
                     user.Email!,
                     activationLink!);
@@ -147,6 +149,11 @@ namespace DugnadAppMvc.Controllers
                 UserId = userId,
                 Token = token
             };
+
+            ViewBag.Title = "Velkommen til DugnadApp";
+            ViewBag.Description = "Velg et passord for kontoen din.";
+            ViewBag.ButtonText = "Aktiver konto";
+            ViewBag.Action = "Activate";
 
             return View(model);
         }
@@ -219,6 +226,96 @@ namespace DugnadAppMvc.Controllers
         public IActionResult ActivateAccount()
         {
             return View();
-        }       
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null && user.IsActivated)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                token = WebEncoders.Base64UrlEncode(
+                    Encoding.UTF8.GetBytes(token));
+
+                var resetLink = Url.Action(
+                    "ResetPassword",
+                    "Account",
+                    new
+                    {
+                        userId = user.Id,
+                        token
+                    },
+                    Request.Scheme);
+
+                await _emailService.SendPasswordResetEmailAsync(
+                    user.Email!,
+                    resetLink!);
+            }
+
+            return View("ForgotPasswordConfirmation");
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            var model = new ActivateViewModel
+            {
+                UserId = userId,
+                Token = token
+            };
+
+            ViewBag.Title = "Velg nytt passord";
+            ViewBag.Description = "Skriv inn et nytt passord.";
+            ViewBag.ButtonText = "Lagre nytt passord";
+            ViewBag.Action = "ResetPassword";
+
+            return View("Activate", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ActivateViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View("Activate", model);
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+
+            if (user == null)
+                return NotFound();
+
+            model.Token = Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(model.Token));
+
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                model.Token,
+                model.Password);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError("", error.Description);
+
+                return View("Activate", model);
+            }
+
+            TempData["Success"] = "Passordet er endret. Du kan nå logge inn.";
+
+            return RedirectToAction(nameof(Login));
+        }
     }
 }

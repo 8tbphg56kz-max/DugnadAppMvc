@@ -4,13 +4,13 @@
     ViewData["Title"] = "Aktiver konto";
 }
 
-<h2>Velkommen til DugnadApp</h2>
+<h2>@ViewBag.Title</h2>
 
 <p class="mb-4">
-    Velg et passord for kontoen din.
+    @ViewBag.Description
 </p>
 
-<form asp-action="Activate" method="post">
+<form asp-action="@ViewBag.Action" method="post">
 
     <div asp-validation-summary="All" class="text-danger"></div>
 
@@ -30,7 +30,7 @@
     </div>
 
     <button type="submit" class="btn btn-primary">
-        Aktiver konto
+        @ViewBag.ButtonText
     </button>
 
 </form>

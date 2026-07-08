@@ -1,32 +1,32 @@
 ﻿@{
-    ViewData["Title"] = "Nesten ferdig!";
+    ViewData["Title"] = "Aktiveringslenke sendt";
 }
 
 <div class="container mt-4">
 
     <div class="alert alert-success">
 
-        <h3>Nesten ferdig!</h3>
+        <h3>Aktiveringslenke sendt</h3>
 
         <p>
-            Vi har sendt en aktiveringslenke til:
-        </p>
-
-        <p>
-            <strong>@ViewBag.Email</strong>
+            Hvis kontoen ikke allerede er aktivert, har vi sendt en aktiveringslenke til den registrerte e-postadressen.
         </p>
 
         <p>
-            Åpne e-posten og klikk på lenken for å velge passord.
+            Åpne e-posten og klikk på Aktiver konto for å velge passord.
         </p>
 
         <p>
-            Når passordet er valgt, blir du logget inn automatisk.
+            Finner du ikke e-posten, sjekk også mappen for søppelpost.
         </p>
 
-        <p class="mb-0">
-            Du kan lukke denne siden mens du venter på e-posten.
+        <p>
+            Hvis kontoen allerede er aktivert, kan du logge inn eller bruke Glemt passord dersom du ikke husker passordet.
         </p>
+
+        <a asp-action="Login" class="btn btn-primary">
+            Tilbake til innlogging
+        </a>
 
     </div>
 

@@ -15,21 +15,31 @@
     <div class="alert alert-success">
         @ViewBag.Message
     </div>
+
+    <p>
+        Sjekk innboksen din. Finner du ikke e-posten, se i søppelpost.
+    </p>
+
+    <a asp-action="Login" class="btn btn-secondary">
+        Tilbake til innlogging
+    </a>
 }
+else
+{
+    <form asp-action="ActivateAccount" method="post">
 
-<form asp-action="ActivateAccount" method="post">
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
+        <button type="submit" class="btn btn-primary">
+            Send aktiveringslenke
+        </button>
 
-    <button type="submit" class="btn btn-primary">
-        Send aktiveringslenke
-    </button>
-
-</form>
+    </form>
+}
 
 @section Scripts {
     @{
