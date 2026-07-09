@@ -1,0 +1,31 @@
+﻿@model DugnadAppMvc.ViewModels.RequestActivationViewModel
+
+@{
+    ViewData["Title"] = "Opprett passord";
+}
+
+<h2>Opprett passord</h2>
+
+<p>
+    Skriv inn e-postadressen din. Hvis den er registrert hos oss,
+    sender vi deg en e-post med en lenke for å opprette passord.
+</p>
+
+<form asp-action="RequestActivation" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Send e-post
+    </button>
+
+</form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

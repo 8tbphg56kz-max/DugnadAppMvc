@@ -66,6 +66,9 @@ namespace DugnadAppMvc.Controllers
 
             await _userProvisioningService.CreateUserAsync(beboer);
 
+            TempData["SuccessMessage"] =
+    $"Beboeren {beboer.Fornavn} {beboer.Etternavn} er opprettet.";
+
             return RedirectToAction(nameof(Index));
 
         }

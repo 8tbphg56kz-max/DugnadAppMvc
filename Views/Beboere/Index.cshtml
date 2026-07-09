@@ -1,7 +1,10 @@
 ﻿@model IEnumerable<DugnadAppMvc.Models.Beboer>
 
-@{
-    ViewData["Title"] = "Beboere";
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
 }
 
 <h2>Beboere</h2>

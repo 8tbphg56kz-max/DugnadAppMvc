@@ -13,18 +13,15 @@ namespace DugnadAppMvc.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly UserProvisioningService _userProvisioningService;
-        private readonly EmailService _emailService;
 
         public SetupController(
-    ApplicationDbContext context,
-    UserManager<ApplicationUser> userManager,
-    UserProvisioningService userProvisioningService,
-    EmailService emailService)
+     ApplicationDbContext context,
+     UserManager<ApplicationUser> userManager,
+     UserProvisioningService userProvisioningService)
         {
             _context = context;
             _userManager = userManager;
             _userProvisioningService = userProvisioningService;
-            _emailService = emailService;
         }
 
         [HttpGet]
@@ -78,27 +75,12 @@ namespace DugnadAppMvc.Controllers
             _context.Beboere.Add(beboer);
             await _context.SaveChangesAsync();
 
-            var provisioningResult =
-                await _userProvisioningService.CreateUserAsync(beboer);
+            await _userProvisioningService.CreateUserAsync(beboer);
 
-            var activationLink = Url.Action(
-    "Activate",
-    "Account",
-    new
-    {
-        userId = provisioningResult.User.Id,
-        token = provisioningResult.ResetPasswordToken
-    },
-    protocol: "https");
+            TempData["SuccessMessage"] =
+                "Administratoren er opprettet. Du kan nå opprette passord fra innloggingssiden.";
 
-            await _emailService.SendActivationEmailAsync(
-                beboer.Epost,
-                activationLink!);
-
-            return RedirectToAction(
-    "ActivationEmailSent",
-    "Account",
-    new { email = beboer.Epost });
-        }
+            return RedirectToAction("Login", "Account");        
+    }
     }
 }

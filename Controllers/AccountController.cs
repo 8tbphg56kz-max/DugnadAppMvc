@@ -51,13 +51,15 @@ namespace DugnadAppMvc.Controllers
 
             if (user == null)
             {
-                ModelState.AddModelError("", "Feil e-postadresse eller passord.");
+                ModelState.AddModelError(nameof(model.Email),
+                    "Du har ikke opprettet passord ennå. Klikk «Opprett passord» nedenfor.");
                 return View(model);
             }
 
             if (!user.IsActivated)
             {
-                ModelState.AddModelError("", "Kontoen er ikke aktivert. Velg 'Aktiver konto' for å aktivere kontoen.");
+                ModelState.AddModelError(nameof(model.Email), 
+                    "Du har ikke opprettet passord ennå. Klikk «Opprett passord» nedenfor.");
                 return View(model);
             }
 
@@ -77,48 +79,13 @@ namespace DugnadAppMvc.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ActivateAccount(ActivateAccountViewModel model)
+        [HttpGet]
+        public async Task<IActionResult> Logout()
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            await _signInManager.SignOutAsync();
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user != null && !user.IsActivated)
-            {
-                // Lager en sikker token
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-                token = WebEncoders.Base64UrlEncode(
-                    Encoding.UTF8.GetBytes(token));
-
-                var activationLink = Url.Action(
-                    "Activate",
-                    "Account",
-                    new
-                    {
-                        userId = user.Id,
-                        token = token
-                    },
-                    Request.Scheme);
-
-                Console.WriteLine("Sender aktiveringsmail...");
-
-                await _emailService.SendActivationEmailAsync(
-                    user.Email!,
-                    activationLink!);
-            }
-
-            // Vis alltid samme melding
-            ViewBag.Message =
-                "Hvis e-postadressen er registrert hos oss, har vi sendt deg en e-post med instruksjoner.";
-
-            return View();
-        }
+            return RedirectToAction("Index", "Home");
+        }        
 
         [HttpGet]
         public async Task<IActionResult> Activate(string userId, string token)
@@ -140,9 +107,6 @@ namespace DugnadAppMvc.Controllers
                 TempData["Info"] = "Kontoen er allerede aktivert.";
                 return RedirectToAction(nameof(Login));
             }
-
-            token = Encoding.UTF8.GetString(
-                WebEncoders.Base64UrlDecode(token));
 
             var model = new ActivateViewModel
             {
@@ -171,15 +135,14 @@ namespace DugnadAppMvc.Controllers
             {
                 return NotFound();
             }
-
-            model.Token = Encoding.UTF8.GetString(
-            WebEncoders.Base64UrlDecode(model.Token));
-
+            
             if (user.IsActivated)
             {
                 TempData["Info"] = "Kontoen er allerede aktivert.";
                 return RedirectToAction(nameof(Login));
             }
+
+            model.Token = DecodeToken(model.Token);
 
             var result = await _userManager.ResetPasswordAsync(
                 user,
@@ -204,30 +167,8 @@ namespace DugnadAppMvc.Controllers
             TempData["Success"] = "Kontoen er aktivert. Du kan nå logge inn.";
 
             return RedirectToAction(nameof(Login));
-        }
-
-        [HttpGet]
-        public IActionResult ActivationEmailSent(string email)
-        {
-            ViewBag.Email = email;
-
-            return View();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        [HttpGet]
-        public IActionResult ActivateAccount()
-        {
-            return View();
-        }
-
+        }        
+      
         [HttpGet]
         public IActionResult ForgotPassword()
         {
@@ -258,7 +199,7 @@ namespace DugnadAppMvc.Controllers
                         userId = user.Id,
                         token
                     },
-                    Request.Scheme);
+                    protocol: "https");
 
                 await _emailService.SendPasswordResetEmailAsync(
                     user.Email!,
@@ -295,10 +236,9 @@ namespace DugnadAppMvc.Controllers
             var user = await _userManager.FindByIdAsync(model.UserId);
 
             if (user == null)
-                return NotFound();
+                return NotFound();          
 
-            model.Token = Encoding.UTF8.GetString(
-                WebEncoders.Base64UrlDecode(model.Token));
+            model.Token = DecodeToken(model.Token);
 
             var result = await _userManager.ResetPasswordAsync(
                 user,
@@ -316,6 +256,57 @@ namespace DugnadAppMvc.Controllers
             TempData["Success"] = "Passordet er endret. Du kan nå logge inn.";
 
             return RedirectToAction(nameof(Login));
+        }
+        private static string DecodeToken(string token)
+        {
+            return Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(token));
+        }
+
+        [HttpGet]
+        public IActionResult RequestActivation()
+        {
+            return View(new RequestActivationViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RequestActivation(RequestActivationViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                token = WebEncoders.Base64UrlEncode(
+                    Encoding.UTF8.GetBytes(token));
+
+                var activationLink = Url.Action(
+                    "Activate",
+                    "Account",
+                    new
+                    {
+                        userId = user.Id,
+                        token = token
+                    },
+                    protocol: "https");
+
+                await _emailService.SendActivationEmailAsync(
+                    model.Email,
+                    activationLink!);
+            }
+
+            return RedirectToAction(nameof(RequestActivationConfirmation));
+        }
+
+        [HttpGet]
+        public IActionResult RequestActivationConfirmation()
+        {
+            return View();
         }
     }
 }
