@@ -14,9 +14,8 @@ namespace DugnadAppMvc.Data
         public DbSet<Beboer> Beboere => Set<Beboer>();
         public DbSet<Leilighet> Leiligheter => Set<Leilighet>();
         public DbSet<Dugnad> Dugnader => Set<Dugnad>();
-        public DbSet<Deltakelse> Deltakelser => Set<Deltakelse>();
-        public DbSet<Sameie> Sameier { get; set; }
-
+         public DbSet<Sameie> Sameier { get; set; }
+        public DbSet<Dugnadstime> Dugnadstimer { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -45,21 +44,19 @@ namespace DugnadAppMvc.Data
                 .HasIndex(b => b.Epost)
                 .IsUnique();
 
-            builder.Entity<Deltakelse>()
-                .HasOne(d => d.Beboer)
-                .WithMany(b => b.Deltakelser)
-                .HasForeignKey(d => d.BeboerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Dugnadstime -> Dugnad
+            builder.Entity<Dugnadstime>()
+                .HasOne(dt => dt.Dugnad)
+                .WithMany(d => d.Dugnadstimer)
+                .HasForeignKey(dt => dt.DugnadId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Deltakelse>()
-                .HasOne(d => d.Dugnad)
-                .WithMany(d => d.Deltakelser)
-                .HasForeignKey(d => d.DugnadId)
+            // Dugnadstime -> Beboer
+            builder.Entity<Dugnadstime>()
+                .HasOne(dt => dt.Beboer)
+                .WithMany(b => b.Dugnadstimer)
+                .HasForeignKey(dt => dt.BeboerId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Deltakelse>()
-                .HasIndex(d => new { d.DugnadId, d.BeboerId })
-                .IsUnique();
         }
     }
 }

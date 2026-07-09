@@ -34,6 +34,8 @@ namespace DugnadAppMvc.Migrations
                     FirstName = table.Column<string>(type: "text", nullable: true),
                     LastName = table.Column<string>(type: "text", nullable: true),
                     Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsActivated = table.Column<bool>(type: "boolean", nullable: false),
+                    ActivatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -85,23 +87,6 @@ namespace DugnadAppMvc.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Leiligheter", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "LoginCodes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Epost = table.Column<string>(type: "text", nullable: false),
-                    Kode = table.Column<string>(type: "text", nullable: false),
-                    Opprettet = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Utloper = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Brukt = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LoginCodes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -255,31 +240,32 @@ namespace DugnadAppMvc.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Deltakelser",
+                name: "Dugnadstimer",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DugnadId = table.Column<int>(type: "integer", nullable: false),
                     BeboerId = table.Column<int>(type: "integer", nullable: false),
+                    Timer = table.Column<decimal>(type: "numeric", nullable: false),
                     Registrert = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Kommentar = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Deltakelser", x => x.Id);
+                    table.PrimaryKey("PK_Dugnadstimer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Deltakelser_Beboere_BeboerId",
+                        name: "FK_Dugnadstimer_Beboere_BeboerId",
                         column: x => x.BeboerId,
                         principalTable: "Beboere",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Deltakelser_Dugnader_DugnadId",
+                        name: "FK_Dugnadstimer_Dugnader_DugnadId",
                         column: x => x.DugnadId,
                         principalTable: "Dugnader",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -336,15 +322,14 @@ namespace DugnadAppMvc.Migrations
                 column: "LeilighetId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Deltakelser_BeboerId",
-                table: "Deltakelser",
+                name: "IX_Dugnadstimer_BeboerId",
+                table: "Dugnadstimer",
                 column: "BeboerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Deltakelser_DugnadId_BeboerId",
-                table: "Deltakelser",
-                columns: new[] { "DugnadId", "BeboerId" },
-                unique: true);
+                name: "IX_Dugnadstimer_DugnadId",
+                table: "Dugnadstimer",
+                column: "DugnadId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Leiligheter_Seksjonsnummer",
@@ -372,10 +357,7 @@ namespace DugnadAppMvc.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Deltakelser");
-
-            migrationBuilder.DropTable(
-                name: "LoginCodes");
+                name: "Dugnadstimer");
 
             migrationBuilder.DropTable(
                 name: "Sameier");

@@ -26,7 +26,6 @@ namespace DugnadAppMvc.Models
 
         public ApplicationUser? ApplicationUser { get; set; }
 
-        // Dugnader beboeren deltar på
-        public ICollection<Deltakelse> Deltakelser { get; set; } = new List<Deltakelse>();
+        public ICollection<Dugnadstime> Dugnadstimer { get; set; } = new List<Dugnadstime>();
     }
 }

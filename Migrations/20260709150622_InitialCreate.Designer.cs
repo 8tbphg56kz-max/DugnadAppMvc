@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DugnadAppMvc.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260702172415_InitialCreate")]
+    [Migration("20260709150622_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,6 +33,9 @@ namespace DugnadAppMvc.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("ActivatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -49,6 +52,9 @@ namespace DugnadAppMvc.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsActivated")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .HasColumnType("text");
@@ -142,36 +148,6 @@ namespace DugnadAppMvc.Migrations
                     b.ToTable("Beboere");
                 });
 
-            modelBuilder.Entity("DugnadAppMvc.Models.Deltakelse", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BeboerId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("DugnadId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Kommentar")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Registrert")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BeboerId");
-
-                    b.HasIndex("DugnadId", "BeboerId")
-                        .IsUnique();
-
-                    b.ToTable("Deltakelser");
-                });
-
             modelBuilder.Entity("DugnadAppMvc.Models.Dugnad", b =>
                 {
                     b.Property<int>("Id")
@@ -207,6 +183,38 @@ namespace DugnadAppMvc.Migrations
                     b.ToTable("Dugnader");
                 });
 
+            modelBuilder.Entity("DugnadAppMvc.Models.Dugnadstime", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BeboerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DugnadId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Kommentar")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Registrert")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Timer")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BeboerId");
+
+                    b.HasIndex("DugnadId");
+
+                    b.ToTable("Dugnadstimer");
+                });
+
             modelBuilder.Entity("DugnadAppMvc.Models.Leilighet", b =>
                 {
                     b.Property<int>("Id")
@@ -228,36 +236,6 @@ namespace DugnadAppMvc.Migrations
                         .IsUnique();
 
                     b.ToTable("Leiligheter");
-                });
-
-            modelBuilder.Entity("DugnadAppMvc.Models.LoginCode", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Brukt")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Epost")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Kode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Opprettet")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("Utloper")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LoginCodes");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Sameie", b =>
@@ -428,18 +406,18 @@ namespace DugnadAppMvc.Migrations
                     b.Navigation("Leilighet");
                 });
 
-            modelBuilder.Entity("DugnadAppMvc.Models.Deltakelse", b =>
+            modelBuilder.Entity("DugnadAppMvc.Models.Dugnadstime", b =>
                 {
                     b.HasOne("DugnadAppMvc.Models.Beboer", "Beboer")
-                        .WithMany("Deltakelser")
+                        .WithMany("Dugnadstimer")
                         .HasForeignKey("BeboerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DugnadAppMvc.Models.Dugnad", "Dugnad")
-                        .WithMany("Deltakelser")
+                        .WithMany("Dugnadstimer")
                         .HasForeignKey("DugnadId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Beboer");
@@ -500,12 +478,12 @@ namespace DugnadAppMvc.Migrations
 
             modelBuilder.Entity("DugnadAppMvc.Models.Beboer", b =>
                 {
-                    b.Navigation("Deltakelser");
+                    b.Navigation("Dugnadstimer");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Dugnad", b =>
                 {
-                    b.Navigation("Deltakelser");
+                    b.Navigation("Dugnadstimer");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Leilighet", b =>

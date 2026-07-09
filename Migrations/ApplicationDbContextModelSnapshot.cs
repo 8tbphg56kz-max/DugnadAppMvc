@@ -145,36 +145,6 @@ namespace DugnadAppMvc.Migrations
                     b.ToTable("Beboere");
                 });
 
-            modelBuilder.Entity("DugnadAppMvc.Models.Deltakelse", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BeboerId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("DugnadId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Kommentar")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Registrert")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BeboerId");
-
-                    b.HasIndex("DugnadId", "BeboerId")
-                        .IsUnique();
-
-                    b.ToTable("Deltakelser");
-                });
-
             modelBuilder.Entity("DugnadAppMvc.Models.Dugnad", b =>
                 {
                     b.Property<int>("Id")
@@ -208,6 +178,38 @@ namespace DugnadAppMvc.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Dugnader");
+                });
+
+            modelBuilder.Entity("DugnadAppMvc.Models.Dugnadstime", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BeboerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DugnadId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Kommentar")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Registrert")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("Timer")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BeboerId");
+
+                    b.HasIndex("DugnadId");
+
+                    b.ToTable("Dugnadstimer");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Leilighet", b =>
@@ -401,18 +403,18 @@ namespace DugnadAppMvc.Migrations
                     b.Navigation("Leilighet");
                 });
 
-            modelBuilder.Entity("DugnadAppMvc.Models.Deltakelse", b =>
+            modelBuilder.Entity("DugnadAppMvc.Models.Dugnadstime", b =>
                 {
                     b.HasOne("DugnadAppMvc.Models.Beboer", "Beboer")
-                        .WithMany("Deltakelser")
+                        .WithMany("Dugnadstimer")
                         .HasForeignKey("BeboerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DugnadAppMvc.Models.Dugnad", "Dugnad")
-                        .WithMany("Deltakelser")
+                        .WithMany("Dugnadstimer")
                         .HasForeignKey("DugnadId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Beboer");
@@ -473,12 +475,12 @@ namespace DugnadAppMvc.Migrations
 
             modelBuilder.Entity("DugnadAppMvc.Models.Beboer", b =>
                 {
-                    b.Navigation("Deltakelser");
+                    b.Navigation("Dugnadstimer");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Dugnad", b =>
                 {
-                    b.Navigation("Deltakelser");
+                    b.Navigation("Dugnadstimer");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Leilighet", b =>

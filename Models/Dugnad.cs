@@ -19,7 +19,6 @@ namespace DugnadAppMvc.Models
 
         public bool ErSynlig { get; set; } = true;
 
-        [ValidateNever]
-        public ICollection<Deltakelse> Deltakelser { get; set; } = new List<Deltakelse>();
+        public ICollection<Dugnadstime> Dugnadstimer { get; set; } = new List<Dugnadstime>();
     }
 }

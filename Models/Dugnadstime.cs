@@ -1,21 +1,24 @@
 ﻿namespace DugnadAppMvc.Models
 {
-    public class Deltakelse
+    public class Dugnadstime
     {
         public int Id { get; set; }
 
-        // Dugnaden
+        // Hvilken dugnad timene gjelder
         public int DugnadId { get; set; }
         public Dugnad Dugnad { get; set; } = null!;
 
-        // Beboeren
+        // Hvem som registrerte timene
         public int BeboerId { get; set; }
         public Beboer Beboer { get; set; } = null!;
 
-        // Når deltakelsen ble registrert
+        // Antall timer
+        public decimal Timer { get; set; }
+
+        // Når timene ble registrert
         public DateTime Registrert { get; set; } = DateTime.UtcNow;
 
-        // Eventuell kommentar
+        // Valgfri kommentar
         public string? Kommentar { get; set; }
     }
 }
