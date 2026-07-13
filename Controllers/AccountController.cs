@@ -71,7 +71,7 @@ namespace DugnadAppMvc.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(nameof(DashboardController.Index), "Dashboard");
             }
 
             ModelState.AddModelError("", "Feil e-postadresse eller passord.");

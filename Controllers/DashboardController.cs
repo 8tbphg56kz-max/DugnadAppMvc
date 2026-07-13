@@ -27,13 +27,28 @@ namespace DugnadAppMvc.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
+            decimal totalHours = 0;
+
+            if (currentUser != null)
+            {
+                var beboer = await _context.Beboere
+                    .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+                if (beboer != null)
+                {
+                    totalHours = await _context.Dugnadstimer
+                        .Where(dt => dt.BeboerId == beboer.Id)
+                        .SumAsync(dt => (decimal?)dt.Timer) ?? 0;
+                }
+            }
+
             var model = new DashboardViewModel
             {
                 FirstName = currentUser?.FirstName ?? "",
-                TotalHours = 12.5m,           // Midlertidig
-                ActiveTasks = 0,              // Midlertidig
-                HasCommonDugnad = false,      // Midlertidig
-                BoardMessage = null           // Midlertidig
+                TotalHours = totalHours,
+                ActiveTasks = 0,
+                HasCommonDugnad = false,
+                BoardMessage = null
             };
 
             return View(model);
