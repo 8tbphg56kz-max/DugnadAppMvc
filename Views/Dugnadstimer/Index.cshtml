@@ -1,0 +1,83 @@
+﻿@model DugnadAppMvc.ViewModels.DugnadstimeHistorikkSideViewModel
+
+@{
+    ViewData["Title"] = "Mine dugnadstimer";
+}
+
+<div class="mb-4">
+    <h2>
+        <i class="bi bi-clock-history me-2"></i>
+        Mine dugnadstimer
+    </h2>
+
+    @if (!Model.Historikk.Any())
+{
+    <div class="alert alert-info">
+        Du har ikke registrert noen dugnadstimer ennå.
+    </div>
+}
+else
+{
+        @foreach (var item in Model.Historikk)
+    {
+            <div class="card shadow-sm border-0 mb-3">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        <i class="bi bi-hammer mb-2"></i>
+                        @item.Dugnad
+                    </h5>
+
+                    <p class="mb-2">
+                        <i class="bi bi-clock-history me-2 text-primary"></i>
+                        @item.Timer.ToString("0.#") timer
+                    </p>
+
+                    @if (!string.IsNullOrWhiteSpace(item.Kommentar))
+                    {
+                        <p class="mb-2">
+                            <i class="bi bi-chat-left-text me-2 text-primary"></i>
+                            @item.Kommentar
+                        </p>
+                    }
+
+                    <small class="text-muted">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        @item.Registrert.ToString("dd.MM.yyyy")
+                    </small>
+
+                    @if (item.KanRedigeres)
+{
+    <div class="mt-3 text-end">
+
+        <a asp-action="Edit"
+           asp-route-id="@item.Id"
+           class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-pencil-square me-1"></i>
+            Endre
+        </a>
+
+        <form asp-action="Delete"
+              asp-route-id="@item.Id"
+              method="post"
+              class="d-inline">
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Er du sikker på at du vil slette registreringen?');">
+
+                                    <i class="bi bi-trash me-1"></i>
+                                    Slett
+
+                                </button>
+
+                            </form>
+                        </div>
+                    }
+            </div>           
+        </div>
+    } 
+} 
+</div>

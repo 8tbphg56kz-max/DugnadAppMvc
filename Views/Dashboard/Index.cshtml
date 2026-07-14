@@ -72,14 +72,16 @@
                 <p class="text-muted">
                     Registrerte timer i år
                 </p>
-
-                <a href="#" class="btn btn-outline-primary">
+                <a asp-controller="Dugnadstimer"
+                   asp-action="Index"
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-clock-history me-1"></i>
                     Vis historikk
                 </a>
-
                 <a asp-controller="Dugnadstimer"
                    asp-action="Create"
                    class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>
                     Registrer timer
                 </a>
 

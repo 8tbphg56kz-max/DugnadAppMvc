@@ -1,0 +1,57 @@
+﻿@model DugnadAppMvc.ViewModels.EditDugnadstimeViewModel
+
+@{
+    ViewData["Title"] = "Rediger dugnadstime";
+}
+
+<div class="mb-4">
+    <h2>
+        <i class="bi bi-pencil-square me-2"></i>
+        Rediger dugnadstime
+    </h2>
+
+    <p class="text-muted">
+        Endre antall timer eller kommentar.
+    </p>
+</div>
+
+<form asp-action="Edit" method="post">
+
+    @Html.AntiForgeryToken()
+
+    <input asp-for="Id" type="hidden" />
+
+    <div class="mb-3">
+        <label class="form-label">Dugnad</label>
+        <input class="form-control" value="@Model.Dugnad" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Timer" class="form-label"></label>
+        <select asp-for="Timer"
+                asp-items="Model.TimerAlternativer"
+                class="form-select">
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Kommentar" class="form-label"></label>
+        <textarea asp-for="Kommentar"
+                  rows="3"
+                  class="form-control"></textarea>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle me-1"></i>
+            Lagre endringer
+        </button>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Avbryt
+        </a>
+
+    </div>
+
+</form>
