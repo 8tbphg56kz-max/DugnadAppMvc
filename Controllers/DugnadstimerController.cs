@@ -211,16 +211,42 @@ namespace DugnadAppMvc.Controllers
             }
         }
 
+        private async Task<Beboer?> HentInnloggetBeboerAsync()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser == null)
+            {
+                return null;
+            }
+
+            return await _context.Beboere
+                .SingleOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var dugnadstime = await _context.Dugnadstimer
-                .FindAsync(id);
+            var dugnadstime = await _context.Dugnadstimer.FindAsync(id);
 
             if (dugnadstime == null)
             {
                 return NotFound();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
+            var beboer = await HentInnloggetBeboerAsync();
+
+            if (beboer == null)
+            {
+                return Forbid();
             }
 
             _context.Dugnadstimer.Remove(dugnadstime);

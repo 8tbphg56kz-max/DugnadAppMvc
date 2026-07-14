@@ -4,15 +4,19 @@
     ViewData["Title"] = "Leiligheter";
 }
 
-<h2>Leiligheter</h2>
+<h2 class="mb-3">
+    Leiligheter
+</h2>
 
 <p>
     <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>
         Ny leilighet
     </a>
 </p>
 
-<table class="table table-striped">
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
     <thead>
         <tr>
             <th>Seksjonsnummer</th>
@@ -28,20 +32,23 @@
                 <td>@leilighet.Seksjonsnummer</td>
                 <td>@leilighet.Leilighetsnummer</td>
                 <td>@leilighet.Beboere.Count</td>
-                <td>
-                    <a asp-action="Edit"
-                       asp-route-id="@leilighet.Id"
-                       class="btn btn-sm btn-outline-primary">
-                        Rediger
-                    </a>
+                    <td class="text-nowrap">
 
-                    <a asp-action="Delete"
-                       asp-route-id="@leilighet.Id"
-                       class="btn btn-sm btn-outline-danger">
-                        Slett
-                    </a>
-                </td>
+                        <a asp-action="Edit"
+                           asp-route-id="@leilighet.Id"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@leilighet.Id"
+                           class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+
+                    </td>
             </tr>
         }
     </tbody>
 </table>
+</div>

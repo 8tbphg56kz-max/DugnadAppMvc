@@ -68,7 +68,6 @@ namespace DugnadAppMvc.Controllers
                 Etternavn = model.Etternavn,
                 Epost = model.Epost,
                 ErAdmin = true,
-                Aktiv = true,
                 LeilighetId = leilighet.Id
             };
 

@@ -13,8 +13,6 @@ namespace DugnadAppMvc.Models
 
         public bool ErAdmin { get; set; }
 
-        public bool Aktiv { get; set; } = true;
-
         // Kobling til leilighet
         public int LeilighetId { get; set; }
 

@@ -115,3 +115,7 @@ body {
     .welcome-card p {
         font-size: 1rem;
     }
+
+.dashboard-card {
+    min-height: 240px;
+}

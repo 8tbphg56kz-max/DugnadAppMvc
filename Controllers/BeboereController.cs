@@ -132,8 +132,6 @@ namespace DugnadAppMvc.Controllers
             if (beboer == null)
                 return NotFound();
 
-            beboer.Aktiv = false;
-
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));

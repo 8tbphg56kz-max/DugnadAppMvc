@@ -7,24 +7,28 @@
     </div>
 }
 
-<h2>Beboere</h2>
+<h2 class="mb-2">Beboere</h2>
+
+<p class="text-muted mb-3">
+    Her administrerer du beboerne i sameiet.
+</p>
 
 <p>
     <a asp-action="Create" class="btn btn-primary">
-        Ny beboer
+        <i class="bi bi-person-plus me-1"></i>
+        Legg til beboer
     </a>
 </p>
 
-<table class="table table-striped">
+<div class="table-responsive">
+
+    <table class="table table-striped align-middle">
     <thead>
         <tr>
-            <th>Fornavn</th>
-            <th>Etternavn</th>
+            <th>Navn</th>
             <th>E-post</th>
-            <th>Seksjonsnr</th>
             <th>Leilighet</th>
             <th>Administrator</th>
-            <th>Aktiv</th>
             <th></th>
         </tr>
     </thead>
@@ -33,37 +37,42 @@
         @foreach (var beboer in Model)
         {
             <tr>
-                <td>@beboer.Fornavn</td>
-                <td>@beboer.Etternavn</td>
+                    <td>
+                        @beboer.Fornavn @beboer.Etternavn
+                    </td>
                 <td>@beboer.Epost</td>
-                <td>@beboer.Leilighet.Seksjonsnummer</td>
-                <td>@beboer.Leilighet.Leilighetsnummer</td>
-                <td>@(beboer.ErAdmin ? "Ja" : "Nei")</td>
-                <td>
-                    @if (beboer.Aktiv)
-                    {
-                        <span class="badge bg-success">Aktiv</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Inaktiv</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Edit"
-                       asp-route-id="@beboer.Id"
-                       class="btn btn-sm btn-outline-primary">
-                        Rediger
-                    </a>
+                    <td>
+                        @beboer.Leilighet.Seksjonsnummer /
+                        @beboer.Leilighet.Leilighetsnummer
+                    </td>
+                    <td>
+                        @if (beboer.ErAdmin)
+                        {
+                            <span class="badge bg-primary">
+                                Administrator
+                            </span>
+                        }
+                    </td>                
+                    <td class="text-nowrap">
 
-                    <a asp-action="Deactivate"
-                       asp-route-id="@beboer.Id"
-                       class="btn btn-sm btn-outline-warning">
-                        Deaktiver
-                    </a>
-                </td>
+                        <a asp-action="Edit"
+                           asp-route-id="@beboer.Id"
+                           class="btn btn-sm btn-outline-primary"
+                           title="Rediger">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@beboer.Id"
+                           class="btn btn-sm btn-outline-danger"
+                           title="Slett">
+                            <i class="bi bi-trash"></i>
+                        </a>
+
+                    </td>
             </tr>
         }
 
     </tbody>
 </table>
+</div>
