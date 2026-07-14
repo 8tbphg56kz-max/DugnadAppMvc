@@ -1,0 +1,83 @@
+﻿@model DugnadAppMvc.Models.Beboer
+
+@{
+    ViewData["Title"] = "Slett beboer";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-trash me-2"></i>
+                    Slett beboer
+                </h4>
+            </div>
+
+            <div class="card-body">
+
+                <p class="mb-4">
+                    Er du sikker på at du vil slette denne beboeren?
+                </p>
+
+                <dl class="row">
+
+                    <dt class="col-sm-4">
+                        Navn
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.Fornavn @Model.Etternavn
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        E-post
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.Epost
+                    </dd>
+
+                    <dt class="col-sm-4">
+                        Leilighet
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.Leilighet.Seksjonsnummer /
+                        @Model.Leilighet.Leilighetsnummer
+                    </dd>
+
+                </dl>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Denne handlingen kan ikke angres.
+                </div>
+
+                <form asp-action="Delete" method="post">
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="d-flex justify-content-between">
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Avbryt
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>
+                            Slett beboer
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
