@@ -57,7 +57,7 @@ namespace DugnadAppMvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DugnadstimeViewModel model)
-        {
+        {           
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -130,8 +130,7 @@ namespace DugnadAppMvc.Controllers
             {
                 var siste = historikk.First();
 
-                //var kanEndres = siste.Registrert > DateTime.UtcNow.AddHours(-1);
-                var kanEndres = siste.Registrert > DateTime.UtcNow.AddMinutes(-2);
+                var kanEndres = siste.Registrert > DateTime.UtcNow.AddHours(-1);
 
                 siste.KanRedigeres = kanEndres;
                 siste.KanSlettes = kanEndres;

@@ -1,0 +1,79 @@
+﻿@model DugnadAppMvc.Models.Dugnad
+
+@{
+    ViewData["Title"] = "Slett dugnad";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-trash me-2"></i>
+                    Slett dugnad
+                </h4>
+            </div>
+
+            <div class="card-body">
+
+                <p class="mb-4">
+                    Er du sikker på at du vil slette denne dugnaden?
+                </p>
+
+                <dl class="row">
+
+                    <dt class="col-sm-4">Tittel</dt>
+                    <dd class="col-sm-8">@Model.Tittel</dd>
+
+                    <dt class="col-sm-4">Startdato</dt>
+                    <dd class="col-sm-8">
+                        @Model.StartDato.ToString("dd.MM.yyyy")
+                    </dd>
+
+                    <dt class="col-sm-4">Sluttdato</dt>
+                    <dd class="col-sm-8">
+                        @Model.SluttDato.ToString("dd.MM.yyyy")
+                    </dd>
+
+                    <dt class="col-sm-4">Påmelding</dt>
+                    <dd class="col-sm-8">
+                        @(Model.KreverPamelding ? "Ja" : "Nei")
+                    </dd>
+
+                </dl>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Denne handlingen kan ikke angres.
+                </div>
+
+                <form asp-action="Delete" method="post">
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="d-flex justify-content-between">
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Avbryt
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>
+                            Slett dugnad
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

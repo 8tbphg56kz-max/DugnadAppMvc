@@ -156,7 +156,7 @@ namespace DugnadAppMvc.Controllers
             return View(beboer);
         }
 
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

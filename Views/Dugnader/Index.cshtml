@@ -1,5 +1,7 @@
 ﻿@model IEnumerable<DugnadAppMvc.Models.Dugnad>
 
+<partial name="_Alerts" />
+
 @{
     ViewData["Title"] = "Dugnader";
 }
@@ -44,7 +46,6 @@
                 <td>
                     @(dugnad.KreverPamelding ? "Ja" : "Nei")
                 </td>
-
                 <td>
                     @if (dugnad.ErSynlig)
                     {
@@ -61,13 +62,40 @@
                     <a asp-action="Edit"
                        asp-route-id="@dugnad.Id"
                        class="btn btn-sm btn-outline-primary">
-                        Rediger
+                        <i class="bi bi-pencil"></i>
                     </a>
 
-                    <a asp-action="Hide"
+                    <form asp-action="ToggleVisible"
+                          asp-route-id="@dugnad.Id"
+                          method="post"
+                          class="d-inline">
+
+                        @Html.AntiForgeryToken()
+
+                        @if (dugnad.ErSynlig)
+                        {
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-warning"
+                                    title="Skjul dugnad">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    title="Vis dugnad">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        }
+
+                    </form>
+
+                    <a asp-action="Delete"
                        asp-route-id="@dugnad.Id"
-                       class="btn btn-sm btn-outline-warning">
-                        Skjul
+                       class="btn btn-sm btn-outline-danger"
+                       title="Slett dugnad">
+                        <i class="bi bi-trash"></i>
                     </a>
 
                 </td>
