@@ -29,7 +29,6 @@ namespace DugnadAppMvc.Controllers
         {
             var model = new DugnadstimeViewModel
             {
-                Dato = DateTime.Today,
 
                 Dugnader = _context.Dugnader
                     .Where(d => d.ErSynlig)

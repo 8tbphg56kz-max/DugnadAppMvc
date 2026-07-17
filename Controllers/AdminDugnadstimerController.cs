@@ -43,7 +43,6 @@ namespace DugnadAppMvc.Controllers
         {
             var model = new DugnadstimeViewModel
             {
-                Dato = DateTime.Today,
 
                 Dugnader = _context.Dugnader
                     .Where(d => d.ErSynlig)
@@ -139,6 +138,56 @@ namespace DugnadAppMvc.Controllers
                     Text = timer.ToString("0.#")
                 });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var dugnadstime = await _context.Dugnadstimer
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (dugnadstime == null)
+            {
+                return NotFound();
+            }
+
+            var model = new DugnadstimeViewModel
+            {
+                DugnadId = dugnadstime.DugnadId,
+                BeboerId = dugnadstime.BeboerId,
+                Timer = dugnadstime.Timer,
+                Kommentar = dugnadstime.Kommentar,
+
+                Dugnader = _context.Dugnader
+                    .Where(d => d.ErSynlig)
+                    .OrderBy(d => d.StartDato)
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.Id.ToString(),
+                        Text = d.Tittel
+                    })
+                    .ToList(),
+
+                Beboere = _context.Beboere
+                    .OrderBy(b => b.Etternavn)
+                    .ThenBy(b => b.Fornavn)
+                    .Select(b => new SelectListItem
+                    {
+                        Value = b.Id.ToString(),
+                        Text = b.Etternavn + ", " + b.Fornavn
+                    })
+                    .ToList()
+            };
+
+            model.TimerAlternativer.Add(new SelectListItem
+            {
+                Value = "",
+                Text = "Velg timer..."
+            });
+
+            FyllTimerAlternativer(model.TimerAlternativer);
+
+            return View(model);
         }
     }
 }

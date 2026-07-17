@@ -9,10 +9,6 @@ namespace DugnadAppMvc.ViewModels
         [Display(Name = "Dugnad")]
         public int DugnadId { get; set; }
 
-        [Display(Name = "Dato")]
-        [DataType(DataType.Date)]
-        public DateTime Dato { get; set; } = DateTime.Today;
-
         [Required(ErrorMessage = "Velg antall timer.")]
         [Display(Name = "Timer")]
         public decimal? Timer { get; set; }
@@ -21,12 +17,13 @@ namespace DugnadAppMvc.ViewModels
         public string? Kommentar { get; set; }
 
         public List<SelectListItem> Dugnader { get; set; } = [];
+
         public List<SelectListItem> TimerAlternativer { get; set; } = [];
 
         [Required(ErrorMessage = "Velg beboer.")]
         [Display(Name = "Beboer")]
         public int? BeboerId { get; set; }
 
-        public List<SelectListItem> Beboere { get; set; } = new();
+        public List<SelectListItem> Beboere { get; set; } = [];
     }
 }

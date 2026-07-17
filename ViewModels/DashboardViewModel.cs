@@ -2,6 +2,7 @@
 {
     public class DashboardViewModel
     {
+        public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
 
         public decimal TotalHours { get; set; }
