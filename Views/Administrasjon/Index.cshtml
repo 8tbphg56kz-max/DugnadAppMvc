@@ -1,0 +1,167 @@
+﻿@model DugnadAppMvc.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Administrasjon";
+}
+
+<h2 class="mb-2">
+    Administrasjon
+</h2>
+
+<p class="text-muted mb-4">
+    Oversikt over status for dugnadsarbeidet i sameiet.
+</p>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-6 g-4">
+
+    <!-- Beboere -->
+    <div class="col">
+
+        <a asp-controller="Beboere"
+           asp-action="Index"
+           class="text-decoration-none text-dark">
+
+            <div class="card dashboard-card shadow-sm border-0 rounded-4 h-100">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-people-fill display-4 text-primary"></i>
+
+                    <h2 class="fw-bold mt-3 mb-1">
+                        @Model.AntallBeboere
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Beboere
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+    <!-- Aktive dugnader -->
+    <div class="col">
+
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+
+            <div class="card-body text-center">
+
+                <i class="bi bi-calendar-event-fill display-4 text-success"></i>
+
+                <h2 class="fw-bold mt-3 mb-1">
+                    @Model.AntallAktiveDugnader
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Aktive dugnader
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Utførte dugnader -->
+    <div class="col">
+
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+
+            <div class="card-body text-center">
+
+                <i class="bi bi-check2-circle display-4 text-success"></i>
+
+                <h2 class="fw-bold mt-3 mb-1">
+                    @*@Model.AntallUtforteDugnader*@
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Utførte dugnader
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Registrerte timer -->
+    <div class="col">
+
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+
+            <div class="card-body text-center">
+
+                <i class="bi bi-clock-history display-4 text-warning"></i>
+
+                <h2 class="fw-bold mt-3 mb-1">
+                    @Model.RegistrerteTimer
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Registrerte timer
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Foreløpig timepris -->
+    <div class="col">
+
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+
+            <div class="card-body text-center">
+
+                <i class="bi bi-cash-stack display-4 text-danger"></i>
+
+                <h2 class="fw-bold mt-3 mb-1">
+                    @Model.ForelopigTimepris.ToString("N0") kr
+                </h2>
+
+                <p class="text-muted mb-0">
+                    Foreløpig timepris
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Dugnadsbudsjett -->
+    <div class="col">
+
+        <a asp-controller="Innstillinger"
+           asp-action="Index"
+           class="text-decoration-none text-dark">
+
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+
+                <div class="card-body text-center">
+
+                    <i class="bi bi-bank display-4 text-info"></i>
+
+                    <h2 class="fw-bold mt-3 mb-1">
+                        @Model.Dugnadsbudsjett.ToString("N0") kr
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Dugnadsbudsjett
+                    </p>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+</div>

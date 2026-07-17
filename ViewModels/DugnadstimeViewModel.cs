@@ -5,6 +5,7 @@ namespace DugnadAppMvc.ViewModels
 {
     public class DugnadstimeViewModel
     {
+        [Required(ErrorMessage = "Velg dugnad.")]
         [Display(Name = "Dugnad")]
         public int DugnadId { get; set; }
 
@@ -21,5 +22,11 @@ namespace DugnadAppMvc.ViewModels
 
         public List<SelectListItem> Dugnader { get; set; } = [];
         public List<SelectListItem> TimerAlternativer { get; set; } = [];
+
+        [Required(ErrorMessage = "Velg beboer.")]
+        [Display(Name = "Beboer")]
+        public int? BeboerId { get; set; }
+
+        public List<SelectListItem> Beboere { get; set; } = new();
     }
 }

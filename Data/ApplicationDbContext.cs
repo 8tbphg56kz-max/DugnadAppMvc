@@ -16,6 +16,7 @@ namespace DugnadAppMvc.Data
         public DbSet<Dugnad> Dugnader => Set<Dugnad>();
          public DbSet<Sameie> Sameier { get; set; }
         public DbSet<Dugnadstime> Dugnadstimer { get; set; }
+        public DbSet<Innstillinger> Innstillinger => Set<Innstillinger>();
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

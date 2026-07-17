@@ -1,0 +1,84 @@
+﻿@model DugnadAppMvc.Models.Innstillinger
+
+@{
+    ViewData["Title"] = "Innstillinger";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-gear me-2"></i>
+                    Innstillinger
+                </h4>
+            </div>
+
+            <div class="card-body">
+
+                <partial name="_Alerts" />
+
+                <p class="text-muted mb-4">
+                    Her administrerer du globale innstillinger for DugnadApp.
+                    Endringer påvirker beregninger og rapporter.
+                </p>
+
+                <form asp-action="Index" method="post">
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+
+                        <label asp-for="Dugnadsbudsjett"
+                               class="form-label">
+                            Dugnadsbudsjett
+                        </label>
+
+                        <input asp-for="Dugnadsbudsjett"
+                               class="form-control"
+                               inputmode="decimal"
+                               autocomplete="off" />
+
+                        <div class="form-text">
+                            Angi årets vedtatte dugnadsbudsjett i kroner.
+                        </div>
+
+                        <span asp-validation-for="Dugnadsbudsjett"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Tilbake
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>
+                            Lagre
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
