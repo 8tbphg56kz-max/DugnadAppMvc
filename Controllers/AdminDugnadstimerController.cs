@@ -189,5 +189,51 @@ namespace DugnadAppMvc.Controllers
 
             return View(model);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var model = await _context.Dugnadstimer
+                .Include(d => d.Dugnad)
+                .Include(d => d.Beboer)
+                .Where(d => d.Id == id)
+                .Select(d => new AdminDugnadstimeViewModel
+                {
+                    Id = d.Id,
+                    Registrert = d.Registrert,
+                    Dugnad = d.Dugnad.Tittel,
+                    Beboer = d.Beboer.Fornavn + " " + d.Beboer.Etternavn,
+                    Timer = d.Timer,
+                    Kommentar = d.Kommentar
+                })
+                .FirstOrDefaultAsync();
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var dugnadstime = await _context.Dugnadstimer.FindAsync(id);
+
+            if (dugnadstime == null)
+            {
+                return NotFound();
+            }
+
+            _context.Dugnadstimer.Remove(dugnadstime);
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Dugnadstimen ble slettet.";
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

@@ -1,0 +1,48 @@
+﻿@model DugnadAppMvc.ViewModels.AdminDugnadstimeViewModel
+
+@{
+    ViewData["Title"] = "Slett dugnadstime";
+}
+
+<h2 class="mb-4">Slett dugnadstime</h2>
+
+<div class="alert alert-warning">
+    Er du sikker på at du vil slette denne registreringen?
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+            <dt class="col-sm-3">Dugnad</dt>
+            <dd class="col-sm-9">@Model.Dugnad</dd>
+
+            <dt class="col-sm-3">Beboer</dt>
+            <dd class="col-sm-9">@Model.Beboer</dd>
+
+            <dt class="col-sm-3">Timer</dt>
+            <dd class="col-sm-9">@Model.Timer</dd>
+
+            <dt class="col-sm-3">Kommentar</dt>
+            <dd class="col-sm-9">@Model.Kommentar</dd>
+
+            <dt class="col-sm-3">Registrert</dt>
+            <dd class="col-sm-9">@Model.Registrert.ToString("dd.MM.yyyy HH:mm")</dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input asp-for="Id" type="hidden" />
+
+            @Html.AntiForgeryToken()
+
+            <button type="submit" class="btn btn-danger">
+                Slett
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                Avbryt
+            </a>
+        </form>
+
+    </div>
+</div>
