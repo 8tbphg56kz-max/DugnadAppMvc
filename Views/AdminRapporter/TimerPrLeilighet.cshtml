@@ -1,0 +1,27 @@
+﻿@model List<DugnadAppMvc.ViewModels.RapportTimerPrLeilighetViewModel>
+
+@{
+    ViewData["Title"] = "Timer pr. leilighet";
+}
+
+<h2>Timer pr. leilighet</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Leilighet</th>
+            <th class="text-end">Registreringer</th>
+            <th class="text-end">Timer</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rad in Model)
+        {
+            <tr>
+                <td>@rad.Leilighetsnummer</td>
+                <td class="text-end">@rad.AntallRegistreringer</td>
+                <td class="text-end">@rad.TotaleTimer</td>
+            </tr>
+        }
+    </tbody>
+</table>

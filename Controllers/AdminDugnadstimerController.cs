@@ -18,11 +18,60 @@ namespace DugnadAppMvc.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? leilighetId, int? dugnadId, int? beboerId)
         {
-            var model = await _context.Dugnadstimer
+            var query = _context.Dugnadstimer
                 .Include(d => d.Dugnad)
                 .Include(d => d.Beboer)
+                    .ThenInclude(b => b.Leilighet)
+                .AsQueryable();
+
+            if (leilighetId.HasValue)
+            {
+                query = query.Where(d => d.Beboer.LeilighetId == leilighetId.Value);
+            }
+
+            if (dugnadId.HasValue)
+            {
+                query = query.Where(d => d.DugnadId == dugnadId.Value);
+            }
+
+            if (beboerId.HasValue)
+            {
+                query = query.Where(d => d.BeboerId == beboerId.Value);
+            }
+
+            var model = new AdminDugnadstimerIndexViewModel();
+
+            model.Beboere = await _context.Beboere
+    .OrderBy(b => b.Etternavn)
+    .ThenBy(b => b.Fornavn)
+    .Select(b => new SelectListItem
+    {
+        Value = b.Id.ToString(),
+        Text = b.Fornavn + " " + b.Etternavn
+    })
+    .ToListAsync();
+
+            model.Leiligheter = await _context.Leiligheter
+                .OrderBy(l => l.Leilighetsnummer)
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = l.Leilighetsnummer
+                })
+                .ToListAsync();
+
+            model.Dugnader = await _context.Dugnader
+    .OrderBy(d => d.Tittel)
+    .Select(d => new SelectListItem
+    {
+        Value = d.Id.ToString(),
+        Text = d.Tittel
+    })
+    .ToListAsync();
+
+            model.Dugnadstimer = await query
                 .OrderByDescending(d => d.Registrert)
                 .Select(d => new AdminDugnadstimeViewModel
                 {
@@ -34,6 +83,9 @@ namespace DugnadAppMvc.Controllers
                     Kommentar = d.Kommentar
                 })
                 .ToListAsync();
+
+            model.LeilighetId = leilighetId;
+            model.DugnadId = dugnadId;
 
             return View(model);
         }
