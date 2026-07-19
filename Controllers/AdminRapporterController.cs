@@ -16,42 +16,225 @@ namespace DugnadAppMvc.Controllers
 
         public async Task<IActionResult> TimerPrLeilighet()
         {
+            var innstillinger = await _context.Innstillinger.FirstAsync();
+
+            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+
+            var timeverdi = totaleTimerAlle == 0
+                ? 0
+                : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
+
             var rapport = await _context.Dugnadstimer
-                .Include(d => d.Beboer)
-                    .ThenInclude(b => b.Leilighet)
-                .GroupBy(d => new
-                {
-                    d.Beboer.Leilighet.Id,
-                    d.Beboer.Leilighet.Leilighetsnummer
-                })
-                .Select(g => new RapportTimerPrLeilighetViewModel
-                {
-                    LeilighetId = g.Key.Id,
-                    Leilighetsnummer = g.Key.Leilighetsnummer,
-                    AntallRegistreringer = g.Count(),
-                    TotaleTimer = g.Sum(x => x.Timer)
-                })
-                .OrderBy(x => x.Leilighetsnummer)
-                .ToListAsync();
+    .Include(d => d.Beboer)
+        .ThenInclude(b => b.Leilighet)
+   .GroupBy(d => new
+   {
+       d.Beboer.Leilighet.Id,
+       d.Beboer.Leilighet.Seksjonsnummer,
+       d.Beboer.Leilighet.Leilighetsnummer
+   })
+    .Select(g => new RapportTimerPrLeilighetViewModel
+    {
+        LeilighetId = g.Key.Id,
+
+        Visningsnavn = $"Seksjon {g.Key.Seksjonsnummer} - {g.Key.Leilighetsnummer}",
+
+        Leilighetsnummer = g.Key.Leilighetsnummer,
+
+        AntallRegistreringer = g.Count(),
+
+        TotaleTimer = g.Sum(x => x.Timer)
+    })
+.OrderBy(x => x.Leilighetsnummer)
+.ToListAsync();
+
+            foreach (var rad in rapport)
+            {
+                rad.TotalVerdi = rad.TotaleTimer * timeverdi;
+            }
 
             return View(rapport);
-        }
-
-        public IActionResult TimerPrBeboer()
-        {
-            return View();
-        }
-
-        public IActionResult TimerPrDugnad()
-        {
-            return View();
-        }
+        }  
 
         private readonly ApplicationDbContext _context;
 
         public AdminRapporterController(ApplicationDbContext context)
         {
             _context = context;
-        }        
+        }
+
+        public async Task<IActionResult> LeilighetDetaljer(int id)
+        {
+            var innstillinger = await _context.Innstillinger.FirstAsync();
+
+            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+
+            var timeverdi = totaleTimerAlle == 0
+                ? 0
+                : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
+
+            var dugnadstimer = await _context.Dugnadstimer
+                .Include(d => d.Dugnad)
+                .Include(d => d.Beboer)
+                    .ThenInclude(b => b.Leilighet)
+                .Where(d => d.Beboer.LeilighetId == id)
+                .OrderByDescending(d => d.Registrert)
+                .ToListAsync();
+
+            var model = new LeilighetDetaljerViewModel
+            {
+                LeilighetId = id,
+                Leilighetsnummer = dugnadstimer.FirstOrDefault()?.Beboer.Leilighet.Leilighetsnummer ?? string.Empty,
+                AntallRegistreringer = dugnadstimer.Count,
+                TotaleTimer = dugnadstimer.Sum(x => x.Timer),
+                TotalVerdi = dugnadstimer.Sum(x => x.Timer) * timeverdi,
+                Dugnadstimer = dugnadstimer
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> TimerPrBeboer()
+        {
+            var innstillinger = await _context.Innstillinger.FirstAsync();
+
+            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+
+            var timeverdi = totaleTimerAlle == 0
+                ? 0
+                : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
+
+            var model = await _context.Dugnadstimer
+                .Include(d => d.Beboer)
+                    .ThenInclude(b => b.Leilighet)
+                .GroupBy(d => new
+                {
+                    d.BeboerId,
+                    d.Beboer.Fornavn,
+                    d.Beboer.Etternavn,
+                    Leilighetsnummer = d.Beboer.Leilighet.Leilighetsnummer
+                })
+                .Select(g => new RapportTimerPrBeboerViewModel
+                {
+                    BeboerId = g.Key.BeboerId,
+                    Navn = g.Key.Fornavn + " " + g.Key.Etternavn,
+                    Leilighetsnummer = g.Key.Leilighetsnummer,
+                    AntallRegistreringer = g.Count(),
+                    TotaleTimer = g.Sum(x => x.Timer),
+                })
+                .OrderBy(x => x.Navn)
+                .ToListAsync();
+
+            foreach (var rad in model)
+            {
+                rad.TotalVerdi = rad.TotaleTimer * timeverdi;
+            }
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> BeboerDetaljer(int id)
+        {
+            var innstillinger = await _context.Innstillinger.FirstAsync();
+
+            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+
+            var timeverdi = totaleTimerAlle == 0
+                ? 0
+                : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
+
+            var dugnadstimer = await _context.Dugnadstimer
+                .Include(d => d.Dugnad)
+                .Include(d => d.Beboer)
+                    .ThenInclude(b => b.Leilighet)
+                .Where(d => d.BeboerId == id)
+                .OrderByDescending(d => d.Registrert)
+                .ToListAsync();
+
+            var model = new BeboerDetaljerViewModel
+            {
+                BeboerId = id,
+                Navn = dugnadstimer.Any()
+                ? $"{dugnadstimer.First().Beboer.Fornavn} {dugnadstimer.First().Beboer.Etternavn}"
+                : string.Empty,
+                Leilighetsnummer = dugnadstimer.FirstOrDefault()?.Beboer.Leilighet.Leilighetsnummer ?? string.Empty,
+                AntallRegistreringer = dugnadstimer.Count,
+                TotaleTimer = dugnadstimer.Sum(x => x.Timer),
+                Dugnadstimer = dugnadstimer
+            };
+
+            model.TotalVerdi = model.TotaleTimer * timeverdi;
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> TimerPrDugnad()
+        {
+            var innstillinger = await _context.Innstillinger.FirstAsync();
+
+            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+
+            var timeverdi = totaleTimerAlle == 0
+                ? 0
+                : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
+
+            var rapport = await _context.Dugnadstimer
+                .Include(d => d.Dugnad)
+                .GroupBy(d => new
+                {
+                    d.DugnadId,
+                    d.Dugnad.Tittel,
+                    d.Dugnad.StartDato
+                })
+                .Select(g => new RapportTimerPrDugnadViewModel
+                {
+                    DugnadId = g.Key.DugnadId,
+                    Tittel = g.Key.Tittel,
+                    Dato = g.Key.StartDato,
+                    AntallRegistreringer = g.Count(),
+                    TotaleTimer = g.Sum(x => x.Timer)
+                })
+                .OrderByDescending(x => x.Dato)
+                .ToListAsync();
+
+            foreach (var rad in rapport)
+            {
+                rad.TotalVerdi = rad.TotaleTimer * timeverdi;
+            }
+
+            return View(rapport);
+        }
+        
+            public async Task<IActionResult> DugnadDetaljer(int id)
+        {
+            var innstillinger = await _context.Innstillinger.FirstAsync();
+
+            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+
+            var timeverdi = totaleTimerAlle == 0
+                ? 0
+                : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
+
+            var dugnadstimer = await _context.Dugnadstimer
+                .Include(d => d.Dugnad)
+                .Include(d => d.Beboer)
+                    .ThenInclude(b => b.Leilighet)
+                .Where(d => d.DugnadId == id)
+                .OrderByDescending(d => d.Registrert)
+                .ToListAsync();
+
+            var model = new DugnadDetaljerViewModel
+            {
+                DugnadId = id,
+                Tittel = dugnadstimer.FirstOrDefault()?.Dugnad.Tittel ?? string.Empty,
+                Dato = dugnadstimer.FirstOrDefault()?.Dugnad.StartDato,
+                AntallRegistreringer = dugnadstimer.Count,
+                TotaleTimer = dugnadstimer.Sum(x => x.Timer),
+                TotalVerdi = dugnadstimer.Sum(x => x.Timer) * timeverdi,
+                Dugnadstimer = dugnadstimer
+            };
+
+            return View(model);
+        }    
     }
 }

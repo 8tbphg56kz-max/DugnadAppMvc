@@ -1,0 +1,89 @@
+﻿@model DugnadAppMvc.ViewModels.DugnadDetaljerViewModel
+
+@{
+    ViewData["Title"] = "Dugnadsdetaljer";
+}
+
+<h2>@Model.Tittel</h2>
+
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Dato</h6>
+                <h4>@Model.Dato</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Registreringer</h6>
+                <h4>@Model.AntallRegistreringer</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Totale timer</h6>
+                <h4>@Model.TotaleTimer</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="text-muted">Verdi</h6>
+                <h4>@Model.TotalVerdi.ToString("N0") kr</h4>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Dato</th>
+            <th>Beboer</th>
+            <th>Leilighet</th>
+            <th class="text-end">Timer</th>
+            <th>Kommentar</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var rad in Model.Dugnadstimer)
+        {
+            <tr>
+                <td>@rad.Registrert.ToShortDateString()</td>
+                <td>@rad.Beboer.Fornavn @rad.Beboer.Etternavn</td>
+                <td>@rad.Beboer.Leilighet.Leilighetsnummer</td>
+                <td class="text-end">@rad.Timer</td>
+                <td>@(string.IsNullOrWhiteSpace(rad.Kommentar) ? "-" : rad.Kommentar)</td>
+                <td>
+                    <a asp-controller="AdminDugnadstimer"
+                       asp-action="Edit"
+                       asp-route-id="@rad.Id"
+                       class="btn btn-sm btn-outline-primary">
+                        Rediger
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>
+
+<a asp-action="TimerPrDugnad"
+   class="btn btn-secondary">
+    Tilbake
+</a>

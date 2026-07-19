@@ -1,0 +1,90 @@
+﻿@model DugnadAppMvc.ViewModels.LeilighetDetaljerViewModel
+
+@{
+    ViewData["Title"] = "Detaljer";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        Leilighet @Model.Leilighetsnummer
+    </h2>
+
+    <a asp-action="TimerPrLeilighet"
+       class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Tilbake
+    </a>
+</div>
+
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Registreringer</h6>
+                <h3>@Model.AntallRegistreringer</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Totale timer</h6>
+                <h3>@Model.TotaleTimer.ToString("N1")</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Verdi</h6>
+                <h3>@Model.TotalVerdi.ToString("N0") kr</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<h4 class="mt-4">Registrerte dugnadstimer</h4>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Dato</th>
+            <th>Beboer</th>
+            <th>Dugnad</th>
+            <th class="text-end">Timer</th>
+            <th>Kommentar</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model.Dugnadstimer)
+        {
+            <tr>
+                <td>@item.Registrert.ToString("dd.MM.yyyy")</td>
+                <td> @item.Beboer.Fornavn @item.Beboer.Etternavn</td>
+                <td>@item.Dugnad.Tittel</td>
+
+                <td class="text-end">
+                    @item.Timer.ToString("N1")
+                </td>
+
+                <td>@item.Kommentar</td>
+
+                <td>
+                    <a asp-controller="AdminDugnadstimer"
+                       asp-action="Edit"
+                       asp-route-id="@item.Id"
+                       class="btn btn-sm btn-outline-primary">
+                        Rediger
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>

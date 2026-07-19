@@ -1,5 +1,32 @@
-﻿@{
+﻿@model IEnumerable<DugnadAppMvc.ViewModels.RapportTimerPrDugnadViewModel>
+
+@{
     ViewData["Title"] = "Timer pr. dugnad";
 }
 
 <h2>Timer pr. dugnad</h2>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Dato</th>
+            <th>Dugnad</th>
+            <th class="text-end">Registreringer</th>
+            <th class="text-end">Timer</th>
+            <th class="text-end">Verdi</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rad in Model)
+        {
+            <tr style="cursor:pointer"
+                onclick="location.href='@Url.Action("DugnadDetaljer", "AdminRapporter", new { id = rad.DugnadId })'">
+                <td>@rad.Dato</td>
+                <td>@rad.Tittel</td>
+                <td class="text-end">@rad.AntallRegistreringer</td>
+                <td class="text-end">@rad.TotaleTimer</td>
+                <td class="text-end">@rad.TotalVerdi.ToString("N0") kr</td>
+            </tr>
+        }
+    </tbody>
+</table>

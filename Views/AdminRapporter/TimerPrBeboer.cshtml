@@ -1,5 +1,72 @@
-﻿@{
+﻿@model List<DugnadAppMvc.ViewModels.RapportTimerPrBeboerViewModel>
+
+@{
     ViewData["Title"] = "Timer pr. beboer";
 }
 
-<h2>Timer pr. beboer</h2>
+@{
+    var totaltAntallRegistreringer = Model.Sum(x => x.AntallRegistreringer);
+    var totaleTimer = Model.Sum(x => x.TotaleTimer);
+    var totalVerdi = Model.Sum(x => x.TotalVerdi);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Timer pr. beboer</h2>
+
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        Tilbake
+    </a>
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-primary text-white">
+        Rapport
+    </div>
+
+    <div class="card-body p-0">
+
+        <table class="table table-hover table-clickable">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Beboer</th>
+                    <th>Leilighet</th>
+                    <th class="text-end">Registreringer</th>
+                    <th class="text-end">Timer</th>
+                    <th class="text-end">Verdi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var rad in Model)
+                {
+                    <tr onclick="location.href='@Url.Action("BeboerDetaljer", new { id = rad.BeboerId })'">
+                        <td>
+                                @rad.Navn
+                        </td>
+                        <td>@rad.Leilighetsnummer</td>
+                        <td class="text-end">@rad.AntallRegistreringer</td>
+                        <td class="text-end">@rad.TotaleTimer.ToString("N1")</td>
+                        <td class="text-end">@rad.TotalVerdi.ToString("N0") kr</td>
+                    </tr>
+                }
+
+            </tbody>
+
+            <tfoot class="table-light fw-bold">
+                <tr>
+                    <td>Totalt</td>
+                    <td></td>
+                    <td class="text-end">@totaltAntallRegistreringer</td>
+                    <td class="text-end">@totaleTimer.ToString("N1")</td>
+                    <td class="text-end">@totalVerdi.ToString("N0") kr</td>
+                </tr>
+            </tfoot>
+
+        </table>
+
+    </div>
+
+</div>
