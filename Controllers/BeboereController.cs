@@ -72,6 +72,22 @@ namespace DugnadAppMvc.Controllers
         }
 
         [Authorize(Roles = IdentityRoles.AdminAccess)]
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var beboer = await _context.Beboere.FindAsync(id);
+
+            if (beboer == null)
+            {
+                return NotFound();
+            }
+
+            FyllLeiligheter();
+
+            return View(beboer);
+        }
+
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Beboer beboer)

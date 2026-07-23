@@ -1,0 +1,83 @@
+@model IEnumerable<Oppgave>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Navn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Beskrivelse)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FraDato)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Frist)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AntallPersoner)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.KanRegistrereTimer)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.KreverBekreftelse)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Utstyr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UtstyrPlassering)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.Navn)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Beskrivelse)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.FraDato)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Frist)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.AntallPersoner)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.KanRegistrereTimer)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.KreverBekreftelse)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Utstyr)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.UtstyrPlassering)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
