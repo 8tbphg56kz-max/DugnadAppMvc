@@ -1,12 +1,14 @@
 ﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace DugnadAppMvc.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = $"{IdentityRoles.Administrator},{IdentityRoles.SystemAdministrator}")]
     public class InnstillingerController : Controller
     {
         private readonly ApplicationDbContext _context;

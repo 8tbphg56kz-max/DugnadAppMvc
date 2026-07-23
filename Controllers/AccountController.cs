@@ -3,9 +3,7 @@ using DugnadAppMvc.Models;
 using DugnadAppMvc.Services;
 using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using System.Text;
 
 namespace DugnadAppMvc.Controllers
@@ -305,6 +303,11 @@ namespace DugnadAppMvc.Controllers
 
         [HttpGet]
         public IActionResult RequestActivationConfirmation()
+        {
+            return View();
+        }
+
+        public IActionResult AccessDenied()
         {
             return View();
         }

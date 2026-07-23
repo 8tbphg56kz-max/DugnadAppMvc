@@ -1,4 +1,5 @@
 ﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -7,10 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace DugnadAppMvc.Controllers
 {
-    [Authorize]
+   [Authorize]
     public class DugnadstimerController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,30 +24,12 @@ namespace DugnadAppMvc.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
+       [HttpGet]
         public IActionResult Create()
         {
-            var model = new DugnadstimeViewModel
-            {
+            var model = new DugnadstimeViewModel();
 
-                Dugnader = _context.Dugnader
-                    .Where(d => d.ErSynlig)
-                    .OrderBy(d => d.StartDato)
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = d.Tittel
-                    })
-                    .ToList()
-            };
-
-            // Fyll nedtrekkslisten for timer
-            model.TimerAlternativer.Add(new SelectListItem
-            {
-                Value = "",
-                Text = "Velg timer..."
-            });
-
+            FyllDugnader(model);
             FyllTimerAlternativer(model.TimerAlternativer);
 
             return View(model);
@@ -56,25 +38,21 @@ namespace DugnadAppMvc.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DugnadstimeViewModel model)
-        {           
+        {
+            ModelState.Remove(nameof(model.BeboerId));
+
             if (!ModelState.IsValid)
-                return View(model);
-
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser == null)
             {
-                return Challenge();
+                FyllDugnader(model);
+                FyllTimerAlternativer(model.TimerAlternativer);
+                return View(model);
             }
 
-            var beboer = _context.Beboere
-    .SingleOrDefault(b => b.ApplicationUserId == currentUser.Id);
+            var beboer = await HentInnloggetBeboerAsync();
 
             if (beboer == null)
             {
-                ModelState.AddModelError("", "Fant ikke tilknyttet beboer.");
-
-                return View(model);
+                return Challenge();
             }
 
             var dugnadstime = new Dugnadstime
@@ -89,50 +67,44 @@ namespace DugnadAppMvc.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index", "Dashboard");
+            TempData["SuccessMessage"] = "Dugnadstimen ble registrert.";
 
+            return RedirectToAction("Index", "Dashboard");
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
+            var beboer = await HentInnloggetBeboerAsync();
 
-            if (currentUser == null)
+            if (beboer == null)
             {
                 return Challenge();
             }
 
-            var beboer = await _context.Beboere
-                .SingleOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
-
-            if (beboer == null)
-            {
-                return NotFound();
-            }
-
             var historikk = await _context.Dugnadstimer
-    .Include(d => d.Dugnad)
-    .Where(d => d.BeboerId == beboer.Id)
-    .OrderByDescending(d => d.Registrert)
-    .Select(d => new DugnadstimeHistorikkViewModel
-    {
-        Id = d.Id,
-        Registrert = d.Registrert,
-        Dugnad = d.Dugnad.Tittel,
-        Timer = d.Timer,
-        Kommentar = d.Kommentar
-    })
-    .ToListAsync();
+                .Include(d => d.Dugnad)
+                .Where(d => d.BeboerId == beboer.Id)
+                .OrderByDescending(d => d.Registrert)
+                .Select(d => new DugnadstimeHistorikkViewModel
+                {
+                    Id = d.Id,
+                    Registrert = d.Registrert,
+                    Dugnad = d.Dugnad.Tittel,
+                    Timer = d.Timer,
+                    Kommentar = d.Kommentar
+                })
+                .ToListAsync();
 
             if (historikk.Any())
             {
-                var siste = historikk.First();
+                foreach (var registrering in historikk)
+                {
+                    var kanEndres = registrering.Registrert > DateTime.UtcNow.AddHours(-1);
 
-                var kanEndres = siste.Registrert > DateTime.UtcNow.AddHours(-1);
-
-                siste.KanRedigeres = kanEndres;
-                siste.KanSlettes = kanEndres;
+                    registrering.KanRedigeres = kanEndres;
+                    registrering.KanSlettes = kanEndres;
+                }
             }
 
             var model = new DugnadstimeHistorikkSideViewModel
@@ -148,13 +120,30 @@ namespace DugnadAppMvc.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
+            var beboer = await HentInnloggetBeboerAsync();
+
+            if (beboer == null)
+            {
+                return Challenge();
+            }
+
             var dugnadstime = await _context.Dugnadstimer
                 .Include(d => d.Dugnad)
-                .FirstOrDefaultAsync(d => d.Id == id);
+                .FirstOrDefaultAsync(d =>
+                    d.Id == id &&
+                    d.BeboerId == beboer.Id);
 
             if (dugnadstime == null)
             {
                 return NotFound();
+            }
+
+            if (!KanEndresEllerSlettes(dugnadstime))
+            {
+                TempData["ErrorMessage"] =
+                    "Dugnadstimen kan ikke lenger redigeres.";
+
+                return RedirectToAction(nameof(Index));
             }
 
             var model = new EditDugnadstimeViewModel
@@ -172,21 +161,42 @@ namespace DugnadAppMvc.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(EditDugnadstimeViewModel model)
+        public async Task<IActionResult> Edit(int id, EditDugnadstimeViewModel model)
         {
+            if (id != model.Id)
+            {
+                return NotFound();
+            }
+
             if (!ModelState.IsValid)
             {
-                // Fyll ned timerlisten igjen
                 FyllTimerAlternativer(model.TimerAlternativer);
-
                 return View(model);
             }
 
-            var dugnadstime = await _context.Dugnadstimer.FindAsync(model.Id);
+            var beboer = await HentInnloggetBeboerAsync();
+
+            if (beboer == null)
+            {
+                return Challenge();
+            }
+
+            var dugnadstime = await _context.Dugnadstimer
+                .FirstOrDefaultAsync(d =>
+                    d.Id == id &&
+                    d.BeboerId == beboer.Id);
 
             if (dugnadstime == null)
             {
                 return NotFound();
+            }
+
+            if (!KanEndresEllerSlettes(dugnadstime))
+            {
+                TempData["ErrorMessage"] =
+                    "Dugnadstimen kan ikke endres etter én time.";
+
+                return RedirectToAction(nameof(Index));
             }
 
             dugnadstime.Timer = model.Timer!.Value;
@@ -194,19 +204,47 @@ namespace DugnadAppMvc.Controllers
 
             await _context.SaveChangesAsync();
 
+            TempData["SuccessMessage"] = "Dugnadstimen ble oppdatert.";
+
             return RedirectToAction(nameof(Index));
         }
 
-        private void FyllTimerAlternativer(List<SelectListItem> liste)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
         {
-            for (decimal timer = 0.5m; timer <= 10m; timer += 0.5m)
+            var beboer = await HentInnloggetBeboerAsync();
+
+            if (beboer == null)
             {
-                liste.Add(new SelectListItem
-                {
-                    Value = timer.ToString("0.#"),
-                    Text = timer.ToString("0.#")
-                });
+                return Challenge();
             }
+
+            var dugnadstime = await _context.Dugnadstimer
+                .FirstOrDefaultAsync(d =>
+                    d.Id == id &&
+                    d.BeboerId == beboer.Id);
+
+            if (dugnadstime == null)
+            {
+                return NotFound();
+            }
+
+            if (!KanEndresEllerSlettes(dugnadstime))
+            {
+                TempData["ErrorMessage"] =
+                    "Dugnadstimen kan ikke slettes etter én time.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.Dugnadstimer.Remove(dugnadstime);
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Dugnadstimen ble slettet.";
+
+            return RedirectToAction(nameof(Index));
         }
 
         private async Task<Beboer?> HentInnloggetBeboerAsync()
@@ -222,36 +260,42 @@ namespace DugnadAppMvc.Controllers
                 .SingleOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        private void FyllDugnader(DugnadstimeViewModel model)
         {
-            var dugnadstime = await _context.Dugnadstimer.FindAsync(id);
+            model.Dugnader = _context.Dugnader
+                .Where(d => d.ErSynlig)
+                .OrderBy(d => d.StartDato)
+                .Select(d => new SelectListItem
+                {
+                    Value = d.Id.ToString(),
+                    Text = d.Tittel
+                })
+                .ToList();
+        }
 
-            if (dugnadstime == null)
+        private void FyllTimerAlternativer(List<SelectListItem> liste)
+        {
+            liste.Clear();
+
+            liste.Add(new SelectListItem
             {
-                return NotFound();
-            }
+                Value = "",
+                Text = "Velg timer..."
+            });
 
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser == null)
+            for (decimal timer = 0.5m; timer <= 10m; timer += 0.5m)
             {
-                return Challenge();
+                liste.Add(new SelectListItem
+                {
+                    Value = timer.ToString("0.#"),
+                    Text = timer.ToString("0.#")
+                });
             }
+        }
 
-            var beboer = await HentInnloggetBeboerAsync();
-
-            if (beboer == null)
-            {
-                return Forbid();
-            }
-
-            _context.Dugnadstimer.Remove(dugnadstime);
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+        private static bool KanEndresEllerSlettes(Dugnadstime dugnadstime)
+        {
+            return dugnadstime.Registrert > DateTime.UtcNow.AddHours(-1);
         }
     }
 }

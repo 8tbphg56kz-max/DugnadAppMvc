@@ -3,6 +3,7 @@ using System;
 using DugnadAppMvc.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DugnadAppMvc.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722133015_AddSameieNavnToInnstillinger")]
+    partial class AddSameieNavnToInnstillinger
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,6 +118,9 @@ namespace DugnadAppMvc.Migrations
                     b.Property<string>("Epost")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("ErAdmin")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Etternavn")
                         .IsRequired()

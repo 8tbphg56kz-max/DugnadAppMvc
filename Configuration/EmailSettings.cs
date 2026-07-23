@@ -1,4 +1,4 @@
-﻿namespace DugnadAppMvc.Models
+﻿namespace DugnadAppMvc.Configuration
 {
     public class EmailSettings
     {

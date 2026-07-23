@@ -1,0 +1,40 @@
+﻿@model IEnumerable<DugnadAppMvc.ViewModels.AdminUsers.UserListViewModel>
+
+@{
+    ViewData["Title"] = "Brukere";
+}
+
+<h2>Brukere</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Navn</th>
+            <th>E-post</th>
+            <th>Rolle</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Navn</td>
+                <td>@user.Epost</td>
+                <td>@user.Rolle</td>
+ 
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@user.Id"
+                       class="btn btn-sm btn-primary">
+                        Rediger
+                    </a>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+
+</table>

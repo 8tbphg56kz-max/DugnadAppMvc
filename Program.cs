@@ -1,15 +1,17 @@
+using DugnadAppMvc.Configuration;
 using DugnadAppMvc.Data;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.Services;
+using DugnadAppMvc.Services.Interfaces;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.HttpOverrides;
 
 namespace DugnadAppMvc
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -52,9 +54,14 @@ namespace DugnadAppMvc
             builder.Services.Configure<EmailSettings>(
             builder.Configuration.GetSection("EmailSettings"));
 
+            builder.Services.Configure<DefaultAdminOptions>(
+            builder.Configuration.GetSection("DefaultAdmin"));
+
             builder.Services.AddScoped<EmailService>();
 
             builder.Services.AddScoped<UserProvisioningService>();
+
+            builder.Services.AddScoped<IUserAdministrationService, UserAdministrationService>();
 
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -63,7 +70,20 @@ namespace DugnadAppMvc
                     ForwardedHeaders.XForwardedProto;
             });
 
-            var app = builder.Build();            
+            var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                await RoleSeeder.SeedAsync(scope.ServiceProvider);
+                await UserSeeder.SeedAsync(scope.ServiceProvider);
+            }
+
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -84,8 +104,8 @@ namespace DugnadAppMvc
             app.UseAuthorization();
 
             app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+            name: "default",
+            pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
             app.Run();
         }

@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using DugnadAppMvc.Data;
+﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers
 {
-    //[Authorize(Roles = "Administrator")]
+    [Authorize(Roles = $"{IdentityRoles.Styremedlem},{IdentityRoles.Administrator},{IdentityRoles.SystemAdministrator}")]
     public class AdminRapporterController : Controller
     {
         public IActionResult Index()

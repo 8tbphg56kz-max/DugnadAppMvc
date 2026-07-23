@@ -1,12 +1,13 @@
 ﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
+using DugnadAppMvc.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DugnadAppMvc.Models;
 
 namespace DugnadAppMvc.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     public class LeiligheterController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -25,12 +26,15 @@ namespace DugnadAppMvc.Controllers
 
             return View(leiligheter);
         }
+
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Leilighet leilighet)
@@ -44,6 +48,7 @@ namespace DugnadAppMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -55,6 +60,7 @@ namespace DugnadAppMvc.Controllers
             return View(leilighet);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Leilighet leilighet)
@@ -71,6 +77,7 @@ namespace DugnadAppMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -84,6 +91,7 @@ namespace DugnadAppMvc.Controllers
             return View(leilighet);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -97,8 +105,10 @@ namespace DugnadAppMvc.Controllers
 
             if (leilighet.Beboere.Any())
             {
-                ModelState.AddModelError("", "Leiligheten kan ikke slettes fordi den har registrerte beboere.");
-                return View(leilighet);
+                TempData["ErrorMessage"] =
+                    "Leiligheten kan ikke slettes fordi den har registrerte beboere.";
+
+                return RedirectToAction(nameof(Index));
             }
 
             _context.Leiligheter.Remove(leilighet);

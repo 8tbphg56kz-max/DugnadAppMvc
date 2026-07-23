@@ -1,7 +1,5 @@
 ﻿@model IEnumerable<DugnadAppMvc.Models.Beboer>
 
-<partial name="_Alerts" />
-
 <h2 class="mb-2">Beboere</h2>
 
 <p class="text-muted mb-3">
@@ -9,10 +7,13 @@
 </p>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-person-plus me-1"></i>
-        Legg til beboer
-    </a>
+    @if (User.HasAdminAccess())
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-person-plus me-1"></i>
+            Legg til beboer
+        </a>
+    }
 </p>
 
 <div class="table-responsive">
@@ -23,7 +24,6 @@
             <th>Navn</th>
             <th>E-post</th>
             <th>Leilighet</th>
-            <th>Administrator</th>
             <th></th>
         </tr>
     </thead>
@@ -39,31 +39,24 @@
                     <td>
                         @beboer.Leilighet.Seksjonsnummer /
                         @beboer.Leilighet.Leilighetsnummer
-                    </td>
-                    <td>
-                        @if (beboer.ErAdmin)
-                        {
-                            <span class="badge bg-primary">
-                                Administrator
-                            </span>
-                        }
-                    </td>                
+                    </td>                      
                     <td class="text-nowrap">
+                        @if (User.HasAdminAccess())
+                        {
+                            <a asp-action="Edit"
+                            asp-route-id="@beboer.Id"
+                            class="btn btn-sm btn-outline-primary"
+                            title="Rediger">
+                                <i class="bi bi-pencil"></i>
+                            </a>
 
-                        <a asp-action="Edit"
-                           asp-route-id="@beboer.Id"
-                           class="btn btn-sm btn-outline-primary"
-                           title="Rediger">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-
-                        <a asp-action="Delete"
-                           asp-route-id="@beboer.Id"
-                           class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash me-1"></i>
-                            Slett
-                        </a>
-
+                            <a asp-action="Delete"
+                            asp-route-id="@beboer.Id"
+                            class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash me-1"></i>
+                                Slett
+                            </a>
+                        }
                     </td>
             </tr>
         }

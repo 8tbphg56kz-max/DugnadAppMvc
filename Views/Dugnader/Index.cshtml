@@ -1,7 +1,5 @@
 ﻿@model IEnumerable<DugnadAppMvc.Models.Dugnad>
 
-<partial name="_Alerts" />
-
 @{
     ViewData["Title"] = "Dugnader";
 }
@@ -9,9 +7,12 @@
 <h2>Dugnader</h2>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">
-        Ny dugnad
-    </a>
+    @if (User.HasAdminAccess())
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            Ny dugnad
+        </a>
+    }
 </p>
 
 <table class="table table-striped">
@@ -59,11 +60,14 @@
 
                 <td>
 
-                    <a asp-action="Edit"
-                       asp-route-id="@dugnad.Id"
-                       class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil"></i>
-                    </a>
+                    @if (User.HasAdminAccess())
+                    {
+                        <a asp-action="Edit"
+                        asp-route-id="@dugnad.Id"
+                        class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    }
 
                     <form asp-action="ToggleVisible"
                           asp-route-id="@dugnad.Id"
@@ -72,32 +76,36 @@
 
                         @Html.AntiForgeryToken()
 
-                        @if (dugnad.ErSynlig)
-                        {
-                            <button type="submit"
+                        @if (User.HasAdminAccess())
+                            {
+                                @if (dugnad.ErSynlig)
+                                {
+                                    <button type="submit"
                                     class="btn btn-sm btn-outline-warning"
                                     title="Skjul dugnad">
-                                <i class="bi bi-eye-slash"></i>
-                            </button>
-                        }
-                        else
-                        {
-                            <button type="submit"
+                                        <i class="bi bi-eye-slash"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit"
                                     class="btn btn-sm btn-outline-success"
                                     title="Vis dugnad">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        }
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                }
+                            }
+                        </form>
 
-                    </form>
-
-                    <a asp-action="Delete"
-                       asp-route-id="@dugnad.Id"
-                       class="btn btn-sm btn-outline-danger"
-                       title="Slett dugnad">
-                        <i class="bi bi-trash"></i>
-                    </a>
-
+                    @if (User.HasAdminAccess())
+                    {
+                        <a asp-action="Delete"
+                        asp-route-id="@dugnad.Id"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Slett dugnad">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    }
                 </td>
 
             </tr>

@@ -1,4 +1,5 @@
 ﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -17,18 +18,25 @@ public class UserProvisioningService
         _context = context;
     }
 
-    /// <summary>
-    /// Oppretter en Identity-bruker for en beboer hvis den ikke finnes.
-    /// </summary>
-    /// <summary>
-    /// Oppretter en Identity-bruker for en beboer hvis den ikke finnes.
-    /// </summary>
     public async Task<UserProvisioningResult> CreateUserAsync(Beboer beboer)
     {
         var existingUser = await _userManager.FindByEmailAsync(beboer.Epost);
 
         if (existingUser != null)
         {
+            // Koble beboeren til eksisterende Identity-bruker dersom nødvendig
+            if (beboer.ApplicationUserId != existingUser.Id)
+            {
+                beboer.ApplicationUserId = existingUser.Id;
+                await _context.SaveChangesAsync();
+            }
+
+            // Sørg for at brukeren alltid har Beboer-rollen
+            if (!await _userManager.IsInRoleAsync(existingUser, IdentityRoles.Beboer))
+            {
+                await _userManager.AddToRoleAsync(existingUser, IdentityRoles.Beboer);
+            }
+
             return new UserProvisioningResult
             {
                 User = existingUser,
@@ -55,11 +63,13 @@ public class UserProvisioningService
             throw new InvalidOperationException(errors);
         }
 
+        // Alle nye brukere er beboere
+        await _userManager.AddToRoleAsync(user, IdentityRoles.Beboer);
+
+        // Koble Identity-brukeren til beboeren
         beboer.ApplicationUserId = user.Id;
 
         await _context.SaveChangesAsync();
-
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
         return new UserProvisioningResult
         {

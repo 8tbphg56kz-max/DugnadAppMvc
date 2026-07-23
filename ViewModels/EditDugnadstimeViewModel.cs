@@ -7,15 +7,12 @@ namespace DugnadAppMvc.ViewModels
     {
         public int Id { get; set; }
 
-        public string Dugnad { get; set; } = "";
+        public string Dugnad { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Velg antall timer.")]
-        [Display(Name = "Timer")]
         public decimal? Timer { get; set; }
 
-        [Display(Name = "Kommentar")]
         public string? Kommentar { get; set; }
 
-        public List<SelectListItem> TimerAlternativer { get; set; } = [];
+        public List<SelectListItem> TimerAlternativer { get; set; } = new();
     }
 }

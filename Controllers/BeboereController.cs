@@ -1,4 +1,5 @@
 ﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,26 +9,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers
 {
-    [Authorize]
-    public class BeboereController : Controller
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+      public class BeboereController : Controller
     {
         private readonly ApplicationDbContext _context;
    
         private readonly UserProvisioningService _userProvisioningService;
 
-        private readonly EmailService _emailService;
 
         private readonly UserManager<ApplicationUser> _userManager;
 
         public BeboereController(
     ApplicationDbContext context,
     UserProvisioningService userProvisioningService,
-    EmailService emailService,
     UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userProvisioningService = userProvisioningService;
-            _emailService = emailService;
             _userManager = userManager;
         }
 
@@ -42,26 +40,23 @@ namespace DugnadAppMvc.Controllers
             return View(beboere);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Leiligheter = _context.Leiligheter
-                .OrderBy(l => l.Seksjonsnummer)
-                .ToList();
+            FyllLeiligheter();
 
             return View();
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Beboer beboer)
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Leiligheter = _context.Leiligheter
-                    .OrderBy(l => l.Seksjonsnummer)
-                    .ToList();
-
+                FyllLeiligheter();
                 return View(beboer);
             }
 
@@ -71,27 +66,12 @@ namespace DugnadAppMvc.Controllers
             await _userProvisioningService.CreateUserAsync(beboer);
 
             TempData["SuccessMessage"] =
-    $"Beboeren {beboer.Fornavn} {beboer.Etternavn} er opprettet.";
+                $"Beboeren {beboer.Fornavn} {beboer.Etternavn} er opprettet.";
 
             return RedirectToAction(nameof(Index));
-
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var beboer = await _context.Beboere.FindAsync(id);
-
-            if (beboer == null)
-                return NotFound();
-
-            ViewBag.Leiligheter = _context.Leiligheter
-                .OrderBy(l => l.Seksjonsnummer)
-                .ToList();
-
-            return View(beboer);
-        }
-
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Beboer beboer)
@@ -114,33 +94,7 @@ namespace DugnadAppMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Deactivate(int id)
-        {
-            var beboer = await _context.Beboere
-                .Include(b => b.Leilighet)
-                .FirstOrDefaultAsync(b => b.Id == id);
-
-            if (beboer == null)
-                return NotFound();
-
-            return View(beboer);
-        }
-
-        [HttpPost, ActionName("Deactivate")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeactivateConfirmed(int id)
-        {
-            var beboer = await _context.Beboere.FindAsync(id);
-
-            if (beboer == null)
-                return NotFound();
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -156,6 +110,7 @@ namespace DugnadAppMvc.Controllers
             return View(beboer);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -200,6 +155,13 @@ namespace DugnadAppMvc.Controllers
             TempData["SuccessMessage"] = "Beboeren ble slettet.";
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private void FyllLeiligheter()
+        {
+            ViewBag.Leiligheter = _context.Leiligheter
+                .OrderBy(l => l.Seksjonsnummer)
+                .ToList();
         }
     }
 }

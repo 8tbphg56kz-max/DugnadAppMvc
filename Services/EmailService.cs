@@ -1,4 +1,4 @@
-﻿using DugnadAppMvc.Models;
+﻿using DugnadAppMvc.Configuration;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;

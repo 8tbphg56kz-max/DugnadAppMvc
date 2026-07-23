@@ -5,10 +5,6 @@ namespace DugnadAppMvc.Models.ViewModels
     public class SetupViewModel
     {
         [Required]
-        [Display(Name = "Sameiets navn")]
-        public string SameieNavn { get; set; } = "";
-
-        [Required]
         public string Fornavn { get; set; } = "";
 
         [Required]

@@ -31,15 +31,29 @@
 
                     <div class="mb-3">
 
-                        <label asp-for="Dugnadsbudsjett"
-                               class="form-label">
-                            Dugnadsbudsjett
-                        </label>
+                        <label asp-for="SameieNavn" class="form-label"></label>
+
+                        <input asp-for="SameieNavn"
+                               class="form-control"
+                               autocomplete="organization" />
+
+                        <div class="form-text">
+                            Navnet som vises øverst i DugnadApp og på rapporter.
+                        </div>
+
+                        <span asp-validation-for="SameieNavn"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label asp-for="Dugnadsbudsjett" class="form-label"></label>
 
                         <input asp-for="Dugnadsbudsjett"
                                class="form-control"
-                               inputmode="decimal"
-                               autocomplete="off" />
+                               type="number"
+                               min="0" />
 
                         <div class="form-text">
                             Angi årets vedtatte dugnadsbudsjett i kroner.
@@ -52,7 +66,7 @@
 
                     <div class="d-flex justify-content-between">
 
-                        <a asp-controller="Home"
+                        <a asp-controller="Administrasjon"
                            asp-action="Index"
                            class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-1"></i>

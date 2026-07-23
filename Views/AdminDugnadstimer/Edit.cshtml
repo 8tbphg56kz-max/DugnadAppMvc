@@ -7,15 +7,17 @@
     </h2>
 
     <p class="text-muted">
-        Registrer timer du har brukt på en dugnad.
+        Oppdater registrerte timer og kommentar.
     </p>
 </div>
 
 <div class="card shadow-sm border-0">
 
     <div class="card-body p-4">
-        <form asp-action="Create" method="post">
+        <form asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
+
+            <input asp-for="Id" type="hidden" />
 
             <div class="mb-3">
                 <label asp-for="DugnadId" class="form-label"></label>

@@ -1,9 +1,11 @@
 using DugnadAppMvc.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace DugnadAppMvc.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         public IActionResult Index()

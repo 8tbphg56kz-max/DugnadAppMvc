@@ -1,12 +1,10 @@
 ﻿using DugnadAppMvc.Data;
 using DugnadAppMvc.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     public class DugnaderController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,6 +14,7 @@ namespace DugnadAppMvc.Controllers
             _context = context;
         }
 
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var dugnader = await _context.Dugnader
@@ -25,8 +24,9 @@ namespace DugnadAppMvc.Controllers
 
             return View(dugnader);
         }
-    
-    [HttpGet]
+
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
+        [HttpGet]
         public IActionResult Create()
         {
             return View(new Dugnad
@@ -37,6 +37,7 @@ namespace DugnadAppMvc.Controllers
             });
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Dugnad dugnad)
@@ -50,6 +51,7 @@ namespace DugnadAppMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -63,6 +65,7 @@ namespace DugnadAppMvc.Controllers
             return View(dugnad);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Dugnad dugnad)
@@ -133,6 +136,7 @@ namespace DugnadAppMvc.Controllers
             return View(dugnad);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

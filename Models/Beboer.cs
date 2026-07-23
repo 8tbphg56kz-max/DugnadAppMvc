@@ -11,8 +11,6 @@ namespace DugnadAppMvc.Models
 
         public string Epost { get; set; } = "";
 
-        public bool ErAdmin { get; set; }
-
         // Kobling til leilighet
         public int LeilighetId { get; set; }
 

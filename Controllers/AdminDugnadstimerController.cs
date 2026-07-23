@@ -1,4 +1,5 @@
 ﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers
 {
-    //[Authorize(Roles = "Administrator")]
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     public class AdminDugnadstimerController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -90,6 +91,7 @@ namespace DugnadAppMvc.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public IActionResult Create()
         {
@@ -128,9 +130,10 @@ namespace DugnadAppMvc.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DugnadstimeViewModel model)
+        public async Task<IActionResult> Create(AdminCreateDugnadstimeViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -192,6 +195,7 @@ namespace DugnadAppMvc.Controllers
             }
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -205,6 +209,7 @@ namespace DugnadAppMvc.Controllers
 
             var model = new DugnadstimeViewModel
             {
+                Id = dugnadstime.Id,
                 DugnadId = dugnadstime.DugnadId,
                 BeboerId = dugnadstime.BeboerId,
                 Timer = dugnadstime.Timer,
@@ -242,6 +247,64 @@ namespace DugnadAppMvc.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, DugnadstimeViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Dugnader = _context.Dugnader
+                    .Where(d => d.ErSynlig)
+                    .OrderBy(d => d.StartDato)
+                    .Select(d => new SelectListItem
+                    {
+                        Value = d.Id.ToString(),
+                        Text = d.Tittel
+                    })
+                    .ToList();
+
+                model.Beboere = _context.Beboere
+                    .OrderBy(b => b.Etternavn)
+                    .ThenBy(b => b.Fornavn)
+                    .Select(b => new SelectListItem
+                    {
+                        Value = b.Id.ToString(),
+                        Text = b.Etternavn + ", " + b.Fornavn
+                    })
+                    .ToList();
+
+                model.TimerAlternativer.Add(new SelectListItem
+                {
+                    Value = "",
+                    Text = "Velg timer..."
+                });
+
+                FyllTimerAlternativer(model.TimerAlternativer);
+
+                return View(model);
+            }
+
+            var dugnadstime = await _context.Dugnadstimer.FindAsync(id);
+
+            if (dugnadstime == null)
+            {
+                return NotFound();
+            }
+
+            dugnadstime.DugnadId = model.DugnadId;
+            dugnadstime.BeboerId = model.BeboerId!.Value;
+            dugnadstime.Timer = model.Timer!.Value;
+            dugnadstime.Kommentar = model.Kommentar;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Dugnadstimen ble oppdatert.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -268,6 +331,7 @@ namespace DugnadAppMvc.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
