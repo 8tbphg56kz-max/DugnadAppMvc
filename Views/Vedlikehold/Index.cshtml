@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Vedlikehold";
+}
+
+<h2>Vedlikehold</h2>
+
+<div class="card">
+    <div class="card-body">
+
+        <h5>Koble eksisterende beboere</h5>
+
+        <p>
+            Går gjennom alle beboere uten ApplicationUserId og
+            kobler dem mot eksisterende Identity-brukere.
+            Hvis brukeren ikke finnes, opprettes den.
+        </p>
+
+        <form asp-action="KobleEksisterendeBeboere" method="post">
+            <button class="btn btn-primary">
+                Kjør
+            </button>
+        </form>
+
+    </div>
+</div>

@@ -47,6 +47,8 @@ namespace DugnadAppMvc
             });
 
             // MVC
+            builder.Services.AddScoped<SameieService>();
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddHttpContextAccessor();

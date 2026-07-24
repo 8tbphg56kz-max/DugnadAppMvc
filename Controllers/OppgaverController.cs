@@ -1,8 +1,10 @@
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using DugnadAppMvc.Data;
+using DugnadAppMvc.Models;
+using DugnadAppMvc.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
+
+[Authorize(Roles = IdentityRoles.BoardAccess)]
 public class OppgaverController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -39,22 +41,41 @@ public class OppgaverController : Controller
     // GET: OPPGAVES/Create
     public IActionResult Create()
     {
-        return View();
+        var model = new Oppgave
+        {
+            FraDato = DateTime.Today,
+            Frist = DateTime.Today.AddDays(14),
+            Prioritet = OppgavePrioritet.Normal,
+            AntallPersoner = 1,
+            KanRegistrereTimer = true,
+            KreverBekreftelse = true
+        };
+
+        return View(model);
     }
 
     // POST: OPPGAVES/Create
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering")] Oppgave oppgave)
+    public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave)
     {
         if (ModelState.IsValid)
         {
+            oppgave.FraDato = DateTime.SpecifyKind(oppgave.FraDato, DateTimeKind.Utc);
+            oppgave.Frist = DateTime.SpecifyKind(oppgave.Frist, DateTimeKind.Utc);
+
+            oppgave.ErUtført = false;
+            oppgave.Opprettet = DateTime.UtcNow;
+
             _context.Add(oppgave);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
+
         return View(oppgave);
     }
 
@@ -79,7 +100,7 @@ public class OppgaverController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? id, [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering")] Oppgave oppgave)
+    public async Task<IActionResult> Edit(int? id, [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave)
     {
         if (id != oppgave.Id)
         {
@@ -90,6 +111,9 @@ public class OppgaverController : Controller
         {
             try
             {
+                oppgave.FraDato = DateTime.SpecifyKind(oppgave.FraDato, DateTimeKind.Utc);
+                oppgave.Frist = DateTime.SpecifyKind(oppgave.Frist, DateTimeKind.Utc);
+
                 _context.Update(oppgave);
                 await _context.SaveChangesAsync();
             }
@@ -145,5 +169,16 @@ public class OppgaverController : Controller
     private bool OppgaveExists(int? id)
     {
         return _context.Oppgaver.Any(e => e.Id == id);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> Mine()
+    {
+        var oppgaver = await _context.Oppgaver
+            .Where(o => !o.ErUtført)
+            .OrderBy(o => o.Frist)
+            .ToListAsync();
+
+        return View(oppgaver);
     }
 }

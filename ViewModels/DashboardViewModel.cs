@@ -1,16 +1,20 @@
-﻿namespace DugnadAppMvc.ViewModels
-{
-    public class DashboardViewModel
-    {
-        public int Id { get; set; }
-        public string FirstName { get; set; } = string.Empty;
+﻿using DugnadAppMvc.Models;
+namespace DugnadAppMvc.ViewModels
+{        public class DashboardViewModel
+        {
+            public int Id { get; set; }
 
-        public decimal TotalHours { get; set; }
+            public string FirstName { get; set; } = string.Empty;
 
-        public int ActiveTasks { get; set; }
+            public decimal TotalHours { get; set; }
 
-        public bool HasCommonDugnad { get; set; }
+            public int ActiveTasks { get; set; }
 
-        public string? BoardMessage { get; set; }
-    }
+            public bool HasCommonDugnad { get; set; }
+
+            public string? BoardMessage { get; set; }
+
+            // Nye egenskaper
+            public List<Oppgave> Oppgaver { get; set; } = new();
+        }
 }

@@ -42,11 +42,21 @@ namespace DugnadAppMvc.Controllers
                 }
             }
 
+            var oppgaver = await _context.Oppgaver
+             .Where(o => !o.ErUtført)
+             .OrderBy(o => o.Prioritet)
+             .ThenBy(o => o.Frist)             
+             .Take(4)
+             .ToListAsync();
+
             var model = new DashboardViewModel
             {
                 FirstName = currentUser?.FirstName ?? "",
                 TotalHours = totalHours,
-                ActiveTasks = 0,
+
+                ActiveTasks = oppgaver.Count,
+                Oppgaver = oppgaver,
+
                 HasCommonDugnad = false,
                 BoardMessage = null
             };

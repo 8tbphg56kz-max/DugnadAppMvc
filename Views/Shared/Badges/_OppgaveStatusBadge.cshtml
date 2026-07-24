@@ -1,0 +1,28 @@
+﻿@model DugnadAppMvc.Models.Oppgave
+
+@{
+    var iDag = DateTime.Today;
+}
+
+@if (Model.ErUtført)
+{
+    <span class="badge bg-success">Utført</span>
+}
+else if (Model.Frist < DateTime.Today)
+{
+    <span class="badge bg-danger">
+        Forfalt (@Model.Frist:dd.MM.yyyy)
+    </span>
+}
+else if (Model.Frist <= DateTime.Today.AddDays(7))
+{
+    <span class="badge bg-warning text-dark">
+        Frist @Model.Frist.ToString("dd.MM")
+    </span>
+}
+else
+{
+    <span class="badge bg-primary">
+        Frist @Model.Frist.ToString("dd.MM")
+    </span>
+}

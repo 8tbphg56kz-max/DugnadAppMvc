@@ -1,0 +1,17 @@
+﻿@using DugnadAppMvc.Models.Enums
+@model OppgavePrioritet
+
+@switch (Model)
+{
+    case OppgavePrioritet.Høy:
+        <span class="badge bg-danger">Høy</span>
+        break;
+
+    case OppgavePrioritet.Normal:
+        <span class="badge bg-warning text-dark">Normal</span>
+        break;
+
+    case OppgavePrioritet.Lav:
+        <span class="badge bg-success">Lav</span>
+        break;
+}

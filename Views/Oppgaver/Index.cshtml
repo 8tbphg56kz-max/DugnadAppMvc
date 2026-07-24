@@ -1,83 +1,128 @@
-@model IEnumerable<Oppgave>
+@model IEnumerable<DugnadAppMvc.Models.Oppgave>
+@using DugnadAppMvc.Models.Enums
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Oppgaver";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Oppgaver</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
+    <a asp-action="Create" class="btn btn-primary">
+        Ny oppgave
+    </a>
+</div>
+
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-light">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Navn)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Beskrivelse)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FraDato)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Frist)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AntallPersoner)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.KanRegistrereTimer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.KreverBekreftelse)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Utstyr)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UtstyrPlassering)
-            </th>
+            <th>Oppgave</th>
+            <th>Fra dato</th>
+            <th>Frist</th>
+            <th>Prioritet</th>
+            <th>Status</th>
+            <th>Personer</th>
+            <th>Timer</th>
+            <th>Bekreftelse</th>
             <th></th>
         </tr>
     </thead>
+
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.Navn)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Beskrivelse)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.FraDato)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Frist)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.AntallPersoner)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.KanRegistrereTimer)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.KreverBekreftelse)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Utstyr)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.UtstyrPlassering)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+
+        @foreach (var item in Model)
+        {
+            <tr class="@(item.ErUtført ? "table-success" : "")">
+
+                <td>
+                    <strong>@item.Navn</strong>
+
+                    @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
+                    {
+                        <div class="text-muted small">
+                            @(item.Beskrivelse.Length > 80
+                                ? item.Beskrivelse[..80] + "..."
+                                : item.Beskrivelse)
+                        </div>
+                    }
+                </td>
+
+                <td>
+                    @item.FraDato.ToString("dd.MM.yyyy")
+                </td>
+
+                <td>
+                    @item.Frist.ToString("dd.MM.yyyy")
+                </td>
+
+                <td>
+
+                    @switch (item.Prioritet)
+                    {
+                        case OppgavePrioritet.Høy:
+                            <span class="badge bg-danger">Høy</span>
+                            break;
+
+                        case OppgavePrioritet.Normal:
+                            <span class="badge bg-warning text-dark">Normal</span>
+                            break;
+
+                        default:
+                            <span class="badge bg-success">Lav</span>
+                            break;
+                    }
+
+                </td>
+
+                <td>
+
+                    @if (item.ErUtført)
+                    {
+                        <span class="badge bg-success">Utført</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Aktiv</span>
+                    }
+
+                </td>
+
+                <td>
+                    @item.AntallPersoner
+                </td>
+
+                <td>
+                    @(item.KanRegistrereTimer ? "Ja" : "Nei")
+                </td>
+
+                <td>
+                    @(item.KreverBekreftelse ? "Ja" : "Nei")
+                </td>
+
+                <td class="text-nowrap">
+
+                    <a asp-action="Edit"
+                       asp-route-id="@item.Id"
+                       class="btn btn-sm btn-outline-primary">
+                        Rediger
+                    </a>
+
+                    <a asp-action="Details"
+                       asp-route-id="@item.Id"
+                       class="btn btn-sm btn-outline-secondary">
+                        Vis
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@item.Id"
+                       class="btn btn-sm btn-outline-danger">
+                        Slett
+                    </a>
+
+                </td>
+
+            </tr>
+        }
+
     </tbody>
 </table>

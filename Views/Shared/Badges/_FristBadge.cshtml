@@ -1,0 +1,31 @@
+﻿@model DateTime
+
+@{
+    var idag = DateTime.Today;
+    var dagerIgjen = (Model.Date - idag).Days;
+}
+
+@if (dagerIgjen < 0)
+{
+    <span class="badge bg-danger">
+        Forfalt (@Model:dd.MM.yyyy)
+    </span>
+}
+else if (dagerIgjen == 0)
+{
+    <span class="badge bg-danger">
+        Frist i dag
+    </span>
+}
+else if (dagerIgjen <= 7)
+{
+    <span class="badge bg-warning text-dark">
+        @dagerIgjen dager igjen (@Model:dd.MM)
+    </span>
+}
+else
+{
+    <span class="badge bg-primary">
+        @Model:dd.MM.yyyy
+    </span>
+}

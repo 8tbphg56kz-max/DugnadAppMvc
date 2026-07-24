@@ -1,74 +1,147 @@
-@model Oppgave
+@using DugnadAppMvc.Models.Enums
+@model DugnadAppMvc.Models.Oppgave
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Rediger oppgave";
 }
 
-<h1>Edit</h1>
+<h2 class="mb-4">Rediger oppgave</h2>
 
-<h4>Oppgave</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Navn" class="control-label"></label>
+<form asp-action="Edit">
+
+    <input type="hidden" asp-for="Id" />
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Generelt</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="mb-3">
+                <label asp-for="Navn" class="form-label"></label>
                 <input asp-for="Navn" class="form-control" />
                 <span asp-validation-for="Navn" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Beskrivelse" class="control-label"></label>
-                <input asp-for="Beskrivelse" class="form-control" />
+
+            <div class="mb-3">
+                <label asp-for="Beskrivelse" class="form-label"></label>
+                <textarea asp-for="Beskrivelse"
+                          class="form-control"
+                          rows="5"></textarea>
                 <span asp-validation-for="Beskrivelse" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="FraDato" class="control-label"></label>
-                <input asp-for="FraDato" class="form-control" />
-                <span asp-validation-for="FraDato" class="text-danger"></span>
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Planlegging</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="FraDato" class="form-label"></label>
+                    <input asp-for="FraDato" class="form-control" />
+                    <span asp-validation-for="FraDato" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Frist" class="form-label"></label>
+                    <input asp-for="Frist" class="form-control" />
+                    <span asp-validation-for="Frist" class="text-danger"></span>
+                </div>
+
             </div>
-            <div class="form-group">
-                <label asp-for="Frist" class="control-label"></label>
-                <input asp-for="Frist" class="form-control" />
-                <span asp-validation-for="Frist" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AntallPersoner" class="control-label"></label>
+
+            <div class="mb-3">
+                <label asp-for="AntallPersoner" class="form-label"></label>
                 <input asp-for="AntallPersoner" class="form-control" />
                 <span asp-validation-for="AntallPersoner" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="KanRegistrereTimer" class="control-label"></label>
-                <input asp-for="KanRegistrereTimer" class="form-check-input" />
-                <span asp-validation-for="KanRegistrereTimer" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="KreverBekreftelse" class="control-label"></label>
-                <input asp-for="KreverBekreftelse" class="form-check-input" />
-                <span asp-validation-for="KreverBekreftelse" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Utstyr" class="control-label"></label>
-                <input asp-for="Utstyr" class="form-control" />
-                <span asp-validation-for="Utstyr" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UtstyrPlassering" class="control-label"></label>
-                <input asp-for="UtstyrPlassering" class="form-control" />
-                <span asp-validation-for="UtstyrPlassering" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Status og prioritet</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="mb-3">
+                <label asp-for="Prioritet" class="form-label"></label>
+                <select asp-for="Prioritet"
+                        asp-items="Html.GetEnumSelectList<OppgavePrioritet>()"
+                        class="form-select">
+                </select>
+            </div>
+
+            <div class="form-check mb-2">
+                <input asp-for="ErUtført" class="form-check-input" />
+                <label asp-for="ErUtført" class="form-check-label"></label>
+            </div>
+
+            <div class="form-check mb-2">
+                <input asp-for="KanRegistrereTimer" class="form-check-input" />
+                <label asp-for="KanRegistrereTimer" class="form-check-label"></label>
+            </div>
+
+            <div class="form-check">
+                <input asp-for="KreverBekreftelse" class="form-check-input" />
+                <label asp-for="KreverBekreftelse" class="form-check-label"></label>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Utstyr</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="mb-3">
+                <label asp-for="Utstyr" class="form-label"></label>
+                <textarea asp-for="Utstyr"
+                          class="form-control"
+                          rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="UtstyrPlassering" class="form-label"></label>
+                <textarea asp-for="UtstyrPlassering"
+                          class="form-control"
+                          rows="3"></textarea>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+
+        <button type="submit" class="btn btn-primary">
+            Lagre
+        </button>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Avbryt
+        </a>
+
+    </div>
+
+</form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

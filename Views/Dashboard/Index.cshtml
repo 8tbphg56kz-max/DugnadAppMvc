@@ -1,4 +1,6 @@
-﻿@model DugnadAppMvc.ViewModels.DashboardViewModel
+﻿@using DugnadAppMvc.Services
+@model DugnadAppMvc.ViewModels.DashboardViewModel
+@inject SameieService SameieService
 @{
     ViewData["Title"] = "Min side";
 }
@@ -29,21 +31,47 @@
 
 <div class="row g-4">
 
-    <!-- Aktuelle dugnader -->
+    <!-- Aktuelle oppgaver -->
     <div class="col-12 col-lg-6">
         <div class="card shadow-sm border-0 rounded-4 h-100">
             <div class="card-body">
 
                 <h5>
                     <i class="bi bi-list-check text-primary me-2"></i>
-                    Aktuelle dugnader
+                   Oppgaver
                 </h5>
 
                 <hr />
 
-                <p class="text-muted">
-                    Ingen åpne dugnader akkurat nå.
-                </p>
+                @if (Model.Oppgaver.Any())
+                {
+                    foreach (var oppgave in Model.Oppgaver)
+                    {
+                        <div class="mb-3">
+                            <strong>@oppgave.Navn</strong><br />    
+
+                            <partial name="Badges/_OppgavePrioritetBadge" model="oppgave.Prioritet" />
+
+                            <br />
+
+                            <small class="text-muted">
+                                Frist: @oppgave.Frist.ToString("dd.MM.yyyy")
+                            </small>
+                        </div>
+                    }
+
+                    <a asp-controller="Oppgaver"
+                       asp-action="Mine"
+                       class="btn btn-sm btn-outline-primary">
+                        Vis alle oppgaver
+                    </a>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">
+                        Ingen aktive oppgaver.
+                    </p>
+                }
 
             </div>
         </div>

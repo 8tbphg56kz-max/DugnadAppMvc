@@ -1,0 +1,68 @@
+﻿@model IEnumerable<DugnadAppMvc.Models.Oppgave>
+
+@{
+    ViewData["Title"] = "Oppgaver";
+}
+
+<h2>Oppgaver</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Det finnes ingen aktive oppgaver.
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var oppgave in Model)
+        {
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+
+                    <div class="card-header d-flex justify-content-between">
+                        <strong>@oppgave.Navn</strong>
+
+                        @await Html.PartialAsync("Badges/_OppgavePrioritetBadge", oppgave.Prioritet)
+                    </div>
+
+                    <div class="card-body">
+
+                        <p>@oppgave.Beskrivelse</p>
+
+                        <dl class="row">
+
+                            <dt class="col-5">Fra dato</dt>
+                            <dd class="col-7">
+                                @oppgave.FraDato.ToString("dd.MM.yyyy")
+                            </dd>
+
+                            <dt class="col-5">Frist</dt>
+                            <dd class="col-7">
+                                @oppgave.Frist.ToString("dd.MM.yyyy")
+                            </dd>
+
+                            <dt class="col-5">Personer</dt>
+                            <dd class="col-7">
+                                @oppgave.AntallPersoner
+                            </dd>
+
+                        </dl>
+
+                    </div>
+
+                    <div class="card-footer">
+
+                        <a asp-action="Details"
+                           asp-route-id="@oppgave.Id"
+                           class="btn btn-outline-primary btn-sm">
+                            Se oppgave
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
