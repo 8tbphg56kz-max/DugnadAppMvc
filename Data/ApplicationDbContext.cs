@@ -1,6 +1,7 @@
 ﻿using DugnadAppMvc.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace DugnadAppMvc.Data
 {
@@ -18,9 +19,13 @@ namespace DugnadAppMvc.Data
         public DbSet<Dugnadstime> Dugnadstimer { get; set; }
         public DbSet<Innstillinger> Innstillinger => Set<Innstillinger>();
         public DbSet<Oppgave> Oppgaver { get; set; }
+        public DbSet<OppgavePamelding> OppgavePameldinger { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<OppgavePamelding>()
+            .ToTable("OppgavePamelding");
 
             // Beboer -> Identity
             builder.Entity<Beboer>()
@@ -59,6 +64,18 @@ namespace DugnadAppMvc.Data
                 .WithMany(b => b.Dugnadstimer)
                 .HasForeignKey(dt => dt.BeboerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Oppgavepåmelding -> Oppgave
+            builder.Entity<OppgavePamelding>()
+                .HasOne(p => p.Oppgave)
+                .WithMany(o => o.Pameldinger)
+                .HasForeignKey(p => p.OppgaveId);
+
+            // Oppgavepåmelding -> Beboer
+            builder.Entity<OppgavePamelding>()
+                .HasOne(p => p.Beboer)
+                .WithMany(b => b.OppgavePameldinger)
+                .HasForeignKey(p => p.BeboerId);
         }
     }
 }

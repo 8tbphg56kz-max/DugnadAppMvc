@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DugnadAppMvc.Models.Oppgave>
+﻿@model IEnumerable<DugnadAppMvc.ViewModels.OppgaveMineViewModel>
 
 @{
     ViewData["Title"] = "Oppgaver";
@@ -21,45 +21,71 @@ else
                 <div class="card h-100">
 
                     <div class="card-header d-flex justify-content-between">
-                        <strong>@oppgave.Navn</strong>
+                        <strong>@oppgave.Oppgave.Navn</strong>
 
-                        @await Html.PartialAsync("Badges/_OppgavePrioritetBadge", oppgave.Prioritet)
+                        @await Html.PartialAsync("Badges/_OppgavePrioritetBadge", oppgave.Oppgave.Prioritet)
                     </div>
 
                     <div class="card-body">
 
-                        <p>@oppgave.Beskrivelse</p>
+                        <p>@oppgave.Oppgave.Beskrivelse</p>
 
                         <dl class="row">
 
                             <dt class="col-5">Fra dato</dt>
                             <dd class="col-7">
-                                @oppgave.FraDato.ToString("dd.MM.yyyy")
+                                @oppgave.Oppgave.FraDato.ToString("dd.MM.yyyy")
                             </dd>
 
                             <dt class="col-5">Frist</dt>
                             <dd class="col-7">
-                                @oppgave.Frist.ToString("dd.MM.yyyy")
+                                @oppgave.Oppgave.Frist.ToString("dd.MM.yyyy")
                             </dd>
 
                             <dt class="col-5">Personer</dt>
                             <dd class="col-7">
-                                @oppgave.AntallPersoner
+                                @oppgave.Oppgave.AntallPersoner
+                            </dd>
+
+                            <dt class="col-5">Påmeldte</dt>
+                            <dd class="col-7">
+                                @oppgave.Oppgave.Pameldinger.Count av @oppgave.Oppgave.AntallPersoner
                             </dd>
 
                         </dl>
 
                     </div>
 
-                    <div class="card-footer">
+                    @if (oppgave.ErPameldt)
+                    {
+                        <span class="badge bg-success mb-2">
+                            <i class="bi bi-check-circle"></i> Du er påmeldt
+                        </span>
 
-                        <a asp-action="Details"
-                           asp-route-id="@oppgave.Id"
-                           class="btn btn-outline-primary btn-sm">
-                            Se oppgave
-                        </a>
+                        <form asp-action="TrekkPameldingFraMine"
+                              asp-route-id="@oppgave.Oppgave.Id"
+                              method="post">
+                            @Html.AntiForgeryToken()
 
-                    </div>
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-person-dash"></i>
+                                Trekk påmelding
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="MeldPaFraMine"
+                              asp-route-id="@oppgave.Oppgave.Id"
+                              method="post">
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-person-plus"></i>
+                                Meld meg på
+                            </button>
+                        </form>
+                    }
 
                 </div>
             </div>

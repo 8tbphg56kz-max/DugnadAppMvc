@@ -1,44 +1,37 @@
 using DugnadAppMvc.Data;
+using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.Models.Enums;
+using DugnadAppMvc.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
-
-[Authorize(Roles = IdentityRoles.BoardAccess)]
 public class OppgaverController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public OppgaverController(ApplicationDbContext context)
+    public OppgaverController(
+    ApplicationDbContext context,
+    UserManager<ApplicationUser> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
-    // GET: OPPGAVES
-    public async Task<IActionResult> Index()    
+    public async Task<IActionResult> Index()
     {
-        return View(await _context.Oppgaver.ToListAsync());
+        var oppgaver = await _context.Oppgaver
+            .OrderBy(o => o.Prioritet)
+            .ThenBy(o => o.Frist)
+            .ToListAsync();
+
+        return View(oppgaver);
     }
 
-    // GET: OPPGAVES/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var oppgave = await _context.Oppgaver
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (oppgave == null)
-        {
-            return NotFound();
-        }
-
-        return View(oppgave);
-    }
-
-    // GET: OPPGAVES/Create
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     public IActionResult Create()
     {
         var model = new Oppgave
@@ -54,10 +47,7 @@ public class OppgaverController : Controller
         return View(model);
     }
 
-    // POST: OPPGAVES/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave)
@@ -79,7 +69,7 @@ public class OppgaverController : Controller
         return View(oppgave);
     }
 
-    // GET: OPPGAVES/Edit/5
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -95,9 +85,7 @@ public class OppgaverController : Controller
         return View(oppgave);
     }
 
-    // POST: OPPGAVES/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int? id, [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave)
@@ -133,7 +121,7 @@ public class OppgaverController : Controller
         return View(oppgave);
     }
 
-    // GET: OPPGAVES/Delete/5
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -151,7 +139,7 @@ public class OppgaverController : Controller
         return View(oppgave);
     }
 
-    // POST: OPPGAVES/Delete/5
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int? id)
@@ -174,11 +162,211 @@ public class OppgaverController : Controller
     [Authorize]
     public async Task<IActionResult> Mine()
     {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+        {
+            return Challenge();
+        }
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+        {
+            return NotFound();
+        }
+
         var oppgaver = await _context.Oppgaver
+            .Include(o => o.Pameldinger)
             .Where(o => !o.ErUtført)
             .OrderBy(o => o.Frist)
             .ToListAsync();
 
-        return View(oppgaver);
+        var model = oppgaver.Select(o => new OppgaveMineViewModel
+        {
+            Oppgave = o,
+            AntallPameldte = o.Pameldinger.Count,
+            ErPameldt = o.Pameldinger.Any(p => p.BeboerId == beboer.Id)
+        }).ToList();
+
+        return View(model);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> Vis(int id)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+            return NotFound();
+
+        var oppgave = await _context.Oppgaver
+            .Include(o => o.Pameldinger)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (oppgave == null)
+            return NotFound();
+
+        ViewBag.ErPameldt = oppgave.Pameldinger
+            .Any(p => p.BeboerId == beboer.Id);
+
+        return View(oppgave);
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]    
+    public async Task<IActionResult> MeldPa(int id)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+            return NotFound();
+
+        var oppgave = await _context.Oppgaver
+            .Include(o => o.Pameldinger)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (oppgave == null)
+            return NotFound();
+
+        // Er brukeren allerede påmeldt?
+        if (oppgave.Pameldinger.Any(p => p.BeboerId == beboer.Id))
+        {
+            TempData["Info"] = "Du er allerede påmeldt denne oppgaven.";
+            return RedirectToAction(nameof(Vis), new { id });
+        }
+
+        // Er oppgaven full?
+        if (oppgave.Pameldinger.Count >= oppgave.AntallPersoner)
+        {
+            TempData["Error"] = "Oppgaven er fulltegnet.";
+            return RedirectToAction(nameof(Vis), new { id });
+        }
+
+        _context.OppgavePameldinger.Add(new OppgavePamelding
+        {
+            OppgaveId = oppgave.Id,
+            BeboerId = beboer.Id,
+            PameldtDato = DateTime.UtcNow
+        });
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Du er nå påmeldt oppgaven.";
+
+        return RedirectToAction(nameof(Vis), new { id });
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TrekkPamelding(int id)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+            return NotFound();
+
+        var pamelding = await _context.OppgavePameldinger
+            .FirstOrDefaultAsync(p =>
+                p.OppgaveId == id &&
+                p.BeboerId == beboer.Id);
+
+        if (pamelding != null)
+        {
+            _context.OppgavePameldinger.Remove(pamelding);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Vis), new { id });
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> TrekkPameldingFraMine(int id)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+            return NotFound();
+
+        var pamelding = await _context.OppgavePameldinger
+            .FirstOrDefaultAsync(p =>
+                p.OppgaveId == id &&
+                p.BeboerId == beboer.Id);
+
+        if (pamelding != null)
+        {
+            _context.OppgavePameldinger.Remove(pamelding);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Mine));
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MeldPaFraMine(int id)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+            return NotFound();
+
+        var oppgave = await _context.Oppgaver
+            .Include(o => o.Pameldinger)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (oppgave == null)
+            return NotFound();
+
+        if (!oppgave.Pameldinger.Any(p => p.BeboerId == beboer.Id)
+            && oppgave.Pameldinger.Count < oppgave.AntallPersoner)
+        {
+            _context.OppgavePameldinger.Add(new OppgavePamelding
+            {
+                OppgaveId = oppgave.Id,
+                BeboerId = beboer.Id,
+                PameldtDato = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Mine));
     }
 }

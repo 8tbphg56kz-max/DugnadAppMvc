@@ -23,5 +23,8 @@ namespace DugnadAppMvc.Models
         public ApplicationUser? ApplicationUser { get; set; }
 
         public ICollection<Dugnadstime> Dugnadstimer { get; set; } = new List<Dugnadstime>();
+
+        public ICollection<OppgavePamelding> OppgavePameldinger { get; set; }
+    = new List<OppgavePamelding>();
     }
 }

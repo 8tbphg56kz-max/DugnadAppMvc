@@ -1,0 +1,105 @@
+﻿@model DugnadAppMvc.Models.Oppgave
+
+@{
+    ViewData["Title"] = Model.Navn;
+}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm border-0 rounded-4">
+
+            <div class="card-body">
+
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary btn-sm mb-4">
+                    <i class="bi bi-arrow-left"></i>
+                    Tilbake til Min side
+                </a>
+
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i>
+                        @TempData["Success"]
+                    </div>
+                }
+
+                <h2 class="mb-3">
+                    @Model.Navn
+                </h2>
+
+                <hr />
+
+                <div class="row mb-3">
+
+                    <div class="col-md-6">
+                        <strong>📅 Frist</strong><br />
+                        @Model.Frist.ToString("dd.MM.yyyy")
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>👥 Deltakere</strong><br />
+                        @Model.Pameldinger.Count av @Model.AntallPersoner påmeldt
+                    </div>
+
+                </div>
+
+                <div class="mb-4">
+
+                    <h5>Beskrivelse</h5>
+
+                    <p class="text-muted">
+                        @Model.Beskrivelse
+                    </p>
+
+                </div>
+
+                <div class="d-grid">
+
+                    @if ((bool?)ViewBag.ErPameldt == true)
+                    {
+                        @if (TempData["Success"] == null)
+                        {
+                            <div class="alert alert-info">
+                                <i class="bi bi-person-check"></i>
+                                Du er registrert som deltaker på denne oppgaven.
+                            </div>
+                        }
+
+                        <form asp-action="TrekkPamelding"
+                              asp-route-id="@Model.Id"
+                              method="post">
+                            @Html.AntiForgeryToken()
+
+                            <button class="btn btn-outline-danger w-100">
+                                <i class="bi bi-person-dash"></i>
+                                Trekk påmelding
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="MeldPa"
+                              asp-route-id="@Model.Id"
+                              method="post">
+                            @Html.AntiForgeryToken()
+
+                            <button class="btn btn-success w-100">
+                                <i class="bi bi-person-plus"></i>
+                                Meld meg på
+                            </button>
+                        </form>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,53 @@
+﻿@model DugnadAppMvc.Models.Oppgave
+
+<div class="border-bottom py-3">
+
+    <div class="d-flex justify-content-between align-items-start">
+
+        <div>
+
+            <h6 class="mb-1">@Model.Navn</h6>
+
+            <small class="text-muted">
+                <i class="bi bi-calendar-event me-1"></i>
+                Frist: @Model.Frist.ToString("dd.MM.yyyy")
+            </small>
+
+            <div class="mt-2">
+
+                @if (Model.ErPameldt)
+                {
+                    <small class="text-success">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Du er påmeldt
+                    </small>
+                }
+                else if (Model.Pameldinger.Count >= Model.AntallPersoner)
+                {
+                    <small class="text-danger">
+                        <i class="bi bi-people-fill me-1"></i>
+                        Fulltegnet
+                    </small>
+                }
+                else
+                {
+                    <small class="text-muted">
+                        <i class="bi bi-people me-1"></i>
+                        @Model.Pameldinger.Count av @Model.AntallPersoner påmeldt
+                    </small>
+                }
+
+            </div>
+
+        </div>
+
+        <a asp-controller="Oppgaver"
+           asp-action="Vis"
+           asp-route-id="@Model.Id"
+           class="btn btn-outline-primary btn-sm">
+            Vis
+        </a>
+
+    </div>
+
+</div>

@@ -1,6 +1,7 @@
 ﻿using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DugnadAppMvc.Models
 {
@@ -67,5 +68,11 @@ namespace DugnadAppMvc.Models
                     new[] { nameof(Frist) });
             }
         }
+
+        [NotMapped]
+        public bool ErPameldt { get; set; }
+
+        public ICollection<OppgavePamelding> Pameldinger { get; set; }
+    = new List<OppgavePamelding>();
     }
 }

@@ -41,13 +41,31 @@ namespace DugnadAppMvc.Controllers
                         .SumAsync(dt => (decimal?)dt.Timer) ?? 0;
                 }
             }
+            var totalActiveTasks = await _context.Oppgaver
+                .CountAsync(o => !o.ErUtført);
 
             var oppgaver = await _context.Oppgaver
-             .Where(o => !o.ErUtført)
-             .OrderBy(o => o.Prioritet)
-             .ThenBy(o => o.Frist)             
-             .Take(4)
-             .ToListAsync();
+                .Include(o => o.Pameldinger)
+                .Where(o => !o.ErUtført)
+                .OrderBy(o => o.Prioritet)
+                .ThenBy(o => o.Frist)
+                .Take(4)
+                .ToListAsync();
+
+            if (currentUser != null)
+            {
+                var beboer = await _context.Beboere
+                    .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+                if (beboer != null)
+                {
+                    foreach (var oppgave in oppgaver)
+                    {
+                        oppgave.ErPameldt = oppgave.Pameldinger
+                            .Any(p => p.BeboerId == beboer.Id);
+                    }
+                }
+            }
 
             var model = new DashboardViewModel
             {
@@ -55,6 +73,7 @@ namespace DugnadAppMvc.Controllers
                 TotalHours = totalHours,
 
                 ActiveTasks = oppgaver.Count,
+                TotalActiveTasks = totalActiveTasks,
                 Oppgaver = oppgaver,
 
                 HasCommonDugnad = false,

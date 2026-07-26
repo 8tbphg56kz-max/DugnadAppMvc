@@ -45,26 +45,18 @@
 
                 @if (Model.Oppgaver.Any())
                 {
-                    foreach (var oppgave in Model.Oppgaver)
+                    @foreach (var oppgave in Model.Oppgaver)
                     {
-                        <div class="mb-3">
-                            <strong>@oppgave.Navn</strong><br />    
-
-                            <partial name="Badges/_OppgavePrioritetBadge" model="oppgave.Prioritet" />
-
-                            <br />
-
-                            <small class="text-muted">
-                                Frist: @oppgave.Frist.ToString("dd.MM.yyyy")
-                            </small>
-                        </div>
+                        <partial name="_OppgaveCard" model="oppgave" />
                     }
-
-                    <a asp-controller="Oppgaver"
-                       asp-action="Mine"
-                       class="btn btn-sm btn-outline-primary">
-                        Vis alle oppgaver
-                    </a>
+                    @if (Model.TotalActiveTasks > 4)
+                    {
+                        <a asp-controller="Oppgaver"
+                           asp-action="Mine"
+                           class="btn btn-outline-primary w-100 mt-3">
+                            Vis alle oppgaver
+                        </a>
+                    }
                 }
                 else
                 {
