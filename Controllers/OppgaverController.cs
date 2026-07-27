@@ -214,8 +214,11 @@ public class OppgaverController : Controller
         if (oppgave == null)
             return NotFound();
 
-        ViewBag.ErPameldt = oppgave.Pameldinger
-            .Any(p => p.BeboerId == beboer.Id);
+        var pamelding = oppgave.Pameldinger
+    .FirstOrDefault(p => p.BeboerId == beboer.Id);
+
+        ViewBag.ErPameldt = pamelding != null;
+        ViewBag.Pamelding = pamelding;
 
         return View(oppgave);
     }
@@ -261,7 +264,8 @@ public class OppgaverController : Controller
         {
             OppgaveId = oppgave.Id,
             BeboerId = beboer.Id,
-            PameldtDato = DateTime.UtcNow
+            PameldtDato = DateTime.UtcNow,
+            Status = OppgaveStatus.Pameldt
         });
 
         await _context.SaveChangesAsync();
@@ -370,20 +374,45 @@ public class OppgaverController : Controller
         return RedirectToAction(nameof(Mine));
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> MarkerSomUtfort(int id)
     {
-        var oppgave = await _context.Oppgaver.FindAsync(id);
+        var currentUser = await _userManager.GetUserAsync(User);
 
-        if (oppgave == null)
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
             return NotFound();
 
-        oppgave.ErUtført = true;
+        var pamelding = await _context.OppgavePameldinger
+            .FirstOrDefaultAsync(p =>
+                p.OppgaveId == id &&
+                p.BeboerId == beboer.Id);
+
+        if (pamelding == null)
+        {
+            TempData["Error"] = "Du er ikke påmeldt denne oppgaven.";
+            return RedirectToAction(nameof(Vis), new { id });
+        }
+
+        if (pamelding.Status == OppgaveStatus.Utfort)
+        {
+            TempData["Info"] = "Oppgaven er allerede markert som utført.";
+            return RedirectToAction(nameof(Vis), new { id });
+        }
+
+        pamelding.Status = OppgaveStatus.Utfort;
+        pamelding.UtfortDato = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
-        TempData["Success"] = "Oppgaven er markert som utført.";
+        TempData["Success"] = "✔ Oppgaven er utført. Du kan nå registrere timer.";
 
         return RedirectToAction(nameof(Vis), new { id });
     }

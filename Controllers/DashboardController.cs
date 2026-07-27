@@ -10,7 +10,7 @@ namespace DugnadAppMvc.Controllers
 {
     [Authorize]
     public class DashboardController : Controller
-    { 
+    {
 
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -70,11 +70,19 @@ namespace DugnadAppMvc.Controllers
             var model = new DashboardViewModel
             {
                 FirstName = currentUser?.FirstName ?? "",
+
                 TotalHours = totalHours,
 
                 ActiveTasks = oppgaver.Count,
                 TotalActiveTasks = totalActiveTasks,
-                Oppgaver = oppgaver,
+
+                MineOppgaver = oppgaver
+        .Where(o => o.ErPameldt)
+        .ToList(),
+
+                LedigeOppgaver = oppgaver
+        .Where(o => !o.ErPameldt)
+        .ToList(),
 
                 HasCommonDugnad = false,
                 BoardMessage = null
@@ -83,5 +91,4 @@ namespace DugnadAppMvc.Controllers
             return View(model);
         }
     }
-
 }

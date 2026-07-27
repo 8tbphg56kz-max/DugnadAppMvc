@@ -15,7 +15,9 @@ namespace DugnadAppMvc.ViewModels
 
         public string? BoardMessage { get; set; }
 
-        public List<Oppgave> Oppgaver { get; set; } = new();
+        public List<Oppgave> MineOppgaver { get; set; } = new();
+
+        public List<Oppgave> LedigeOppgaver { get; set; } = new();
 
         public int TotalActiveTasks { get; set; }
     }

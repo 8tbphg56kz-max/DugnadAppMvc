@@ -38,31 +38,52 @@
 
                 <h5>
                     <i class="bi bi-list-check text-primary me-2"></i>
-                   Oppgaver
+                    Oppgaver
                 </h5>
 
                 <hr />
 
-                @if (Model.Oppgaver.Any())
+                <h6 class="text-primary">Mine oppgaver</h6>
+
+                @if (Model.MineOppgaver.Any())
                 {
-                    @foreach (var oppgave in Model.Oppgaver)
+                    @foreach (var oppgave in Model.MineOppgaver)
                     {
                         <partial name="_OppgaveCard" model="oppgave" />
-                    }
-                    @if (Model.TotalActiveTasks > 4)
-                    {
-                        <a asp-controller="Oppgaver"
-                           asp-action="Mine"
-                           class="btn btn-outline-primary w-100 mt-3">
-                            Vis alle oppgaver
-                        </a>
                     }
                 }
                 else
                 {
-                    <p class="text-muted mb-0">
-                        Ingen aktive oppgaver.
+                    <p class="text-muted">
+                        Du er ikke påmeldt noen oppgaver.
                     </p>
+                }
+
+                <hr />
+
+                <h6 class="text-success">Ledige oppgaver</h6>
+
+                @if (Model.LedigeOppgaver.Any())
+                {
+                    @foreach (var oppgave in Model.LedigeOppgaver)
+                    {
+                        <partial name="_OppgaveCard" model="oppgave" />
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">
+                        Ingen ledige oppgaver.
+                    </p>
+                }
+
+                @if (Model.TotalActiveTasks > 4)
+                {
+                    <a asp-controller="Oppgaver"
+                       asp-action="Mine"
+                       class="btn btn-outline-primary w-100 mt-3">
+                        Vis alle oppgaver
+                    </a>
                 }
 
             </div>
