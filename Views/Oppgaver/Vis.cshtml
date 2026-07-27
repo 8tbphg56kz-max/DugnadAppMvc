@@ -69,6 +69,17 @@
                             </div>
                         }
 
+                        <form asp-action="MarkerSomUtfort"
+                              asp-route-id="@Model.Id"
+                              method="post">
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Marker som utført
+                            </button>
+
+                        </form>
+
                         <form asp-action="TrekkPamelding"
                               asp-route-id="@Model.Id"
                               method="post">

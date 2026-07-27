@@ -369,4 +369,22 @@ public class OppgaverController : Controller
 
         return RedirectToAction(nameof(Mine));
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarkerSomUtfort(int id)
+    {
+        var oppgave = await _context.Oppgaver.FindAsync(id);
+
+        if (oppgave == null)
+            return NotFound();
+
+        oppgave.ErUtført = true;
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Oppgaven er markert som utført.";
+
+        return RedirectToAction(nameof(Vis), new { id });
+    }
 }
