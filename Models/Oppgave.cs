@@ -72,6 +72,9 @@ namespace DugnadAppMvc.Models
         [NotMapped]
         public bool ErPameldt { get; set; }
 
+        [NotMapped]
+        public OppgaveStatus? MinStatus { get; set; }
+
         public ICollection<OppgavePamelding> Pameldinger { get; set; }
     = new List<OppgavePamelding>();
     }

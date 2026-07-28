@@ -55,15 +55,15 @@ namespace DugnadAppMvc.Controllers
                 return Challenge();
             }
 
-            var dugnadstime = new Dugnadstime
+            var timeforing = new Timeforing
             {
                 DugnadId = model.DugnadId,
                 BeboerId = beboer.Id,
-                Timer = model.Timer!.Value,
+                AntallTimer = model.Timer!.Value,
                 Kommentar = model.Kommentar
             };
 
-            _context.Dugnadstimer.Add(dugnadstime);
+            _context.Timeforinger.Add(timeforing);
 
             await _context.SaveChangesAsync();
 
@@ -82,19 +82,31 @@ namespace DugnadAppMvc.Controllers
                 return Challenge();
             }
 
-            var historikk = await _context.Dugnadstimer
-                .Include(d => d.Dugnad)
-                .Where(d => d.BeboerId == beboer.Id)
-                .OrderByDescending(d => d.Registrert)
-                .Select(d => new DugnadstimeHistorikkViewModel
-                {
-                    Id = d.Id,
-                    Registrert = d.Registrert,
-                    Dugnad = d.Dugnad.Tittel,
-                    Timer = d.Timer,
-                    Kommentar = d.Kommentar
-                })
-                .ToListAsync();
+            var historikk = await _context.Timeforinger
+    .Include(t => t.Oppgave)
+    .Include(t => t.Dugnad)
+    .Where(t => t.BeboerId == beboer.Id)
+    .OrderByDescending(t => t.RegistrertDato)
+    .Select(t => new DugnadstimeHistorikkViewModel
+    {
+        Id = t.Id,
+        Registrert = t.RegistrertDato,
+
+        Type = t.OppgaveId != null ? "Oppgave" : "Dugnad",
+
+        Aktivitet = t.OppgaveId != null
+            ? t.Oppgave!.Navn
+            : t.Dugnad!.Tittel,
+
+        // Midlertidig slik at eksisterende view fortsatt virker
+        Dugnad = t.OppgaveId != null
+            ? t.Oppgave!.Navn
+            : t.Dugnad!.Tittel,
+
+        Timer = t.AntallTimer,
+        Kommentar = t.Kommentar
+    })
+    .ToListAsync();
 
             if (historikk.Any())
             {

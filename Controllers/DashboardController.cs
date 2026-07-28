@@ -61,8 +61,11 @@ namespace DugnadAppMvc.Controllers
                 {
                     foreach (var oppgave in oppgaver)
                     {
-                        oppgave.ErPameldt = oppgave.Pameldinger
-                            .Any(p => p.BeboerId == beboer.Id);
+                        var pamelding = oppgave.Pameldinger
+                            .FirstOrDefault(p => p.BeboerId == beboer.Id);
+
+                        oppgave.ErPameldt = pamelding != null;
+                        oppgave.MinStatus = pamelding?.Status;
                     }
                 }
             }

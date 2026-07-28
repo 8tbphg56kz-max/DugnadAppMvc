@@ -1,4 +1,6 @@
-﻿public class DashboardOppgaveViewModel
+﻿using DugnadAppMvc.Models.Enums;
+
+public class DashboardOppgaveViewModel
 {
     public int Id { get; set; }
 
@@ -13,4 +15,5 @@
     public bool ErPameldt { get; set; }
 
     public bool ErFulltegnet => AntallPameldte >= AntallPersoner;
+    public OppgaveStatus? Status { get; set; }
 }

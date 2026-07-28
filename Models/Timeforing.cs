@@ -4,8 +4,11 @@ public class Timeforing
 {
     public int Id { get; set; }
 
-    public int OppgaveId { get; set; }
-    public Oppgave Oppgave { get; set; } = null!;
+    public int? OppgaveId { get; set; }
+    public Oppgave? Oppgave { get; set; }
+
+    public int? DugnadId { get; set; }
+    public Dugnad? Dugnad { get; set; }
 
     public int BeboerId { get; set; }
     public Beboer Beboer { get; set; } = null!;
@@ -14,5 +17,5 @@ public class Timeforing
 
     public string? Kommentar { get; set; }
 
-    public DateTime RegistrertDato { get; set; }
+    public DateTime RegistrertDato { get; set; } = DateTime.UtcNow;
 }
