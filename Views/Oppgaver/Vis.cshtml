@@ -100,22 +100,21 @@
                         }
                         else if (pamelding?.Status == OppgaveStatus.TimerRegistrert)
                         {
-                            <div class="alert alert-success mb-0">
-                                <i class="bi bi-check2-all"></i>
-                                Timene er registrert.
-                            </div>
                         }
 
-                        <form asp-action="TrekkPamelding"
-                              asp-route-id="@Model.Id"
-                              method="post">
-                            @Html.AntiForgeryToken()
+                        @if (pamelding?.Status != OppgaveStatus.TimerRegistrert)
+                        {
+                            <form asp-action="TrekkPamelding"
+                                  asp-route-id="@Model.Id"
+                                  method="post">
+                                @Html.AntiForgeryToken()
 
-                            <button class="btn btn-outline-danger w-100">
-                                <i class="bi bi-person-dash"></i>
-                                Trekk påmelding
-                            </button>
-                        </form>
+                                <button class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-person-dash"></i>
+                                    Trekk påmelding
+                                </button>
+                            </form>
+                        }
                     }
                     else
                     {

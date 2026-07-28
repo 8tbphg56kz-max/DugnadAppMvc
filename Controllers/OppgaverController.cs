@@ -3,10 +3,11 @@ using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.Models.Enums;
 using DugnadAppMvc.ViewModels;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 public class OppgaverController : Controller
 {
@@ -415,5 +416,118 @@ public class OppgaverController : Controller
         TempData["Success"] = "✔ Oppgaven er utført. Du kan nå registrere timer.";
 
         return RedirectToAction(nameof(Vis), new { id });
+    }
+
+    [Authorize]
+    public async Task<IActionResult> RegistrerTimer(int id)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+            return NotFound();
+
+        var oppgave = await _context.Oppgaver
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (oppgave == null)
+            return NotFound();
+
+        var model = new RegistrerTimerViewModel
+        {
+            OppgaveId = oppgave.Id,
+            OppgaveNavn = oppgave.Navn,
+            TimerAlternativer = new()
+    {
+        new SelectListItem("Velg antall timer", ""),
+        new("0,5", "0.5"),
+        new("1", "1"),
+        new("1,5", "1.5"),
+        new("2", "2"),
+        new("2,5", "2.5"),
+        new("3", "3"),
+        new("3,5", "3.5"),
+        new("4", "4"),
+        new("4,5", "4.5"),
+        new("5", "5"),
+        new("5,5", "5.5"),
+        new("6", "6"),
+        new("6,5", "6.5"),
+        new("7", "7"),
+        new("7,5", "7.5"),
+        new("8", "8"),
+        new("8,5", "8.5"),
+        new("9", "9"),
+        new("9,5", "9.5"),
+        new("10", "10")
+    }
+        };
+
+        return View(model);
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegistrerTimer(RegistrerTimerViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        if (!decimal.TryParse(
+        model.AntallTimer,
+        System.Globalization.NumberStyles.Number,
+        System.Globalization.CultureInfo.InvariantCulture,
+        out var antallTimer))
+        {
+            ModelState.AddModelError(nameof(model.AntallTimer), "Ugyldig timetall.");
+            return View(model);
+        }
+
+        var currentUser = await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+            return Challenge();
+
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+
+        if (beboer == null)
+            return NotFound();
+
+        var pamelding = await _context.OppgavePameldinger
+            .FirstOrDefaultAsync(p =>
+                p.OppgaveId == model.OppgaveId &&
+                p.BeboerId == beboer.Id);
+
+        if (pamelding == null)
+            return NotFound();
+
+        if (pamelding.Status != OppgaveStatus.Utfort)
+        {
+            return Forbid();
+        }
+
+        _context.Timeforinger.Add(new Timeforing
+        {
+            OppgaveId = model.OppgaveId,
+            BeboerId = beboer.Id,
+            AntallTimer = antallTimer,
+            Kommentar = model.Kommentar,
+            RegistrertDato = DateTime.UtcNow
+        });
+
+        pamelding.Status = OppgaveStatus.TimerRegistrert;
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Timene er registrert.";
+
+        return RedirectToAction(nameof(Vis), new { id = model.OppgaveId });
     }
 }

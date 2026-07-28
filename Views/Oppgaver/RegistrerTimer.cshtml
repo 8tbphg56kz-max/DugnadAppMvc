@@ -1,0 +1,64 @@
+﻿@model DugnadAppMvc.ViewModels.RegistrerTimerViewModel
+
+@{
+    ViewData["Title"] = "Registrer timer";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body">
+
+                <h2>Registrer timer</h2>
+
+                <p class="text-muted">
+                    @Model.OppgaveNavn
+                </p>
+
+                <hr />
+
+                <form asp-action="RegistrerTimer" method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="OppgaveId" type="hidden" />
+
+                    <div class="mb-3">
+                        <label asp-for="AntallTimer" class="form-label"></label>
+                        <select asp-for="AntallTimer"
+                                asp-items="Model.TimerAlternativer"
+                                class="form-select">
+                        </select>
+                        <span asp-validation-for="AntallTimer" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Kommentar" class="form-label">Kommentar(Valgfritt)</label>
+                        <textarea asp-for="Kommentar"
+                                  rows="3"
+                                  class="form-control"></textarea>
+                        <span asp-validation-for="Kommentar" class="text-danger"></span>
+                    </div>
+
+                    <button class="btn btn-primary">
+                        Lagre timer
+                    </button>
+
+                    <a asp-action="Vis"
+                       asp-route-id="@Model.OppgaveId"
+                       class="btn btn-secondary">
+                        Avbryt
+                    </a>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

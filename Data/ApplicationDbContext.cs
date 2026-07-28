@@ -20,6 +20,7 @@ namespace DugnadAppMvc.Data
         public DbSet<Innstillinger> Innstillinger => Set<Innstillinger>();
         public DbSet<Oppgave> Oppgaver { get; set; }
         public DbSet<OppgavePamelding> OppgavePameldinger { get; set; }
+        public DbSet<Timeforing> Timeforinger { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
