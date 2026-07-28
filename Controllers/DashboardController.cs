@@ -87,8 +87,9 @@ namespace DugnadAppMvc.Controllers
         .ToList(),
 
                 LedigeOppgaver = oppgaver
-        .Where(o => !o.ErPameldt)
-        .ToList(),
+    .Where(o => !o.ErPameldt &&
+                o.MinStatus != OppgaveStatus.TimerRegistrert)
+    .ToList(),
 
                 HasCommonDugnad = false,
                 BoardMessage = null
