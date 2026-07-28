@@ -37,9 +37,9 @@ namespace DugnadAppMvc.Controllers
 
                 if (beboer != null)
                 {
-                    totalHours = await _context.Dugnadstimer
-                        .Where(dt => dt.BeboerId == beboer.Id)
-                        .SumAsync(dt => (decimal?)dt.Timer) ?? 0;
+                    totalHours = await _context.Timeforinger
+                   .Where(tf => tf.BeboerId == beboer.Id)
+                   .SumAsync(tf => (decimal?)tf.AntallTimer) ?? 0;
                 }
             }
             var totalActiveTasks = await _context.Oppgaver
