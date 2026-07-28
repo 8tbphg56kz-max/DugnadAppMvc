@@ -1,9 +1,10 @@
-﻿using DugnadAppMvc.Models;
+﻿using DugnadAppMvc.Data;
+using DugnadAppMvc.Models;
+using DugnadAppMvc.Models.Enums;
+using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using DugnadAppMvc.Data;
-using DugnadAppMvc.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers
@@ -64,7 +65,9 @@ namespace DugnadAppMvc.Controllers
                         var pamelding = oppgave.Pameldinger
                             .FirstOrDefault(p => p.BeboerId == beboer.Id);
 
-                        oppgave.ErPameldt = pamelding != null;
+                        oppgave.ErPameldt =
+                        pamelding != null &&
+                        pamelding.Status != OppgaveStatus.TimerRegistrert;
                         oppgave.MinStatus = pamelding?.Status;
                     }
                 }
