@@ -219,3 +219,15 @@ body {
         color: #59C36A;
         font-weight: 700;
     }
+
+.dashboard-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.app-content {
+    max-width: 1280px;
+    margin: 0 auto;
+}

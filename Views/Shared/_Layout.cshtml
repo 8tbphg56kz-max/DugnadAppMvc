@@ -240,10 +240,12 @@
         </nav>
     </header>
     <div class="container-fluid px-2 px-md-4">
-        <main role="main" class="pb-3">
-            <partial name="_Alerts" />
-            @RenderBody()
-        </main>
+        <div class="app-content">
+            <main role="main" class="pb-3">
+                <partial name="_Alerts" />
+                @RenderBody()
+            </main>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted">
