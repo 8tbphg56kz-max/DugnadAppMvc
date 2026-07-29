@@ -31,10 +31,12 @@ namespace DugnadAppMvc.Controllers
 
             decimal totalHours = 0;
 
+            Beboer? beboer = null;
+
             if (currentUser != null)
             {
-                var beboer = await _context.Beboere
-                    .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
+                beboer = await _context.Beboere
+                   .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
 
                 if (beboer != null)
                 {
@@ -56,7 +58,7 @@ namespace DugnadAppMvc.Controllers
 
             if (currentUser != null)
             {
-                var beboer = await _context.Beboere
+                beboer = await _context.Beboere
                     .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
 
                 if (beboer != null)
@@ -81,6 +83,16 @@ namespace DugnadAppMvc.Controllers
             .OrderBy(d => d.StartDato)
             .FirstOrDefaultAsync();
 
+            var antallRegistreringerPaAktivDugnad = 0;
+
+            if (beboer != null && nesteDugnad != null)
+            {
+                antallRegistreringerPaAktivDugnad = await _context.Timeforinger
+                    .CountAsync(tf =>
+                        tf.BeboerId == beboer.Id &&
+                        tf.DugnadId == nesteDugnad.Id);
+            }            
+
             var model = new DashboardViewModel
             {
                 FirstName = currentUser?.FirstName ?? "",
@@ -100,6 +112,7 @@ namespace DugnadAppMvc.Controllers
         .ToList(),
 
                 NesteDugnad = nesteDugnad,
+                AntallRegistreringerPaAktivDugnad = antallRegistreringerPaAktivDugnad,
 
                 HasCommonDugnad = false,
                 BoardMessage = null
