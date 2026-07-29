@@ -203,25 +203,18 @@
             </div>
 
             <!-- Beskjed fra styret -->
-            <div class="col-12">
+            @if (!string.IsNullOrWhiteSpace(Model.BoardMessage))
+            {
+                <div class="col-12">
                 <div class="card shadow-sm border-0 rounded-4">
-                    <div class="card-body">
+                        <div class="card-body">
+                            <h5>Beskjed fra styret</h5>
 
-                        <h5>
-                            <i class="bi bi-megaphone text-warning me-2"></i>
-                            Beskjed fra styret
-                        </h5>
-
-                        <hr />
-
-                        <p class="text-muted mb-0">
-                            Ingen nye beskjeder.
-                        </p>
-
-                    </div>
+                            @Model.BoardMessage
+                        </div>
                 </div>
             </div>
-
+            }
         </div>
 
     </div>
