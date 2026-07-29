@@ -72,6 +72,10 @@ namespace DugnadAppMvc
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor |
                     ForwardedHeaders.XForwardedProto;
+
+                // Stol på reverse proxy (Synology)
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
             });
 
             var app = builder.Build();
@@ -80,14 +84,7 @@ namespace DugnadAppMvc
             {
                 await RoleSeeder.SeedAsync(scope.ServiceProvider);
                 await UserSeeder.SeedAsync(scope.ServiceProvider);
-            }
-
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
+            }            
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

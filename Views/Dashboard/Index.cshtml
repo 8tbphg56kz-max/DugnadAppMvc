@@ -24,8 +24,58 @@
 
             </div>
         </div>
-
     </div>
+
+    @if (Model.NesteDugnad != null)
+    {
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-body">
+
+                    <h5>
+                        <i class="bi bi-tree text-success me-2"></i>
+                        Neste fellesdugnad
+                    </h5>
+
+                    <hr />
+
+                    <h5>@Model.NesteDugnad.Tittel</h5>
+
+                    @if (Model.NesteDugnad.StartDato == Model.NesteDugnad.SluttDato)
+                    {
+                        <p class="mb-1">
+                            <strong>Dato:</strong>
+                            @Model.NesteDugnad.StartDato.ToString("dd.MM.yyyy")
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="mb-1">
+                            <strong>Periode:</strong>
+                            @Model.NesteDugnad.StartDato.ToString("dd.MM.yyyy")
+                            –
+                            @Model.NesteDugnad.SluttDato.ToString("dd.MM.yyyy")
+                        </p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.NesteDugnad.Beskrivelse))
+                    {
+                        <p class="text-muted mb-0">
+                            @Model.NesteDugnad.Beskrivelse
+                        </p>
+                    }
+
+                </div>
+                <a asp-controller="Dugnader"
+                   asp-action="Details"
+                   asp-route-id="@Model.NesteDugnad.Id"
+                   class="btn btn-outline-primary mt-3">
+                    <i class="bi bi-arrow-right-circle me-1"></i>
+                    Se dugnaden
+                </a>
+            </div>
+        </div>
+    }
 
 </div>
 
@@ -33,7 +83,7 @@
 
     <!-- Aktuelle oppgaver -->
     <div class="col-12 col-lg-6">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
+        <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body">
 
                 <h5>
@@ -76,7 +126,7 @@
                         Ingen ledige oppgaver.
                     </p>
                 }
-
+                <!--
                 @if (Model.TotalActiveTasks > 4)
                 {
                     <a asp-controller="Oppgaver"
@@ -85,87 +135,81 @@
                         Vis alle oppgaver
                     </a>
                 }
-
+                -->
             </div>
         </div>
-    </div>
-
-    <!-- Fellesdugnad -->
-    <div class="col-12 col-lg-6">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
-            <div class="card-body">
-
-                <h5>
-                    <i class="bi bi-tree text-success me-2"></i>
-                    Fellesdugnad
-                </h5>
-
-                <hr />
-
-                Ingen planlagt akkurat nå.
-
-            </div>
-        </div>
-    </div>
+    </div>    
 
     <!-- Mine dugnadstimer -->
+    <!-- Høyre kolonne -->
     <div class="col-12 col-lg-6">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
-            <div class="card-body">
 
-                <h5>
-                    <i class="bi bi-clock-history text-success me-2"></i>
-                    Mine dugnadstimer
-                </h5>
+        <div class="row g-4">
 
-                <hr />
+            <!-- Mine dugnadstimer -->
+            <div class="col-12">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body">
 
-                <h1 class="display-4 text-primary">
-                    @Model.TotalHours
-                </h1>
+                        <h5>
+                            <i class="bi bi-clock-history text-success me-2"></i>
+                            Mine dugnadstimer
+                        </h5>
 
-                <p class="text-muted">
-                    Registrerte timer i år
-                </p>
+                        <hr />
 
-                <div class="d-grid gap-2 d-md-flex">
-                    <a asp-controller="Dugnadstimer"
-                       asp-action="Index"
-                       class="btn btn-outline-primary">
-                        <i class="bi bi-clock-history me-1"></i>
-                        Vis historikk
-                    </a>
+                        <h1 class="display-4 text-primary">
+                            @Model.TotalHours
+                        </h1>
 
-                    <a asp-controller="Dugnadstimer"
-                       asp-action="Create"
-                       class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i>
-                        Registrer timer
-                    </a>
+                        <p class="text-muted">
+                            Registrerte timer i år
+                        </p>
+
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a asp-controller="Dugnadstimer"
+                               asp-action="Index"
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-clock-history me-1"></i>
+                                Vis historikk
+                            </a>
+
+                            <a asp-controller="Dugnadstimer"
+                               asp-action="Create"
+                               class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>
+                                Registrer timer
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
-
             </div>
+
+            <!-- Beskjed fra styret -->
+            <div class="col-12">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body">
+
+                        <h5>
+                            <i class="bi bi-megaphone text-warning me-2"></i>
+                            Beskjed fra styret
+                        </h5>
+
+                        <hr />
+
+                        <p class="text-muted mb-0">
+                            Ingen nye beskjeder.
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
+
     </div>
 
-    <!-- Beskjed fra styret -->
-    <div class="col-12 col-lg-6">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
-            <div class="card-body">
-
-                <h5>
-                    <i class="bi bi-megaphone text-warning me-2"></i>
-                    Beskjed fra styret
-                </h5>
-
-                <hr />
-
-                <p class="text-muted">
-                    Ingen nye beskjeder.
-                </p>
-
-            </div>
-        </div>
-    </div>  
+    
 
 </div>

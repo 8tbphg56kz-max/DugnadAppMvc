@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace DugnadAppMvc.Controllers
 {
@@ -73,6 +74,13 @@ namespace DugnadAppMvc.Controllers
                 }
             }
 
+            var iDag = DateOnly.FromDateTime(DateTime.Today);
+
+            var nesteDugnad = await _context.Dugnader
+            .Where(d => d.ErSynlig)
+            .OrderBy(d => d.StartDato)
+            .FirstOrDefaultAsync();
+
             var model = new DashboardViewModel
             {
                 FirstName = currentUser?.FirstName ?? "",
@@ -87,9 +95,11 @@ namespace DugnadAppMvc.Controllers
         .ToList(),
 
                 LedigeOppgaver = oppgaver
-    .Where(o => !o.ErPameldt &&
-                o.MinStatus != OppgaveStatus.TimerRegistrert)
-    .ToList(),
+        .Where(o => !o.ErPameldt &&
+                    o.MinStatus != OppgaveStatus.TimerRegistrert)
+        .ToList(),
+
+                NesteDugnad = nesteDugnad,
 
                 HasCommonDugnad = false,
                 BoardMessage = null

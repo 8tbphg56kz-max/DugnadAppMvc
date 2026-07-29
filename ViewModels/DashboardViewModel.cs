@@ -20,5 +20,7 @@ namespace DugnadAppMvc.ViewModels
         public List<Oppgave> LedigeOppgaver { get; set; } = new();
 
         public int TotalActiveTasks { get; set; }
+
+        public Dugnad? NesteDugnad { get; set; }
     }
 }
