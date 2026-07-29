@@ -32,10 +32,19 @@
             <div class="card shadow-sm border-0 rounded-4 mb-4">
                 <div class="card-body">
 
-                    <h5>
-                        <i class="bi bi-tree text-success me-2"></i>
-                        Neste fellesdugnad
-                    </h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            🌳 Neste fellesdugnad
+                        </h5>
+
+                        <a asp-controller="Dugnader"
+                           asp-action="Details"
+                           asp-route-id="@Model.NesteDugnad.Id"
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-arrow-right-circle me-1"></i>
+                            Vis dugnad
+                        </a>
+                    </div>
 
                     <hr />
 
@@ -65,14 +74,7 @@
                         </p>
                     }
 
-                </div>
-                <a asp-controller="Dugnader"
-                   asp-action="Details"
-                   asp-route-id="@Model.NesteDugnad.Id"
-                   class="btn btn-outline-primary mt-3">
-                    <i class="bi bi-arrow-right-circle me-1"></i>
-                    Se dugnaden
-                </a>
+                </div>                
             </div>
         </div>
     }
