@@ -22,5 +22,7 @@ namespace DugnadAppMvc.ViewModels
         public int TotalActiveTasks { get; set; }
 
         public Dugnad? NesteDugnad { get; set; }
+
+        public int AntallRegistreringerPaAktivDugnad { get; set; }
     }
 }
