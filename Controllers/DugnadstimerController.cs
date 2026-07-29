@@ -24,10 +24,15 @@ namespace DugnadAppMvc.Controllers
             _userManager = userManager;
         }
 
-       [HttpGet]
-        public IActionResult Create()
+        [HttpGet]
+        public IActionResult Create(int? dugnadId)
         {
             var model = new DugnadstimeViewModel();
+
+            if (dugnadId.HasValue)
+            {
+                model.DugnadId = dugnadId.Value;
+            }
 
             FyllDugnader(model);
             FyllTimerAlternativer(model.TimerAlternativer);
