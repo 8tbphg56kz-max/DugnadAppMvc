@@ -18,20 +18,17 @@
 
             @Html.AntiForgeryToken()
 
+           <div class="mb-3">
+    <label asp-for="DugnadId" class="form-label"></label>
+
+    <input asp-for="DugnadId" type="hidden" />
+
+    <div class="form-control-plaintext fw-semibold">
+        @Model.DugnadNavn
+    </div>
+</div>
+            
             <div class="mb-3">
-                <label asp-for="DugnadId" class="form-label"></label>
-
-                <select asp-for="DugnadId"
-                        asp-items="Model.Dugnader"
-                        class="form-select">
-
-                    <option value="">Velg dugnad...</option>
-
-                </select>
-
-                <span asp-validation-for="DugnadId"
-                      class="text-danger"></span>
-            </div>           <div class="mb-3">
                 <label asp-for="Timer" class="form-label"></label>
 
                 <select asp-for="Timer"

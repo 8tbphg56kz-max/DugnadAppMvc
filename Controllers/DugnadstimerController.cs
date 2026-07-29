@@ -32,6 +32,14 @@ namespace DugnadAppMvc.Controllers
             if (dugnadId.HasValue)
             {
                 model.DugnadId = dugnadId.Value;
+
+                var dugnad = _context.Dugnader
+                    .FirstOrDefault(d => d.Id == dugnadId.Value);
+
+                if (dugnad != null)
+                {
+                    model.DugnadNavn = dugnad.Tittel;
+                }
             }
 
             FyllDugnader(model);
