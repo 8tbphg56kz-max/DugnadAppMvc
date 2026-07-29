@@ -26,20 +26,20 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand d-flex align-items-start"
+                <a class="navbar-brand d-flex align-items-center"
                    asp-controller="Dashboard"
                    asp-action="Index">
 
-                    <i class="bi bi-buildings me-2 fs-4"></i>
+                    <i class="bi bi-house-door me-2 brand-icon"></i>
 
-                    <div class="d-flex flex-column">
-                        <span class="fw-semibold">
-                            @(innstillinger?.SameieNavn ?? "Sameiet")
-                        </span>
+                    <div class="brand-text">
+                        <div class="brand-sameie">
+                            Sameiet Lekven II
+                        </div>
 
-                        <small class="text-muted">
-                            DugnadApp
-                        </small>
+                        <div class="brand-app">
+                            Dugnad<span>App</span>
+                        </div>
                     </div>
 
                 </a>
@@ -193,7 +193,7 @@
                         }
 
                     </ul>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav ms-4">
 
                         @{
                             ApplicationUser? currentUser = null;

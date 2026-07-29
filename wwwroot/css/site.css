@@ -142,3 +142,80 @@ body {
         background-color: rgba(13, 110, 253, 0.08);
     }
 
+/* ---------- Branding ---------- */
+
+.navbar-brand {
+    text-decoration: none;
+    color: white;
+}
+
+    .navbar-brand:hover {
+        color: white;
+    }
+
+    .navbar-brand i {
+        color: white;
+    }
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.brand-title {
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: .2px;
+}
+
+.brand-subtitle {
+    color: white;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.brand-app {
+    color: #6CC04A;
+}
+
+/* Logo */
+
+.navbar-brand {
+    text-decoration: none;
+    padding: 0;
+}
+
+    .navbar-brand:hover {
+        text-decoration: none;
+    }
+
+.brand-icon {
+    font-size: 1.7rem;
+    color: white;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.brand-sameie {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: .2px;
+}
+
+.brand-app {
+    color: rgba(255,255,255,.70);
+    font-size: .85rem;
+    font-weight: 500;
+}
+
+    .brand-app span {
+        color: #59C36A;
+        font-weight: 700;
+    }
