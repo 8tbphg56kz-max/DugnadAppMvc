@@ -45,23 +45,22 @@ namespace DugnadAppMvc.Controllers
             return View();
         }
 
-        // POST: BOARDMESSAGES/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Tittel,Innhold,PublisertDato")] BoardMessage boardmessage)
         {
             if (ModelState.IsValid)
             {
+                boardmessage.PublisertDato = DateTime.UtcNow;
+
                 _context.Add(boardmessage);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(boardmessage);
         }
 
-        // GET: BOARDMESSAGES/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,9 +76,6 @@ namespace DugnadAppMvc.Controllers
             return View(boardmessage);
         }
 
-        // POST: BOARDMESSAGES/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int? id, [Bind("Id,Tittel,Innhold,PublisertDato")] BoardMessage boardmessage)
@@ -91,24 +87,21 @@ namespace DugnadAppMvc.Controllers
 
             if (ModelState.IsValid)
             {
-                try
+                var existing = await _context.BoardMessages.FindAsync(id);
+
+                if (existing == null)
                 {
-                    _context.Update(boardmessage);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BoardMessageExists(boardmessage.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+
+                existing.Tittel = boardmessage.Tittel;
+                existing.Innhold = boardmessage.Innhold;
+
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(boardmessage);
         }
 

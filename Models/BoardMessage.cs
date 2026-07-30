@@ -11,5 +11,5 @@ public class BoardMessage
     [Required]
     public string Innhold { get; set; } = string.Empty;
 
-    public DateTime PublisertDato { get; set; } = DateTime.Now;
+    public DateTime PublisertDato { get; set; } = DateTime.UtcNow;
 }

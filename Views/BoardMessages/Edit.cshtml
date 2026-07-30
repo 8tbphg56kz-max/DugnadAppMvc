@@ -1,13 +1,13 @@
 @model BoardMessage
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Rediger styremelding";
 }
 
-<h1>Edit</h1>
+<h1>Rediger styremelding</h1>
 
-<h4>BoardMessage</h4>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
@@ -20,7 +20,9 @@
             </div>
             <div class="form-group">
                 <label asp-for="Innhold" class="control-label"></label>
-                <input asp-for="Innhold" class="form-control" />
+                <textarea asp-for="Innhold"
+                          class="form-control"
+                          rows="6"></textarea> <input asp-for="Innhold" class="form-control" />
                 <span asp-validation-for="Innhold" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -29,14 +31,20 @@
                 <span asp-validation-for="PublisertDato" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Lagre endringer
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i>
+        Tilbake
+    </a>
 </div>
 
 @section Scripts {
