@@ -12,7 +12,7 @@
         Ny melding
     </a>
 </p>
-<table class="table table-striped table-hover align-middle">
+<table class="table table-striped table-hover align-top">
     <thead>
         <tr>
             <th>
@@ -22,7 +22,7 @@
                 @Html.DisplayNameFor(model => model.Innhold)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PublisertDato)
+                Publisert
             </th>
             <th></th>
         </tr>
@@ -30,15 +30,13 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>
-                @Html.DisplayFor(model => item.Tittel)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Innhold)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.PublisertDato)
-            </td>
+                <td class="align-top">
+                    @item.Tittel
+                </td>
+                <td class="align-top" style="white-space: pre-line;">@item.Innhold</td>
+                <td class="align-top">
+                    @item.PublisertDato.ToString("dd.MM.yy")
+                </td>
                 <td class="text-nowrap">
                     <a asp-action="Edit"
                        asp-route-id="@item.Id"

@@ -13,8 +13,6 @@ namespace DugnadAppMvc.ViewModels
 
         public bool HasCommonDugnad { get; set; }
 
-        public string? BoardMessage { get; set; }
-
         public List<Oppgave> MineOppgaver { get; set; } = new();
 
         public List<Oppgave> LedigeOppgaver { get; set; } = new();
@@ -24,5 +22,7 @@ namespace DugnadAppMvc.ViewModels
         public Dugnad? NesteDugnad { get; set; }
 
         public int AntallRegistreringerPaAktivDugnad { get; set; }
+
+        public BoardMessage? SisteStyremelding { get; set; }
     }
 }

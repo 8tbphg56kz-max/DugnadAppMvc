@@ -91,7 +91,11 @@ namespace DugnadAppMvc.Controllers
                     .CountAsync(tf =>
                         tf.BeboerId == beboer.Id &&
                         tf.DugnadId == nesteDugnad.Id);
-            }            
+            }
+
+            var sisteStyremelding = await _context.BoardMessages
+            .OrderByDescending(m => m.PublisertDato)
+            .FirstOrDefaultAsync();
 
             var model = new DashboardViewModel
             {
@@ -115,7 +119,7 @@ namespace DugnadAppMvc.Controllers
                 AntallRegistreringerPaAktivDugnad = antallRegistreringerPaAktivDugnad,
 
                 HasCommonDugnad = false,
-                BoardMessage = null
+                SisteStyremelding = sisteStyremelding
             };
 
             return View(model);
