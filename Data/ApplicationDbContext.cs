@@ -21,6 +21,7 @@ namespace DugnadAppMvc.Data
         public DbSet<Oppgave> Oppgaver { get; set; }
         public DbSet<OppgavePamelding> OppgavePameldinger { get; set; }
         public DbSet<Timeforing> Timeforinger { get; set; }
+        public DbSet<BoardMessage> BoardMessages { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

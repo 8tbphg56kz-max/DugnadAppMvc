@@ -11,7 +11,7 @@
     <div class="col-12">
 
         <div class="card shadow-sm border-0 mb-4 welcome-card">
-            <div class="card-body py-2 text-center text-md-start">
+                <div <div class="card-body py-2 text-start">
 
                 <h2 class="mb-2">
                     Hei @Model.FirstName 👋
@@ -50,14 +50,14 @@
                         {
                             <small class="text-success">
                                 <i class="bi bi-check-circle"></i>
-                                Mine registreringer: 1 gang
+                                Mine registreringer: 1
                             </small>
                         }
                         else if (Model.AntallRegistreringerPaAktivDugnad > 1)
                         {
                             <small class="text-success">
                                 <i class="bi bi-check-circle"></i>
-                                Mine registreringer: @Model.AntallRegistreringerPaAktivDugnad ganger
+                                Mine registreringer: @Model.AntallRegistreringerPaAktivDugnad
                             </small>
                         }
                     </div>
@@ -190,14 +190,12 @@
                             Registrerte timer i år
                         </p>
 
-                        <div class="d-grid gap-2 d-md-flex">
                             <a asp-controller="Dugnadstimer"
                                asp-action="Index"
                                class="btn btn-outline-primary">
                                 <i class="bi bi-clock-history me-1"></i>
                                 Vis historikk
                             </a>
-                        </div>
 
                     </div>
                 </div>
