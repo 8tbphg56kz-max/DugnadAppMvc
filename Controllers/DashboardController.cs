@@ -53,7 +53,6 @@ namespace DugnadAppMvc.Controllers
                 .Where(o => !o.ErUtført)
                 .OrderBy(o => o.Prioritet)
                 .ThenBy(o => o.Frist)
-                .Take(4)
                 .ToListAsync();
 
             if (currentUser != null)
