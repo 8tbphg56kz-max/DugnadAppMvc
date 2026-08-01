@@ -258,12 +258,16 @@
     </div>
 
     <footer class="border-top footer text-muted mt-5">
-        <div class="container text-center py-3">
+        <div class="text-center">
             &copy; @DateTime.Now.Year DugnadApp
             &nbsp;|&nbsp;
-            <a asp-controller="Information" asp-action="Om">Om DugnadApp</a>
+            <a asp-controller="Information" asp-action="Om" class="text-decoration-none">
+                <i class="bi bi-info-circle me-1"></i>Om DugnadApp
+            </a>
             &nbsp;|&nbsp;
-            <a asp-controller="Information" asp-action="Personvern">Personvern</a>
+            <a asp-controller="Information" asp-action="Personvern" class="text-decoration-none">
+                <i class="bi bi-shield-lock me-1"></i>Personvern
+            </a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
