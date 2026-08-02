@@ -3,11 +3,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DugnadAppMvc.ViewModels
 {
-    public class AdminCreateDugnadstimeViewModel
+    public class TimeforingViewModel
     {
+        public int Id { get; set; }
+
         [Required(ErrorMessage = "Velg dugnad.")]
         [Display(Name = "Dugnad")]
         public int DugnadId { get; set; }
+
+        public string? DugnadNavn { get; set; }
 
         [Required(ErrorMessage = "Velg antall timer.")]
         [Display(Name = "Timer")]

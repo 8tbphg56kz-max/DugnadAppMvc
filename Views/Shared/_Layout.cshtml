@@ -56,7 +56,7 @@
                                 <a class="nav-link"
                                    asp-controller="Dashboard"
                                    asp-action="Index">
-                                    <i class="bi bi-house-door me-1"></i>
+                                    <i class="bi bi-speedometer2 me-1"></i>
                                     Dashboard
                                 </a>
                             </li>
@@ -67,7 +67,7 @@
                                 <a class="nav-link"
                                    asp-controller="Dashboard"
                                    asp-action="Index">
-                                    <i class="bi bi-house-door me-1"></i>
+                                    <i class="bi bi-speedometer2 me-1"></i>
                                     Min side
                                 </a>
                             </li>
@@ -147,10 +147,10 @@
 
                                     <li>
                                         <a class="dropdown-item"
-                                           asp-controller="AdminDugnadstimer"
+                                           asp-controller="AdminTimeforinger"
                                            asp-action="Index">
                                             <i class="bi bi-clock-history me-2"></i>
-                                            Dugnadstimer
+                                            Timeføringer
                                         </a>
                                     </li>
 
@@ -215,20 +215,28 @@
 
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <span class="nav-link">
-                                    <i class="bi bi-person-circle me-1"></i>
-                                    @(currentUser?.FirstName ?? User.Identity?.Name)
-                                </span>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="Account"
-                                   asp-action="Logout">
-                                    <i class="bi bi-box-arrow-right me-1"></i>
-                                    Logg ut
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle"></i> Knut
                                 </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="dropdown-item">
+                                     Min konto
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li> 
+                                        <a class="dropdown-item text-danger"
+                                           asp-controller="Account"
+                                           asp-action="Logout">
+                                            <i class="bi bi-box-arrow-right me-1"></i>
+                                            Logg ut
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
@@ -258,7 +266,7 @@
     </div>
 
     <footer class="border-top footer text-muted mt-5">
-        <div class="text-center">
+        <div class="container text-center">
             &copy; @DateTime.Now.Year DugnadApp
             &nbsp;|&nbsp;
             <a asp-controller="Information" asp-action="Om" class="text-decoration-none">

@@ -2,7 +2,7 @@
 
 namespace DugnadAppMvc.ViewModels
 {
-    public class DugnadstimeHistorikkViewModel
+    public class TimeforingHistorikkViewModel
     {
         public int Id { get; set; }
 

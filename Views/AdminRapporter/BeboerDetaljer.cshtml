@@ -46,7 +46,7 @@
 
 </div>
 
-<h4 class="mt-4">Registrerte dugnadstimer</h4>
+<h4 class="mt-4">Registrerte timeføringer</h4>
 
 <table class="table table-hover">
     <thead>
@@ -65,12 +65,14 @@
         @foreach (var item in Model.Dugnadstimer)
         {
             <tr>
-                <td>@item.Registrert.ToString("dd.MM.yyyy")</td>
+                <td>@item.RegistrertDato.ToString("dd.MM.yyyy")</td>
                 <td> @item.Beboer.Fornavn @item.Beboer.Etternavn</td>
-                <td>@item.Dugnad.Tittel</td>
+                <td>
+                    @(item.Dugnad?.Tittel ?? item.Oppgave?.Navn ?? "-")
+                </td>
 
                 <td class="text-end">
-                    @item.Timer.ToString("N1")
+                    @item.AntallTimer.ToString("N1")
                 </td>
 
                 <td>@item.Kommentar</td>

@@ -1,6 +1,6 @@
 ﻿namespace DugnadAppMvc.ViewModels
 {
-    public class AdminDugnadstimeViewModel
+    public class AdminTimeforingViewModel
     {
         public int Id { get; set; }
 

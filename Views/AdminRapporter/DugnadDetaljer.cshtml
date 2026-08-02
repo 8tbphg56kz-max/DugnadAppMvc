@@ -63,10 +63,10 @@
         @foreach (var rad in Model.Dugnadstimer)
         {
             <tr>
-                <td>@rad.Registrert.ToShortDateString()</td>
+                <td>@rad.RegistrertDato.ToShortDateString()</td>
                 <td>@rad.Beboer.Fornavn @rad.Beboer.Etternavn</td>
                 <td>@rad.Beboer.Leilighet.Leilighetsnummer</td>
-                <td class="text-end">@rad.Timer</td>
+                <td class="text-end">@rad.AntallTimer</td>
                 <td>@(string.IsNullOrWhiteSpace(rad.Kommentar) ? "-" : rad.Kommentar)</td>
                 <td>
                     <a asp-controller="AdminDugnadstimer"

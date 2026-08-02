@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DugnadAppMvc.ViewModels
 {
-    public class CreateDugnadstimeViewModel
+    public class CreateTimeforingViewModel
     {
         [Display(Name = "Dato")]
         [DataType(DataType.Date)]

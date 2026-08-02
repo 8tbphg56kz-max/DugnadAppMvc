@@ -149,13 +149,13 @@ namespace DugnadAppMvc.Controllers
                 return NotFound();
             }
 
-            var harTimer = await _context.Dugnadstimer
+            var harTimer = await _context.Timeforinger
                 .AnyAsync(t => t.DugnadId == id);
 
             if (harTimer)
             {
                 TempData["ErrorMessage"] =
-                    "Dugnaden kan ikke slettes fordi det finnes registrerte dugnadstimer.";
+                    "Dugnaden kan ikke slettes fordi det finnes registrerte timeføringer.";
 
                 return RedirectToAction(nameof(Index));
             }

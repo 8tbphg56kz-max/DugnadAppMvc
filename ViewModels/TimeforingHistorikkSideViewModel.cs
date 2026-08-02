@@ -1,11 +1,11 @@
 ﻿namespace DugnadAppMvc.ViewModels
 {
-    public class DugnadstimeHistorikkSideViewModel
+    public class TimeforingHistorikkSideViewModel
     {
         public int AntallRegistreringer { get; set; }
 
         public decimal TotaltAntallTimer { get; set; }
 
-        public List<DugnadstimeHistorikkViewModel> Historikk { get; set; } = [];
+        public List<TimeforingHistorikkViewModel> Historikk { get; set; } = [];
     }
 }

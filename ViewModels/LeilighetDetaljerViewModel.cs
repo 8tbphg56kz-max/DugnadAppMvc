@@ -14,7 +14,7 @@ namespace DugnadAppMvc.ViewModels
 
         public decimal TotalVerdi { get; set; }
 
-        public List<Dugnadstime> Dugnadstimer { get; set; } = new();
+        public List<Timeforing> Dugnadstimer { get; set; } = [];
 
         public string BeboerNavn { get; set; } = string.Empty;
     }

@@ -1,15 +1,15 @@
-﻿@model DugnadAppMvc.ViewModels.AdminDugnadstimerIndexViewModel
+﻿@model DugnadAppMvc.ViewModels.AdminTimeforingerIndexViewModel
 
 @{
-    ViewData["Title"] = "Registrerte dugnadstimer";
+    ViewData["Title"] = "Registrerte timeføringer";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">Registrerte dugnadstimer</h2>
+<div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+    <h2 class="mb-0">Registrerte timeføringer</h2>
      @if (User.HasAdminAccess())
                         {
     <a asp-action="Create" class="btn btn-success">
-        Registrer dugnadstime
+        Registrer timeføring
     </a>
                         }
 </div>
@@ -52,7 +52,7 @@
                 class="form-select"
                 onchange="this.form.submit()">
 
-            <option value="">Alle dugnader</option>
+            <option value="">Alle timeføringer</option>
 
         </select>
     </div>

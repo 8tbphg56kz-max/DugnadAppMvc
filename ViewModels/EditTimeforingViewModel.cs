@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DugnadAppMvc.ViewModels
 {
-    public class EditDugnadstimeViewModel
+    public class EditTimeforingViewModel
     {
         public int Id { get; set; }
 

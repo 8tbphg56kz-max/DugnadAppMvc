@@ -27,7 +27,7 @@ namespace DugnadAppMvc.Controllers
         [HttpGet]
         public IActionResult Create(int? dugnadId)
         {
-            var model = new DugnadstimeViewModel();
+            var model = new TimeforingViewModel();
 
             if (dugnadId.HasValue)
             {
@@ -50,7 +50,7 @@ namespace DugnadAppMvc.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DugnadstimeViewModel model)
+        public async Task<IActionResult> Create(TimeforingViewModel model)
         {
             ModelState.Remove(nameof(model.BeboerId));
 
@@ -100,7 +100,7 @@ namespace DugnadAppMvc.Controllers
     .Include(t => t.Dugnad)
     .Where(t => t.BeboerId == beboer.Id)
     .OrderByDescending(t => t.RegistrertDato)
-    .Select(t => new DugnadstimeHistorikkViewModel
+    .Select(t => new TimeforingHistorikkViewModel
     {
         Id = t.Id,
         Registrert = t.RegistrertDato,
@@ -132,7 +132,7 @@ namespace DugnadAppMvc.Controllers
                 }
             }
 
-            var model = new DugnadstimeHistorikkSideViewModel
+            var model = new TimeforingHistorikkSideViewModel
             {
                 AntallRegistreringer = historikk.Count,
                 TotaltAntallTimer = historikk.Sum(h => h.Timer),
@@ -152,7 +152,7 @@ namespace DugnadAppMvc.Controllers
                 return Challenge();
             }
 
-            var dugnadstime = await _context.Dugnadstimer
+            var dugnadstime = await _context.Timeforinger
                 .Include(d => d.Dugnad)
                 .FirstOrDefaultAsync(d =>
                     d.Id == id &&
@@ -171,11 +171,11 @@ namespace DugnadAppMvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var model = new EditDugnadstimeViewModel
+            var model = new EditTimeforingViewModel
             {
                 Id = dugnadstime.Id,
                 Dugnad = dugnadstime.Dugnad.Tittel,
-                Timer = dugnadstime.Timer,
+                Timer = dugnadstime.AntallTimer,
                 Kommentar = dugnadstime.Kommentar
             };
 
@@ -186,7 +186,7 @@ namespace DugnadAppMvc.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EditDugnadstimeViewModel model)
+        public async Task<IActionResult> Edit(int id, EditTimeforingViewModel model)
         {
             if (id != model.Id)
             {
@@ -206,7 +206,7 @@ namespace DugnadAppMvc.Controllers
                 return Challenge();
             }
 
-            var dugnadstime = await _context.Dugnadstimer
+            var dugnadstime = await _context.Timeforinger
                 .FirstOrDefaultAsync(d =>
                     d.Id == id &&
                     d.BeboerId == beboer.Id);
@@ -224,7 +224,7 @@ namespace DugnadAppMvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            dugnadstime.Timer = model.Timer!.Value;
+            dugnadstime.AntallTimer = model.Timer!.Value;
             dugnadstime.Kommentar = model.Kommentar;
 
             await _context.SaveChangesAsync();
@@ -245,7 +245,7 @@ namespace DugnadAppMvc.Controllers
                 return Challenge();
             }
 
-            var dugnadstime = await _context.Dugnadstimer
+            var dugnadstime = await _context.Timeforinger
                 .FirstOrDefaultAsync(d =>
                     d.Id == id &&
                     d.BeboerId == beboer.Id);
@@ -263,7 +263,7 @@ namespace DugnadAppMvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.Dugnadstimer.Remove(dugnadstime);
+            _context.Timeforinger.Remove(dugnadstime);
 
             await _context.SaveChangesAsync();
 
@@ -285,7 +285,7 @@ namespace DugnadAppMvc.Controllers
                 .SingleOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
         }
 
-        private void FyllDugnader(DugnadstimeViewModel model)
+        private void FyllDugnader(TimeforingViewModel model)
         {
             model.Dugnader = _context.Dugnader
                 .Where(d => d.ErSynlig)
@@ -318,9 +318,9 @@ namespace DugnadAppMvc.Controllers
             }
         }
 
-        private static bool KanEndresEllerSlettes(Dugnadstime dugnadstime)
+        private static bool KanEndresEllerSlettes(Timeforing timeforing)
         {
-            return dugnadstime.Registrert > DateTime.UtcNow.AddHours(-1);
+            return timeforing.RegistrertDato > DateTime.UtcNow.AddHours(-1);
         }
     }
 }

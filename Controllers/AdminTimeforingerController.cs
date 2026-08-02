@@ -10,18 +10,18 @@ using Microsoft.EntityFrameworkCore;
 namespace DugnadAppMvc.Controllers
 {
     [Authorize(Roles = IdentityRoles.BoardAccess)]
-    public class AdminDugnadstimerController : Controller
+    public class AdminTimeforingerController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public AdminDugnadstimerController(ApplicationDbContext context)
+        public AdminTimeforingerController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index(int? leilighetId, int? dugnadId, int? beboerId)
         {
-            var query = _context.Dugnadstimer
+            var query = _context.Timeforinger
                 .Include(d => d.Dugnad)
                 .Include(d => d.Beboer)
                     .ThenInclude(b => b.Leilighet)
@@ -42,7 +42,7 @@ namespace DugnadAppMvc.Controllers
                 query = query.Where(d => d.BeboerId == beboerId.Value);
             }
 
-            var model = new AdminDugnadstimerIndexViewModel();
+            var model = new AdminTimeforingerIndexViewModel();
 
             model.Beboere = await _context.Beboere
     .OrderBy(b => b.Etternavn)
@@ -73,14 +73,14 @@ namespace DugnadAppMvc.Controllers
     .ToListAsync();
 
             model.Dugnadstimer = await query
-                .OrderByDescending(d => d.Registrert)
-                .Select(d => new AdminDugnadstimeViewModel
+                .OrderByDescending(d => d.RegistrertDato)
+                .Select(d => new AdminTimeforingViewModel
                 {
                     Id = d.Id,
-                    Registrert = d.Registrert,
+                    Registrert = d.RegistrertDato,
                     Dugnad = d.Dugnad.Tittel,
                     Beboer = d.Beboer.Fornavn + " " + d.Beboer.Etternavn,
-                    Timer = d.Timer,
+                    Timer = d.AntallTimer,
                     Kommentar = d.Kommentar
                 })
                 .ToListAsync();
@@ -95,7 +95,7 @@ namespace DugnadAppMvc.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var model = new DugnadstimeViewModel
+            var model = new TimeforingViewModel
             {
 
                 Dugnader = _context.Dugnader
@@ -133,7 +133,7 @@ namespace DugnadAppMvc.Controllers
         [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AdminCreateDugnadstimeViewModel model)
+        public async Task<IActionResult> Create(AdminCreateTimeforingViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -168,15 +168,15 @@ namespace DugnadAppMvc.Controllers
                 return View(model);
             }
 
-            var dugnadstime = new Dugnadstime
+            var timeforing = new Timeforing
             {
                 DugnadId = model.DugnadId,
                 BeboerId = model.BeboerId!.Value,
-                Timer = model.Timer!.Value,
+                AntallTimer = model.Timer!.Value,
                 Kommentar = model.Kommentar
             };
 
-            _context.Dugnadstimer.Add(dugnadstime);
+            _context.Timeforinger.Add(timeforing);
 
             await _context.SaveChangesAsync();
 
@@ -199,7 +199,7 @@ namespace DugnadAppMvc.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var dugnadstime = await _context.Dugnadstimer
+            var dugnadstime = await _context.Timeforinger
                 .FirstOrDefaultAsync(d => d.Id == id);
 
             if (dugnadstime == null)
@@ -207,12 +207,12 @@ namespace DugnadAppMvc.Controllers
                 return NotFound();
             }
 
-            var model = new DugnadstimeViewModel
+            var model = new TimeforingViewModel
             {
                 Id = dugnadstime.Id,
-                DugnadId = dugnadstime.DugnadId,
+                DugnadId = dugnadstime.DugnadId ?? 0,
                 BeboerId = dugnadstime.BeboerId,
-                Timer = dugnadstime.Timer,
+                Timer = dugnadstime.AntallTimer,
                 Kommentar = dugnadstime.Kommentar,
 
                 Dugnader = _context.Dugnader
@@ -250,7 +250,7 @@ namespace DugnadAppMvc.Controllers
         [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, DugnadstimeViewModel model)
+        public async Task<IActionResult> Edit(int id, TimeforingViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -285,7 +285,7 @@ namespace DugnadAppMvc.Controllers
                 return View(model);
             }
 
-            var dugnadstime = await _context.Dugnadstimer.FindAsync(id);
+            var dugnadstime = await _context.Timeforinger.FindAsync(id);
 
             if (dugnadstime == null)
             {
@@ -294,7 +294,7 @@ namespace DugnadAppMvc.Controllers
 
             dugnadstime.DugnadId = model.DugnadId;
             dugnadstime.BeboerId = model.BeboerId!.Value;
-            dugnadstime.Timer = model.Timer!.Value;
+            dugnadstime.AntallTimer = model.Timer!.Value;
             dugnadstime.Kommentar = model.Kommentar;
 
             await _context.SaveChangesAsync();
@@ -308,17 +308,17 @@ namespace DugnadAppMvc.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
-            var model = await _context.Dugnadstimer
+            var model = await _context.Timeforinger
                 .Include(d => d.Dugnad)
                 .Include(d => d.Beboer)
                 .Where(d => d.Id == id)
-                .Select(d => new AdminDugnadstimeViewModel
+                .Select(d => new AdminTimeforingViewModel
                 {
                     Id = d.Id,
-                    Registrert = d.Registrert,
+                    Registrert = d.RegistrertDato,
                     Dugnad = d.Dugnad.Tittel,
                     Beboer = d.Beboer.Fornavn + " " + d.Beboer.Etternavn,
-                    Timer = d.Timer,
+                    Timer = d.AntallTimer,
                     Kommentar = d.Kommentar
                 })
                 .FirstOrDefaultAsync();
@@ -336,14 +336,14 @@ namespace DugnadAppMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var dugnadstime = await _context.Dugnadstimer.FindAsync(id);
+            var dugnadstime = await _context.Timeforinger.FindAsync(id);
 
             if (dugnadstime == null)
             {
                 return NotFound();
             }
 
-            _context.Dugnadstimer.Remove(dugnadstime);
+            _context.Timeforinger.Remove(dugnadstime);
 
             await _context.SaveChangesAsync();
 

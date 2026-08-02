@@ -19,13 +19,13 @@ namespace DugnadAppMvc.Controllers
         {
             var innstillinger = await _context.Innstillinger.FirstAsync();
 
-            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
 
             var timeverdi = totaleTimerAlle == 0
                 ? 0
                 : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
 
-            var rapport = await _context.Dugnadstimer
+            var rapport = await _context.Timeforinger
     .Include(d => d.Beboer)
         .ThenInclude(b => b.Leilighet)
    .GroupBy(d => new
@@ -44,7 +44,7 @@ namespace DugnadAppMvc.Controllers
 
         AntallRegistreringer = g.Count(),
 
-        TotaleTimer = g.Sum(x => x.Timer)
+        TotaleTimer = g.Sum(x => x.AntallTimer)
     })
 .OrderBy(x => x.Leilighetsnummer)
 .ToListAsync();
@@ -68,18 +68,19 @@ namespace DugnadAppMvc.Controllers
         {
             var innstillinger = await _context.Innstillinger.FirstAsync();
 
-            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
 
             var timeverdi = totaleTimerAlle == 0
                 ? 0
                 : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
 
-            var dugnadstimer = await _context.Dugnadstimer
+            var dugnadstimer = await _context.Timeforinger
                 .Include(d => d.Dugnad)
+                .Include(d => d.Oppgave)
                 .Include(d => d.Beboer)
                     .ThenInclude(b => b.Leilighet)
                 .Where(d => d.Beboer.LeilighetId == id)
-                .OrderByDescending(d => d.Registrert)
+                .OrderByDescending(d => d.RegistrertDato)
                 .ToListAsync();
 
             var model = new LeilighetDetaljerViewModel
@@ -87,8 +88,8 @@ namespace DugnadAppMvc.Controllers
                 LeilighetId = id,
                 Leilighetsnummer = dugnadstimer.FirstOrDefault()?.Beboer.Leilighet.Leilighetsnummer ?? string.Empty,
                 AntallRegistreringer = dugnadstimer.Count,
-                TotaleTimer = dugnadstimer.Sum(x => x.Timer),
-                TotalVerdi = dugnadstimer.Sum(x => x.Timer) * timeverdi,
+                TotaleTimer = dugnadstimer.Sum(x => x.AntallTimer),
+                TotalVerdi = dugnadstimer.Sum(x => x.AntallTimer) * timeverdi,
                 Dugnadstimer = dugnadstimer
             };
 
@@ -99,13 +100,13 @@ namespace DugnadAppMvc.Controllers
         {
             var innstillinger = await _context.Innstillinger.FirstAsync();
 
-            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
 
             var timeverdi = totaleTimerAlle == 0
                 ? 0
                 : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
 
-            var model = await _context.Dugnadstimer
+            var model = await _context.Timeforinger
                 .Include(d => d.Beboer)
                     .ThenInclude(b => b.Leilighet)
                 .GroupBy(d => new
@@ -121,7 +122,7 @@ namespace DugnadAppMvc.Controllers
                     Navn = g.Key.Fornavn + " " + g.Key.Etternavn,
                     Leilighetsnummer = g.Key.Leilighetsnummer,
                     AntallRegistreringer = g.Count(),
-                    TotaleTimer = g.Sum(x => x.Timer),
+                    TotaleTimer = g.Sum(x => x.AntallTimer),
                 })
                 .OrderBy(x => x.Navn)
                 .ToListAsync();
@@ -138,18 +139,19 @@ namespace DugnadAppMvc.Controllers
         {
             var innstillinger = await _context.Innstillinger.FirstAsync();
 
-            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
 
             var timeverdi = totaleTimerAlle == 0
                 ? 0
                 : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
 
-            var dugnadstimer = await _context.Dugnadstimer
-                .Include(d => d.Dugnad)
-                .Include(d => d.Beboer)
+            var dugnadstimer = await _context.Timeforinger
+            .Include(d => d.Dugnad)
+            .Include(d => d.Oppgave)
+            .Include(d => d.Beboer)
                     .ThenInclude(b => b.Leilighet)
                 .Where(d => d.BeboerId == id)
-                .OrderByDescending(d => d.Registrert)
+                .OrderByDescending(d => d.RegistrertDato)
                 .ToListAsync();
 
             var model = new BeboerDetaljerViewModel
@@ -160,7 +162,7 @@ namespace DugnadAppMvc.Controllers
                 : string.Empty,
                 Leilighetsnummer = dugnadstimer.FirstOrDefault()?.Beboer.Leilighet.Leilighetsnummer ?? string.Empty,
                 AntallRegistreringer = dugnadstimer.Count,
-                TotaleTimer = dugnadstimer.Sum(x => x.Timer),
+                TotaleTimer = dugnadstimer.Sum(x => x.AntallTimer),
                 Dugnadstimer = dugnadstimer
             };
 
@@ -173,14 +175,15 @@ namespace DugnadAppMvc.Controllers
         {
             var innstillinger = await _context.Innstillinger.FirstAsync();
 
-            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
 
             var timeverdi = totaleTimerAlle == 0
                 ? 0
                 : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
 
-            var rapport = await _context.Dugnadstimer
-                .Include(d => d.Dugnad)
+            var rapport = await _context.Timeforinger
+    .Where(t => t.DugnadId != null)
+    .Include(t => t.Dugnad)
                 .GroupBy(d => new
                 {
                     d.DugnadId,
@@ -189,11 +192,11 @@ namespace DugnadAppMvc.Controllers
                 })
                 .Select(g => new RapportTimerPrDugnadViewModel
                 {
-                    DugnadId = g.Key.DugnadId,
+                    DugnadId = g.Key.DugnadId ?? 0,
                     Tittel = g.Key.Tittel,
                     Dato = g.Key.StartDato,
                     AntallRegistreringer = g.Count(),
-                    TotaleTimer = g.Sum(x => x.Timer)
+                    TotaleTimer = g.Sum(x => x.AntallTimer)
                 })
                 .OrderByDescending(x => x.Dato)
                 .ToListAsync();
@@ -210,18 +213,18 @@ namespace DugnadAppMvc.Controllers
         {
             var innstillinger = await _context.Innstillinger.FirstAsync();
 
-            var totaleTimerAlle = await _context.Dugnadstimer.SumAsync(x => x.Timer);
+            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
 
             var timeverdi = totaleTimerAlle == 0
                 ? 0
                 : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
 
-            var dugnadstimer = await _context.Dugnadstimer
+            var dugnadstimer = await _context.Timeforinger
                 .Include(d => d.Dugnad)
                 .Include(d => d.Beboer)
                     .ThenInclude(b => b.Leilighet)
                 .Where(d => d.DugnadId == id)
-                .OrderByDescending(d => d.Registrert)
+                .OrderByDescending(d => d.RegistrertDato)
                 .ToListAsync();
 
             var model = new DugnadDetaljerViewModel
@@ -230,8 +233,8 @@ namespace DugnadAppMvc.Controllers
                 Tittel = dugnadstimer.FirstOrDefault()?.Dugnad.Tittel ?? string.Empty,
                 Dato = dugnadstimer.FirstOrDefault()?.Dugnad.StartDato,
                 AntallRegistreringer = dugnadstimer.Count,
-                TotaleTimer = dugnadstimer.Sum(x => x.Timer),
-                TotalVerdi = dugnadstimer.Sum(x => x.Timer) * timeverdi,
+                TotaleTimer = dugnadstimer.Sum(x => x.AntallTimer),
+                TotalVerdi = dugnadstimer.Sum(x => x.AntallTimer) * timeverdi,
                 Dugnadstimer = dugnadstimer
             };
 

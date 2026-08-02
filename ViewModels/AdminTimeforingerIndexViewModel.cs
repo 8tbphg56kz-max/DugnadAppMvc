@@ -2,7 +2,7 @@
 
 namespace DugnadAppMvc.ViewModels
 {
-    public class AdminDugnadstimerIndexViewModel
+    public class AdminTimeforingerIndexViewModel
     {
         public int? LeilighetId { get; set; }
 
@@ -12,7 +12,7 @@ namespace DugnadAppMvc.ViewModels
 
         public List<SelectListItem> Dugnader { get; set; } = new();
 
-        public List<AdminDugnadstimeViewModel> Dugnadstimer { get; set; } = new();
+        public List<AdminTimeforingViewModel> Dugnadstimer { get; set; } = new();
 
         public int? BeboerId { get; set; }
 

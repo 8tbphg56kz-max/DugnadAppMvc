@@ -24,8 +24,9 @@ namespace DugnadAppMvc.Controllers
                 .Select(i => i.Dugnadsbudsjett)
                 .FirstOrDefaultAsync();
 
-            var registrerteTimer = await _context.Dugnadstimer
-                .SumAsync(t => (decimal?)t.Timer) ?? 0;
+            var registrerteTimer = await _context.Timeforinger
+    .Select(t => (decimal?)t.AntallTimer)
+    .SumAsync() ?? 0;
 
             var model = new AdminDashboardViewModel
             {
