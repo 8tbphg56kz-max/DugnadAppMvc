@@ -6,7 +6,7 @@
 
         public DateTime Registrert { get; set; }
 
-        public string Dugnad { get; set; } = "";
+        public string Aktivitet { get; set; } = "";
 
         public string Beboer { get; set; } = "";
 

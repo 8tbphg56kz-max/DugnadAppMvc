@@ -154,6 +154,7 @@ namespace DugnadAppMvc.Controllers
 
             var dugnadstime = await _context.Timeforinger
                 .Include(d => d.Dugnad)
+                .Include(d => d.Oppgave)
                 .FirstOrDefaultAsync(d =>
                     d.Id == id &&
                     d.BeboerId == beboer.Id);
@@ -174,7 +175,9 @@ namespace DugnadAppMvc.Controllers
             var model = new EditTimeforingViewModel
             {
                 Id = dugnadstime.Id,
-                Dugnad = dugnadstime.Dugnad.Tittel,
+                Aktivitet = dugnadstime.OppgaveId != null
+    ? dugnadstime.Oppgave!.Navn
+    : dugnadstime.Dugnad!.Tittel,
                 Timer = dugnadstime.AntallTimer,
                 Kommentar = dugnadstime.Kommentar
             };

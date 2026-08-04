@@ -1,20 +1,15 @@
 ﻿@model IEnumerable<DugnadAppMvc.Models.Beboer>
 
-<h2 class="mb-2">Beboere</h2>
-
-<p class="text-muted mb-3">
-    Her administrerer du beboerne i sameiet.
-</p>
-
-<p>
     @if (User.HasAdminAccess())
     {
+        <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <h2>Beboere</h2>
         <a asp-action="Create" class="btn btn-primary">
             <i class="bi bi-person-plus me-1"></i>
             Legg til beboer
         </a>
+        </div>
     }
-</p>
 
 <div class="table-responsive">
 

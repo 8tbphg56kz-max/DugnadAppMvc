@@ -45,7 +45,7 @@
     </div>
 
     <div class="col-md-3">
-        <label asp-for="DugnadId" class="form-label fw-semibold text-primary">Dugnad</label>
+        <label asp-for="DugnadId" class="form-label fw-semibold text-primary">Aktivitet</label>
 
         <select asp-for="DugnadId"
                 asp-items="Model.Dugnader"
@@ -71,7 +71,7 @@
     <thead>
         <tr>
             <th>Registrert</th>
-            <th>Dugnad</th>
+            <th>Aktivitet</th>
             <th>Beboer</th>
             <th class="text-end">Timer</th>
             <th>Kommentar</th>
@@ -85,7 +85,7 @@
         {
             <tr>
                 <td>@item.Registrert.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>@item.Dugnad</td>
+                <td>@item.Aktivitet</td>
                 <td>@item.Beboer</td>
                 <td class="text-end">@item.Timer</td>
                 <td>@item.Kommentar</td>

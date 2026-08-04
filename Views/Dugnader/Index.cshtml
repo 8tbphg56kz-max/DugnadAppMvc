@@ -1,19 +1,18 @@
 ﻿@model IEnumerable<DugnadAppMvc.Models.Dugnad>
 
 @{
-    ViewData["Title"] = "Dugnader";
+    ViewData["Title"] = "Fellesdugnader";
 }
 
-<h2>Dugnader</h2>
-
-<p>
     @if (User.HasAdminAccess())
     {
+        <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+            <h2>Fellesdugnader</h2>
         <a asp-action="Create" class="btn btn-primary">
-            Ny dugnad
+            <i class="bi bi-plus-circle me-1"></i>Ny fellesdugnad
         </a>
+        </div>
     }
-</p>
 
 <table class="table table-striped">
 

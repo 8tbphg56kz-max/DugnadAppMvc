@@ -192,7 +192,7 @@ body {
     }
 
 .brand-icon {
-    font-size: 1.7rem;
+    font-size: 2rem;
     color: white;
 }
 
@@ -200,6 +200,7 @@ body {
     display: flex;
     flex-direction: column;
     line-height: 1.05;
+    margin-left: -6px;
 }
 
 .brand-sameie {
@@ -237,6 +238,7 @@ body {
     transition: color .2s ease;
 }
 
-    .footer a:hover {
+.footer a:hover {
         color: var(--bs-primary);
-    }
+}
+

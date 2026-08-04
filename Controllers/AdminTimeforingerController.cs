@@ -21,11 +21,12 @@ namespace DugnadAppMvc.Controllers
 
         public async Task<IActionResult> Index(int? leilighetId, int? dugnadId, int? beboerId)
         {
-            var query = _context.Timeforinger
-                .Include(d => d.Dugnad)
-                .Include(d => d.Beboer)
-                    .ThenInclude(b => b.Leilighet)
-                .AsQueryable();
+             var query = _context.Timeforinger
+    .Include(d => d.Dugnad)
+    .Include(d => d.Oppgave)
+    .Include(d => d.Beboer)
+        .ThenInclude(b => b.Leilighet)
+    .AsQueryable();
 
             if (leilighetId.HasValue)
             {
@@ -78,7 +79,7 @@ namespace DugnadAppMvc.Controllers
                 {
                     Id = d.Id,
                     Registrert = d.RegistrertDato,
-                    Dugnad = d.Dugnad.Tittel,
+                    Aktivitet = d.OppgaveId != null ? d.Oppgave!.Navn : d.Dugnad!.Tittel,
                     Beboer = d.Beboer.Fornavn + " " + d.Beboer.Etternavn,
                     Timer = d.AntallTimer,
                     Kommentar = d.Kommentar
@@ -199,31 +200,27 @@ namespace DugnadAppMvc.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var dugnadstime = await _context.Timeforinger
-                .FirstOrDefaultAsync(d => d.Id == id);
+            var timeforing = await _context.Timeforinger
+                .Include(t => t.Dugnad)
+                .Include(t => t.Oppgave)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (dugnadstime == null)
+            if (timeforing == null)
             {
                 return NotFound();
             }
 
-            var model = new TimeforingViewModel
+            var model = new EditTimeforingViewModel
             {
-                Id = dugnadstime.Id,
-                DugnadId = dugnadstime.DugnadId ?? 0,
-                BeboerId = dugnadstime.BeboerId,
-                Timer = dugnadstime.AntallTimer,
-                Kommentar = dugnadstime.Kommentar,
+                Id = timeforing.Id,
 
-                Dugnader = _context.Dugnader
-                    .Where(d => d.ErSynlig)
-                    .OrderBy(d => d.StartDato)
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = d.Tittel
-                    })
-                    .ToList(),
+                Aktivitet = timeforing.OppgaveId != null
+                    ? timeforing.Oppgave!.Navn
+                    : timeforing.Dugnad!.Tittel,
+
+                BeboerId = timeforing.BeboerId,
+                Timer = timeforing.AntallTimer,
+                Kommentar = timeforing.Kommentar,
 
                 Beboere = _context.Beboere
                     .OrderBy(b => b.Etternavn)
@@ -236,12 +233,6 @@ namespace DugnadAppMvc.Controllers
                     .ToList()
             };
 
-            model.TimerAlternativer.Add(new SelectListItem
-            {
-                Value = "",
-                Text = "Velg timer..."
-            });
-
             FyllTimerAlternativer(model.TimerAlternativer);
 
             return View(model);
@@ -250,20 +241,10 @@ namespace DugnadAppMvc.Controllers
         [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, TimeforingViewModel model)
+        public async Task<IActionResult> Edit(int id, EditTimeforingViewModel model)
         {
             if (!ModelState.IsValid)
-            {
-                model.Dugnader = _context.Dugnader
-                    .Where(d => d.ErSynlig)
-                    .OrderBy(d => d.StartDato)
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = d.Tittel
-                    })
-                    .ToList();
-
+            {   
                 model.Beboere = _context.Beboere
                     .OrderBy(b => b.Etternavn)
                     .ThenBy(b => b.Fornavn)
@@ -274,32 +255,38 @@ namespace DugnadAppMvc.Controllers
                     })
                     .ToList();
 
-                model.TimerAlternativer.Add(new SelectListItem
-                {
-                    Value = "",
-                    Text = "Velg timer..."
-                });
 
                 FyllTimerAlternativer(model.TimerAlternativer);
+
+                var aktivitet = await _context.Timeforinger
+    .Include(t => t.Dugnad)
+    .Include(t => t.Oppgave)
+    .FirstOrDefaultAsync(t => t.Id == id);
+
+                if (aktivitet != null)
+                {
+                    model.Aktivitet = aktivitet.OppgaveId != null
+                        ? aktivitet.Oppgave!.Navn
+                        : aktivitet.Dugnad!.Tittel;
+                }
 
                 return View(model);
             }
 
-            var dugnadstime = await _context.Timeforinger.FindAsync(id);
+            var timeforing = await _context.Timeforinger.FindAsync(id);
 
-            if (dugnadstime == null)
+            if (timeforing == null)
             {
                 return NotFound();
             }
-
-            dugnadstime.DugnadId = model.DugnadId;
-            dugnadstime.BeboerId = model.BeboerId!.Value;
-            dugnadstime.AntallTimer = model.Timer!.Value;
-            dugnadstime.Kommentar = model.Kommentar;
+           
+            timeforing.BeboerId = model.BeboerId!.Value;
+            timeforing.AntallTimer = model.Timer!.Value;
+            timeforing.Kommentar = model.Kommentar;
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Dugnadstimen ble oppdatert.";
+            TempData["SuccessMessage"] = "Timeføringen ble oppdatert.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -310,13 +297,14 @@ namespace DugnadAppMvc.Controllers
         {
             var model = await _context.Timeforinger
                 .Include(d => d.Dugnad)
+                .Include(d => d.Oppgave)
                 .Include(d => d.Beboer)
                 .Where(d => d.Id == id)
                 .Select(d => new AdminTimeforingViewModel
                 {
                     Id = d.Id,
                     Registrert = d.RegistrertDato,
-                    Dugnad = d.Dugnad.Tittel,
+                    Aktivitet = d.OppgaveId != null ? d.Oppgave!.Navn : d.Dugnad!.Tittel,
                     Beboer = d.Beboer.Fornavn + " " + d.Beboer.Etternavn,
                     Timer = d.AntallTimer,
                     Kommentar = d.Kommentar
@@ -336,18 +324,18 @@ namespace DugnadAppMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var dugnadstime = await _context.Timeforinger.FindAsync(id);
+            var timeforing = await _context.Timeforinger.FindAsync(id);
 
-            if (dugnadstime == null)
+            if (timeforing == null)
             {
                 return NotFound();
             }
 
-            _context.Timeforinger.Remove(dugnadstime);
+            _context.Timeforinger.Remove(timeforing);
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Dugnadstimen ble slettet.";
+            TempData["SuccessMessage"] = "Timeføringen ble slettet.";
 
             return RedirectToAction(nameof(Index));
         }
