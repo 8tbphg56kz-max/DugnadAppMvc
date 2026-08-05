@@ -1,4 +1,4 @@
-@model IEnumerable<DugnadAppMvc.Models.Oppgave>
+@model DugnadAppMvc.ViewModels.OppgaveIndexViewModel
 @using DugnadAppMvc.Models.Enums
 
 @{
@@ -30,7 +30,7 @@
 
     <tbody>
 
-        @foreach (var item in Model)
+        @foreach (var item in Model.Oppgaver)
         {
             <tr class="@(item.ErUtført ? "table-success" : "")">
 

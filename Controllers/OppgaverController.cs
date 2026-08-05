@@ -25,11 +25,17 @@ public class OppgaverController : Controller
     public async Task<IActionResult> Index()
     {
         var oppgaver = await _context.Oppgaver
-            .OrderBy(o => o.Prioritet)
-            .ThenBy(o => o.Frist)
-            .ToListAsync();
+    .Include(o => o.Pameldinger)
+    .OrderBy(o => o.Prioritet)
+    .ThenBy(o => o.Frist)
+    .ToListAsync();
 
-        return View(oppgaver);
+        var model = new OppgaveIndexViewModel
+        {
+            Oppgaver = oppgaver
+        };
+
+        return View(model);
     }
 
     [Authorize(Roles = IdentityRoles.BoardAccess)]
