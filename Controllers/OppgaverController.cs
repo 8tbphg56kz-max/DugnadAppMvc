@@ -543,17 +543,38 @@ public class OppgaverController : Controller
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     public async Task<IActionResult> AdministrerPameldinger(int id)
     {
-        var oppgave = await _context.Oppgaver
-            .Include(o => o.Pameldinger)
-                .ThenInclude(p => p.Beboer)
-            .FirstOrDefaultAsync(o => o.Id == id);
+       var oppgave = await _context.Oppgaver
+    .Include(o => o.Pameldinger)
+        .ThenInclude(p => p.Beboer)
+    .FirstOrDefaultAsync(o => o.Id == id);
 
-        if (oppgave == null)
+if (oppgave == null)
+{
+    return NotFound();
+}
+
+var pameldteIder = oppgave.Pameldinger
+    .Select(p => p.BeboerId);
+
+var ledigeBeboere = await _context.Beboere
+    .Where(b => !pameldteIder.Contains(b.Id))
+    .OrderBy(b => b.Etternavn)
+    .ThenBy(b => b.Fornavn)
+    .ToListAsync();
+
+var model = new AdministrerPameldingerViewModel
+{
+    Oppgave = oppgave,
+    LedigeBeboere = ledigeBeboere
+        .Select(b => new SelectListItem
         {
-            return NotFound();
-        }
+            Value = b.Id.ToString(),
+            Text = b.Fornavn + " " + b.Etternavn
+        })
+        .ToList()
+};
 
-        return View(oppgave);
+return View(model);
     }
 
     [Authorize(Roles = IdentityRoles.BoardAccess)]
@@ -573,6 +594,66 @@ public class OppgaverController : Controller
 
         _context.OppgavePameldinger.Remove(pamelding);
         await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+    }
+
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MeldPaSomAdministrator(int oppgaveId, int? valgtBeboerId)
+    {
+
+        if (!valgtBeboerId.HasValue)
+        {
+            TempData["Error"] = "Du må velge en beboer.";
+            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+        }
+
+
+        var oppgave = await _context.Oppgaver
+            .Include(o => o.Pameldinger)
+            .FirstOrDefaultAsync(o => o.Id == oppgaveId);
+
+        if (oppgave == null)
+        {
+            return NotFound();
+        }
+
+        // Finnes beboeren?
+        var beboer = await _context.Beboere
+            .FindAsync(valgtBeboerId);
+
+        if (beboer == null)
+        {
+            return NotFound();
+        }
+
+        // Allerede påmeldt?
+        if (oppgave.Pameldinger.Any(p => p.BeboerId == valgtBeboerId))
+        {
+            TempData["Info"] = "Beboeren er allerede påmeldt.";
+            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+        }
+
+        // Full oppgave?
+        if (oppgave.Pameldinger.Count >= oppgave.AntallPersoner)
+        {
+            TempData["Error"] = "Oppgaven er fulltegnet.";
+            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+        }
+
+        _context.OppgavePameldinger.Add(new OppgavePamelding
+        {
+            OppgaveId = oppgaveId,
+            BeboerId = valgtBeboerId.Value,
+            PameldtDato = DateTime.UtcNow,
+            Status = OppgaveStatus.Pameldt
+        });
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Beboeren ble meldt på.";
 
         return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
     }
