@@ -1,0 +1,43 @@
+﻿@model DugnadAppMvc.Models.Oppgave
+
+@{
+    ViewData["Title"] = "Administrer påmeldinger";
+}
+
+<h2>@Model.Navn</h2>
+
+<div class="card mt-3">
+    <div class="card-header">
+        Påmeldte
+    </div>
+
+    <div class="card-body">
+
+        @if (Model.Pameldinger.Any())
+        {
+            <ul class="list-group list-group-flush">
+
+                @foreach (var pamelding in Model.Pameldinger)
+                {
+                    <li class="list-group-item">
+                        @pamelding.Beboer.Fornavn @pamelding.Beboer.Etternavn
+                    </li>
+                }
+
+            </ul>
+        }
+        else
+        {
+            <p class="text-muted mb-0">
+                Ingen er påmeldt denne oppgaven.
+            </p>
+        }
+
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        Tilbake
+    </a>
+</div>

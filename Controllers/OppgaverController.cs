@@ -539,4 +539,20 @@ public class OppgaverController : Controller
 
         return RedirectToAction(nameof(Vis), new { id = model.OppgaveId });
     }
+
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+    public async Task<IActionResult> AdministrerPameldinger(int id)
+    {
+        var oppgave = await _context.Oppgaver
+            .Include(o => o.Pameldinger)
+                .ThenInclude(p => p.Beboer)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (oppgave == null)
+        {
+            return NotFound();
+        }
+
+        return View(oppgave);
+    }
 }

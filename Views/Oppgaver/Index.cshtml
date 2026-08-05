@@ -131,9 +131,13 @@
                                     : "bg-success";
                     }
 
-                    <span class="badge @badgeClass">
-                        @antallPameldte / @item.AntallPersoner
-                    </span>
+                    <a asp-action="AdministrerPameldinger"
+                       asp-route-id="@item.Id"
+                       class="text-decoration-none">
+                        <span class="badge @badgeClass">
+                            @antallPameldte / @item.AntallPersoner
+                        </span>
+                    </a>
                 </td>
 
                 <td>
