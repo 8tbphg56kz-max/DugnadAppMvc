@@ -57,20 +57,11 @@
     <tbody>
 
         @foreach (var item in Model.Oppgaver)
-        {
+        {            
             <tr class="@(item.ErUtført ? "table-success" : "")">
 
                 <td>
-                    <strong>@item.Navn</strong>
-
-                    @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
-                    {
-                        <div class="text-muted small">
-                            @(item.Beskrivelse.Length > 80
-                                ? item.Beskrivelse[..80] + "..."
-                                : item.Beskrivelse)
-                        </div>
-                    }
+                    <strong>@item.Navn</strong>                   
                 </td>
 
                 <td>
@@ -116,14 +107,16 @@
                 <td>
                     @{
                         var antallPameldte = item.Pameldinger.Count;
-                        var cssClass = antallPameldte == 0
-                            ? "text-danger fw-bold"
-                            : antallPameldte < item.AntallPersoner
-                                ? "text-warning fw-bold"
-                                : "text-success fw-bold";
+
+                        var badgeClass =
+                            antallPameldte == 0
+                                ? "bg-danger"
+                                : antallPameldte < item.AntallPersoner
+                                    ? "bg-warning text-dark"
+                                    : "bg-success";
                     }
 
-                    <span class="@cssClass">
+                    <span class="badge @badgeClass">
                         @antallPameldte / @item.AntallPersoner
                     </span>
                 </td>
