@@ -555,4 +555,25 @@ public class OppgaverController : Controller
 
         return View(oppgave);
     }
+
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MeldAvSomAdministrator(int pameldingId)
+    {
+        var pamelding = await _context.OppgavePameldinger
+            .FirstOrDefaultAsync(p => p.Id == pameldingId);
+
+        if (pamelding == null)
+        {
+            return NotFound();
+        }
+
+        var oppgaveId = pamelding.OppgaveId;
+
+        _context.OppgavePameldinger.Remove(pamelding);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+    }
 }

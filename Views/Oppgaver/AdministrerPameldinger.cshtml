@@ -19,8 +19,21 @@
 
                 @foreach (var pamelding in Model.Pameldinger)
                 {
-                    <li class="list-group-item">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+
                         @pamelding.Beboer.Fornavn @pamelding.Beboer.Etternavn
+
+                        <form asp-action="MeldAvSomAdministrator" method="post">
+                            <input type="hidden" name="pameldingId" value="@pamelding.Id" />
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-person-dash"></i>
+                                Meld av
+                            </button>
+                        </form>
+
                     </li>
                 }
 
