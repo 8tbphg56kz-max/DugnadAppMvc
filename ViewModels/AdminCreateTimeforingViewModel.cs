@@ -5,9 +5,11 @@ namespace DugnadAppMvc.ViewModels
 {
     public class AdminCreateTimeforingViewModel
     {
-        [Required(ErrorMessage = "Velg dugnad.")]
-        [Display(Name = "Dugnad")]
-        public int DugnadId { get; set; }
+        [Required(ErrorMessage = "Velg aktivitet.")]
+        [Display(Name = "Aktivitet")]
+        public string Aktivitet { get; set; } = string.Empty;
+
+        public List<SelectListItem> Aktiviteter { get; set; } = [];
 
         [Required(ErrorMessage = "Velg antall timer.")]
         [Display(Name = "Timer")]
@@ -15,8 +17,6 @@ namespace DugnadAppMvc.ViewModels
 
         [Display(Name = "Kommentar")]
         public string? Kommentar { get; set; }
-
-        public List<SelectListItem> Dugnader { get; set; } = [];
 
         public List<SelectListItem> TimerAlternativer { get; set; } = [];
 

@@ -45,10 +45,10 @@
     </div>
 
     <div class="col-md-3">
-        <label asp-for="DugnadId" class="form-label fw-semibold text-primary">Aktivitet</label>
+        <label asp-for="Aktivitet" class="form-label fw-semibold text-primary">Aktivitet</label>
 
-        <select asp-for="DugnadId"
-                asp-items="Model.Dugnader"
+                <select asp-for="Aktivitet"
+                        asp-items="Model.Aktiviteter"
                 class="form-select"
                 onchange="this.form.submit()">
 

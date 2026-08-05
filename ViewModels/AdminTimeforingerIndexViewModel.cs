@@ -8,9 +8,9 @@ namespace DugnadAppMvc.ViewModels
 
         public List<SelectListItem> Leiligheter { get; set; } = new();
 
-        public int? DugnadId { get; set; }
+        public string? Aktivitet { get; set; }
 
-        public List<SelectListItem> Dugnader { get; set; } = new();
+        public List<SelectListItem> Aktiviteter { get; set; } = new();
 
         public List<AdminTimeforingViewModel> Dugnadstimer { get; set; } = new();
 

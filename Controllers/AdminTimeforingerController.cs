@@ -19,7 +19,7 @@ namespace DugnadAppMvc.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(int? leilighetId, int? dugnadId, int? beboerId)
+        public async Task<IActionResult> Index(int? leilighetId, string? aktivitet, int? beboerId)
         {
              var query = _context.Timeforinger
     .Include(d => d.Dugnad)
@@ -33,9 +33,18 @@ namespace DugnadAppMvc.Controllers
                 query = query.Where(d => d.Beboer.LeilighetId == leilighetId.Value);
             }
 
-            if (dugnadId.HasValue)
+            if (!string.IsNullOrWhiteSpace(aktivitet))
             {
-                query = query.Where(d => d.DugnadId == dugnadId.Value);
+                if (aktivitet.StartsWith("D-"))
+                {
+                    var dugnadId = int.Parse(aktivitet[2..]);
+                    query = query.Where(t => t.DugnadId == dugnadId);
+                }
+                else if (aktivitet.StartsWith("O-"))
+                {
+                    var oppgaveId = int.Parse(aktivitet[2..]);
+                    query = query.Where(t => t.OppgaveId == oppgaveId);
+                }
             }
 
             if (beboerId.HasValue)
@@ -64,14 +73,27 @@ namespace DugnadAppMvc.Controllers
                 })
                 .ToListAsync();
 
-            model.Dugnader = await _context.Dugnader
-    .OrderBy(d => d.Tittel)
-    .Select(d => new SelectListItem
-    {
-        Value = d.Id.ToString(),
-        Text = d.Tittel
-    })
-    .ToListAsync();
+            model.Aktiviteter = new List<SelectListItem>();
+
+            model.Aktiviteter.AddRange(
+                await _context.Dugnader
+                    .OrderBy(d => d.Tittel)
+                    .Select(d => new SelectListItem
+                    {
+                        Value = $"D-{d.Id}",
+                        Text = $"📅 {d.Tittel}"
+                    })
+                    .ToListAsync());
+
+            model.Aktiviteter.AddRange(
+                await _context.Oppgaver
+                    .OrderBy(o => o.Navn)
+                    .Select(o => new SelectListItem
+                    {
+                        Value = $"O-{o.Id}",
+                        Text = $"🛠 {o.Navn}"
+                    })
+                    .ToListAsync());
 
             model.Dugnadstimer = await query
                 .OrderByDescending(d => d.RegistrertDato)
@@ -87,7 +109,7 @@ namespace DugnadAppMvc.Controllers
                 .ToListAsync();
 
             model.LeilighetId = leilighetId;
-            model.DugnadId = dugnadId;
+            model.Aktivitet = aktivitet;
 
             return View(model);
         }
@@ -96,19 +118,8 @@ namespace DugnadAppMvc.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var model = new TimeforingViewModel
+            var model = new AdminCreateTimeforingViewModel
             {
-
-                Dugnader = _context.Dugnader
-                    .Where(d => d.ErSynlig)
-                    .OrderBy(d => d.StartDato)
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = d.Tittel
-                    })
-                    .ToList(),
-
                 Beboere = _context.Beboere
                     .OrderBy(b => b.Etternavn)
                     .ThenBy(b => b.Fornavn)
@@ -119,6 +130,29 @@ namespace DugnadAppMvc.Controllers
                     })
                     .ToList()
             };
+
+            model.Aktiviteter = new List<SelectListItem>();
+
+            model.Aktiviteter.AddRange(
+                _context.Dugnader
+                    .Where(d => d.ErSynlig)
+                    .OrderBy(d => d.StartDato)
+                    .Select(d => new SelectListItem
+                    {
+                        Value = $"D-{d.Id}",
+                        Text = $"📅 {d.Tittel}"
+                    })
+                    .ToList());
+
+            model.Aktiviteter.AddRange(
+                _context.Oppgaver
+                    .OrderBy(o => o.Navn)
+                    .Select(o => new SelectListItem
+                    {
+                        Value = $"O-{o.Id}",
+                        Text = $"🛠 {o.Navn}"
+                    })
+                    .ToList());
 
             model.TimerAlternativer.Add(new SelectListItem
             {
@@ -138,15 +172,28 @@ namespace DugnadAppMvc.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.Dugnader = _context.Dugnader
-                    .Where(d => d.ErSynlig)
-                    .OrderBy(d => d.StartDato)
-                    .Select(d => new SelectListItem
-                    {
-                        Value = d.Id.ToString(),
-                        Text = d.Tittel
-                    })
-                    .ToList();
+                model.Aktiviteter = new List<SelectListItem>();
+
+                model.Aktiviteter.AddRange(
+                    _context.Dugnader
+                        .Where(d => d.ErSynlig)
+                        .OrderBy(d => d.StartDato)
+                        .Select(d => new SelectListItem
+                        {
+                            Value = $"D-{d.Id}",
+                            Text = $"📅 {d.Tittel}"
+                        })
+                        .ToList());
+
+                model.Aktiviteter.AddRange(
+                    _context.Oppgaver
+                        .OrderBy(o => o.Navn)
+                        .Select(o => new SelectListItem
+                        {
+                            Value = $"O-{o.Id}",
+                            Text = $"🛠 {o.Navn}"
+                        })
+                        .ToList());
 
                 model.Beboere = _context.Beboere
                     .OrderBy(b => b.Etternavn)
@@ -171,11 +218,19 @@ namespace DugnadAppMvc.Controllers
 
             var timeforing = new Timeforing
             {
-                DugnadId = model.DugnadId,
                 BeboerId = model.BeboerId!.Value,
                 AntallTimer = model.Timer!.Value,
                 Kommentar = model.Kommentar
             };
+
+            if (model.Aktivitet.StartsWith("D-"))
+            {
+                timeforing.DugnadId = int.Parse(model.Aktivitet[2..]);
+            }
+            else if (model.Aktivitet.StartsWith("O-"))
+            {
+                timeforing.OppgaveId = int.Parse(model.Aktivitet[2..]);
+            }
 
             _context.Timeforinger.Add(timeforing);
 
