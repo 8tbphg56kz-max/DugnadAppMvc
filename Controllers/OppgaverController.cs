@@ -22,18 +22,21 @@ public class OppgaverController : Controller
         _userManager = userManager;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(OppgaveIndexViewModel model)
     {
-        var oppgaver = await _context.Oppgaver
-    .Include(o => o.Pameldinger)
-    .OrderBy(o => o.Prioritet)
-    .ThenBy(o => o.Frist)
-    .ToListAsync();
+        var query = _context.Oppgaver
+            .Include(o => o.Pameldinger)
+            .AsQueryable();
 
-        var model = new OppgaveIndexViewModel
+        if (model.ErUtfort.HasValue)
         {
-            Oppgaver = oppgaver
-        };
+            query = query.Where(o => o.ErUtført == model.ErUtfort.Value);
+        }
+
+        model.Oppgaver = await query
+            .OrderBy(o => o.Prioritet)
+            .ThenBy(o => o.Frist)
+            .ToListAsync();
 
         return View(model);
     }

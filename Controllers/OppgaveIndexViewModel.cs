@@ -7,9 +7,5 @@ public class OppgaveIndexViewModel
 {
     public IEnumerable<Oppgave> Oppgaver { get; set; } = [];
 
-    public string? Sok { get; set; }
-
-    public OppgavePrioritet? Prioritet { get; set; }
-
-    public bool? ErUtfort { get; set; }
+    public bool? ErUtfort { get; set; } = null;
 }
