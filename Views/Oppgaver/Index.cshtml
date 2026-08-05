@@ -47,7 +47,7 @@
             <th>Frist</th>
             <th>Prioritet</th>
             <th>Status</th>
-            <th>Påmeldte</th>
+            <th>Påmeldt</th>
             <th>Timer</th>
             <th>Bekreftelse</th>
             <th></th>
@@ -61,7 +61,22 @@
             <tr class="@(item.ErUtført ? "table-success" : "")">
 
                 <td>
-                    <strong>@item.Navn</strong>                   
+                    <strong>
+                        <a asp-action="Edit"
+                           asp-route-id="@item.Id"
+                           class="text-decoration-none">
+                            @item.Navn
+                        </a>
+                    </strong>
+
+                    @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
+                    {
+                        <div class="text-muted small">
+                            @(item.Beskrivelse.Length > 80
+                                ? item.Beskrivelse[..80] + "..."
+                                : item.Beskrivelse)
+                        </div>
+                    }
                 </td>
 
                 <td>
@@ -134,13 +149,13 @@
                     <a asp-action="Edit"
                        asp-route-id="@item.Id"
                        class="btn btn-sm btn-outline-primary">
-                        Rediger
+                        <i class="bi bi-pencil"></i>
                     </a>
 
                     <a asp-action="Delete"
                        asp-route-id="@item.Id"
                        class="btn btn-sm btn-outline-danger">
-                        Slett
+                        <i class="bi bi-trash"></i>
                     </a>
 
                 </td>
