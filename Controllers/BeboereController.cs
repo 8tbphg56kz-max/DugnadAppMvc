@@ -32,10 +32,11 @@ namespace DugnadAppMvc.Controllers
         public async Task<IActionResult> Index()
         {
             var beboere = await _context.Beboere
-                .Include(b => b.Leilighet)
-                .OrderBy(b => b.Etternavn)
-                .ThenBy(b => b.Fornavn)
-                .ToListAsync();
+     .Include(b => b.Leilighet)
+     .Include(b => b.ApplicationUser)
+     .OrderBy(b => b.Etternavn)
+     .ThenBy(b => b.Fornavn)
+     .ToListAsync();
 
             return View(beboere);
         }

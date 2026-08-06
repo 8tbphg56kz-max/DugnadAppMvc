@@ -19,6 +19,7 @@
             <th>Navn</th>
             <th>E-post</th>
             <th>Leilighet</th>
+                <th>Konto</th>
             <th></th>
         </tr>
     </thead>
@@ -34,7 +35,30 @@
                     <td>
                         @beboer.Leilighet.Seksjonsnummer /
                         @beboer.Leilighet.Leilighetsnummer
-                    </td>                      
+                    </td>  
+                    <td>
+                        @if (beboer.ApplicationUser == null)
+                        {
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-person-x-fill"></i>
+                                Ingen konto
+                            </span>
+                        }
+                        else if (beboer.ApplicationUser.IsActivated)
+                        {
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Aktiv
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-clock-history"></i>
+                                Venter på aktivering
+                            </span>
+                        }
+                    </td>
                     <td class="text-nowrap">
                         @if (User.HasAdminAccess())
                         {
