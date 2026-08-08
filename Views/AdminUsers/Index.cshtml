@@ -4,37 +4,72 @@
     ViewData["Title"] = "Brukere";
 }
 
-<h2>Brukere</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Administratorer</h2>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Navn</th>
-            <th>E-post</th>
-            <th>Rolle</th>
-            <th></th>
-        </tr>
-    </thead>
+    <a asp-action="Add" class="btn btn-primary"> <i class="bi bi-shield-plus me-1"></i> Legg til tilgang </a>
+</div>
 
-    <tbody>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Det er ingen administratorer registrert.
+    </div>
+}
+else
+{
 
-        @foreach (var user in Model)
-        {
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@user.Navn</td>
-                <td>@user.Epost</td>
-                <td>@user.Rolle</td>
- 
-                <td>
-                    <a asp-action="Edit"
-                       asp-route-id="@user.Id"
-                       class="btn btn-sm btn-primary">
-                        Rediger
-                    </a>
-                </td>
+                <th>Navn</th>
+                <th>E-post</th>
+                <th>Tilganger</th>
+                <th>Handling</th>
             </tr>
-        }
+        </thead>
 
-    </tbody>
+        <tbody>
 
-</table>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Navn</td>
+                    <td>@user.Epost</td>                                           
+                            <td>
+                                <span class="badge bg-primary">@user.Rolle</span>
+                            </td>  
+                    <td>   
+                        <a asp-action="Edit"
+                           asp-route-id="@user.Id"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <form asp-action="FjernTilgang"
+                              method="post"
+                              class="d-inline">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="userId"
+                                   value="@user.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm"
+                                    onclick="return confirm('Fjerne styretilgangen for @user.Navn?');">
+
+                                <i class="bi bi-person-dash me-1"></i>
+                                Gjør til beboer
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+}

@@ -54,14 +54,7 @@ namespace DugnadAppMvc.Controllers
                 return View(model);
             }
 
-            if (!user.IsActivated)
-            {
-                ModelState.AddModelError(nameof(model.Email), 
-                    "Du har ikke opprettet passord ennå. Klikk «Opprett passord» nedenfor.");
-                return View(model);
-            }
-
-            var result = await _signInManager.PasswordSignInAsync(
+                var result = await _signInManager.PasswordSignInAsync(
                 user,
                 model.Password,
                 model.RememberMe,
@@ -305,7 +298,7 @@ namespace DugnadAppMvc.Controllers
         public IActionResult RequestActivationConfirmation()
         {
             return View();
-        }
+        }      
 
         public IActionResult AccessDenied()
         {

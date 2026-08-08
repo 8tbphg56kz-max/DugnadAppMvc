@@ -12,6 +12,6 @@ namespace DugnadAppMvc.Models
 
         public bool IsActivated { get; set; } = false;
 
-        public DateTime? ActivatedDate { get; set; }
+        public DateTime? ActivatedDate { get; set; }       
     }
 }

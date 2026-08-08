@@ -169,6 +169,15 @@
                                     {
                                         <li>
                                             <a class="dropdown-item"
+                                               asp-controller="Kontoadministrasjon"
+                                               asp-action="Index">
+                                                <i class="bi bi-person-check"></i>
+                                                Brukeradministrasjon
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
                                                asp-controller="AdminUsers"
                                                asp-action="Index">
                                                 <i class="bi bi-person-gear me-2"></i>
@@ -220,7 +229,7 @@
                                    href="#"
                                    role="button"
                                    data-bs-toggle="dropdown">
-                                    <i class="bi bi-person-circle"></i> Knut
+                                    <i class="bi bi-person-circle"></i> @((await UserManager.GetUserAsync(User))?.FirstName)
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end">

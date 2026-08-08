@@ -3,6 +3,7 @@ using DugnadAppMvc.Services.Interfaces;
 using DugnadAppMvc.ViewModels.AdminUsers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Services;
 
@@ -15,7 +16,7 @@ public class UserAdministrationService : IUserAdministrationService
     {
         _userManager = userManager;
     }
-
+    
     public async Task<List<UserListViewModel>> GetUsersAsync()
     {
         var users = _userManager.Users.ToList();
@@ -24,15 +25,20 @@ public class UserAdministrationService : IUserAdministrationService
 
         foreach (var user in users)
         {
-            var roles = await _userManager.GetRolesAsync(user);
+            var roller = await _userManager.GetRolesAsync(user);
+
+            // Finn den administrative rollen
+            var rolle = roller.FirstOrDefault(r => r != IdentityRoles.Beboer);
+
+            if (rolle is null)
+                continue;
 
             model.Add(new UserListViewModel
             {
                 Id = user.Id,
                 Navn = $"{user.FirstName} {user.LastName}",
                 Epost = user.Email ?? "",
-                ErAktiv = user.IsActivated,
-                Rolle = roles.FirstOrDefault() ?? ""
+                Rolle = rolle
             });
         }
 
@@ -92,7 +98,6 @@ public class UserAdministrationService : IUserAdministrationService
 
             Roles = new List<SelectListItem>
     {
-        new() { Value = IdentityRoles.Beboer, Text = "Beboer" },
         new() { Value = IdentityRoles.Styremedlem, Text = "Styremedlem" },
         new() { Value = IdentityRoles.Administrator, Text = "Administrator" },
         new() { Value = IdentityRoles.SystemAdministrator, Text = "Systemadministrator" }

@@ -9,4 +9,6 @@ public interface IUserAdministrationService
     Task<EditUserRoleViewModel?> GetUserAsync(string id);
 
     Task<(bool Success, string? ErrorMessage)> UpdateRoleAsync(EditUserRoleViewModel model);
+   
+
 }

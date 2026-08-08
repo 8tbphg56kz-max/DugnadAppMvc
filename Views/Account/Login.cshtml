@@ -6,6 +6,10 @@
 
 <h2>Logg inn</h2>
 
+<p class="text-muted">
+    Har du allerede aktivert kontoen din? Logg inn med e-post og passord.
+</p>
+
 <form asp-action="Login" method="post">
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -30,29 +34,45 @@
     </div>
 
     <button type="submit" class="btn btn-primary">
+        <i class="bi bi-box-arrow-in-right"></i>
         Logg inn
     </button>
 
 </form>
 
-<div class="mt-3">
+<hr class="my-4" />
 
-    <p>
-        Har du ikke opprettet passord ennå?
-    </p>
+<div class="card border-0 bg-light">
 
-    <a asp-action="RequestActivation"
-       class="btn btn-outline-primary">
-        Opprett passord
-    </a>
+    <div class="card-body">
+
+        <h5 class="card-title">
+            <i class="bi bi-person-plus"></i>
+            Første gang du bruker DugnadApp?
+        </h5>
+
+        <p class="text-muted mb-3">
+            Har du mottatt en invitasjon på e-post fra styret?
+            Aktiver kontoen din ved å velge et passord.
+        </p>
+
+        <a asp-action="RequestActivation"
+           class="btn btn-outline-success">
+            <i class="bi bi-person-check"></i>
+            Aktiver konto
+        </a>
+
+    </div>
 
 </div>
 
-<p class="mt-3">
+<p class="mt-4">
     <a asp-action="ForgotPassword">
+        <i class="bi bi-key"></i>
         Glemt passord?
     </a>
 </p>
+
 @section Scripts
 {
     <partial name="_ValidationScriptsPartial" />

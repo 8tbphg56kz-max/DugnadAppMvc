@@ -1,8 +1,12 @@
 ﻿using DugnadAppMvc.Models;
+using DugnadAppMvc.Services;
 using DugnadAppMvc.Services.Interfaces;
+using DugnadAppMvc.ViewModels;
 using DugnadAppMvc.ViewModels.AdminUsers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers;
 
@@ -11,10 +15,14 @@ public class AdminUsersController : Controller
 {
     private readonly IUserAdministrationService _userService;
 
+    private readonly UserManager<ApplicationUser> _userManager;
+
     public AdminUsersController(
-     IUserAdministrationService userService)
+    IUserAdministrationService userService,
+    UserManager<ApplicationUser> userManager)
     {
         _userService = userService;
+        _userManager = userManager;
     }
 
     public async Task<IActionResult> Index()
@@ -42,12 +50,13 @@ public class AdminUsersController : Controller
         if (!ModelState.IsValid)
         {
             model.Roles = IdentityRoles.All
-                .Select(role => new SelectListItem
-                {
-                    Text = role,
-                    Value = role
-                })
-                .ToList();
+    .Where(r => r != IdentityRoles.Beboer)
+    .Select(r => new SelectListItem
+    {
+        Text = r,
+        Value = r
+    })
+    .ToList();
 
             return View(model);
         }
@@ -64,6 +73,117 @@ public class AdminUsersController : Controller
         TempData["SuccessMessage"] = "Rollen er oppdatert.";
 
         return RedirectToAction(nameof(Index));
+    }
 
+    public async Task<IActionResult> Add()
+    {
+        var alleBrukere = await _userManager.Users
+        .OrderBy(u => u.LastName)
+        .ThenBy(u => u.FirstName)
+        .ToListAsync();
+
+        var beboere = new List<SelectListItem>();
+
+        foreach (var user in alleBrukere)
+        {
+            var roller = await _userManager.GetRolesAsync(user);
+
+            if (roller.Contains(IdentityRoles.Beboer))
+            {
+                beboere.Add(new SelectListItem
+                {
+                    Value = user.Id,
+                    Text = $"{user.FirstName} {user.LastName}"
+                });
+            }
         }
+
+        ViewBag.Beboere = beboere;
+
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> GiTilgang(LeggTilTilgangViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return RedirectToAction(nameof(Add));
+        }
+
+        var user = await _userManager.FindByIdAsync(model.UserId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        if (model.Rolle != IdentityRoles.Styremedlem &&
+            model.Rolle != IdentityRoles.Administrator)
+        {
+            return BadRequest();
+        }
+
+        await _userManager.RemoveFromRoleAsync(user, IdentityRoles.Beboer);
+        await _userManager.AddToRoleAsync(user, model.Rolle);
+
+        TempData["Success"] =
+            $"{user.FirstName} {user.LastName} er nå {model.Rolle}.";
+
+        return RedirectToAction(nameof(Index));
+
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = IdentityRoles.SystemAdministrator)]
+    public async Task<IActionResult> FjernTilgang(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        // Sikkerhet: ikke la siste systemadministrator miste tilgangen
+        var systemadministratorer = await _userManager.GetUsersInRoleAsync(
+            IdentityRoles.SystemAdministrator);
+
+        var erSisteSystemadministrator =
+            systemadministratorer.Count == 1 &&
+            systemadministratorer[0].Id == user.Id;
+
+        if (erSisteSystemadministrator)
+        {
+            TempData["Error"] =
+                "Den siste systemadministratoren kan ikke gjøres om til beboer.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Fjern alle utvidede roller
+        var roller = await _userManager.GetRolesAsync(user);
+
+        foreach (var rolle in roller)
+        {
+            if (rolle != IdentityRoles.Beboer)
+            {
+                await _userManager.RemoveFromRoleAsync(user, rolle);
+            }
+        }
+
+        // Sørg for at brukeren har Beboer-rollen
+        if (!await _userManager.IsInRoleAsync(user, IdentityRoles.Beboer))
+        {
+            await _userManager.AddToRoleAsync(user, IdentityRoles.Beboer);
+        }
+
+        TempData["Success"] =
+            $"{user.FirstName} {user.LastName} er nå vanlig beboer.";
+
+        return RedirectToAction(nameof(Index));
+    }
+
 }

@@ -15,15 +15,6 @@ public class EmailService
         _settings = options.Value;
     }
 
-    
-
-    
-
-    
-   
-
-    
-
     private string BuildHtmlEmail(
     string title,
     string introText,
