@@ -2,23 +2,65 @@
     ViewData["Title"] = "Rapporter";
 }
 
-<h2>Rapporter</h2>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
 
-<div class="list-group mt-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
 
-    <a asp-action="TimerPrLeilighet"
-       class="list-group-item list-group-item-action">
-        🏠 Timer pr. leilighet
-    </a>
+                <h3 class="mb-4 d-flex align-items-center">
+                    <i class="bi bi-bar-chart-line text-primary me-2"></i>
+                    Rapporter
+                </h3>
 
-    <a asp-action="TimerPrBeboer"
-       class="list-group-item list-group-item-action">
-        👤 Timer pr. beboer
-    </a>
+                <div class="list-group list-group-flush">
 
-    <a asp-action="TimerPrDugnad"
-       class="list-group-item list-group-item-action">
-        🛠 Timer pr. dugnad
-    </a>
+                    <a asp-action="TimerPrLeilighet"
+                       class="list-group-item list-group-item-action d-flex align-items-center py-3">
 
+                        <i class="bi bi-house-door text-primary me-3 fs-5"></i>
+
+                        <div>
+                            <div class="fw-semibold">Timer pr. leilighet</div>
+                            <small class="text-muted">
+                                Vis registrerte timer fordelt på leiligheter
+                            </small>
+                        </div>
+
+                    </a>
+
+                    <a asp-action="TimerPrBeboer"
+                       class="list-group-item list-group-item-action d-flex align-items-center py-3">
+
+                        <i class="bi bi-person text-primary me-3 fs-5"></i>
+
+                        <div>
+                            <div class="fw-semibold">Timer pr. beboer</div>
+                            <small class="text-muted">
+                                Vis registrerte timer per beboer
+                            </small>
+                        </div>
+
+                    </a>
+
+                    <a asp-action="TimerPrDugnad"
+                       class="list-group-item list-group-item-action d-flex align-items-center py-3">
+
+                        <i class="bi bi-tools text-primary me-3 fs-5"></i>
+
+                        <div>
+                            <div class="fw-semibold">Timer pr. dugnad</div>
+                            <small class="text-muted">
+                                Vis registrerte timer fordelt på dugnader
+                            </small>
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
 </div>

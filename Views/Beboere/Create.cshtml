@@ -6,52 +6,68 @@
     ViewData["Title"] = "Ny beboer";
 }
 
-<h2>Ny beboer</h2>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
 
-<form asp-action="Create" method="post">
+                <h3 class="mb-4">
+                    <i class="bi bi-person-plus text-primary me-2"></i>
+                    Ny beboer
+                </h3>
 
-    <div class="mb-3">
-        <label asp-for="Fornavn" class="form-label"></label>
-        <input asp-for="Fornavn" class="form-control" />
-        <span asp-validation-for="Fornavn" class="text-danger"></span>
+                <form asp-action="Create" method="post">
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Fornavn" class="form-label"></label>
+                        <input asp-for="Fornavn" class="form-control" />
+                        <span asp-validation-for="Fornavn" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Etternavn" class="form-label"></label>
+                        <input asp-for="Etternavn" class="form-control" />
+                        <span asp-validation-for="Etternavn" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Epost" class="form-label"></label>
+                        <input asp-for="Epost" class="form-control" />
+                        <span asp-validation-for="Epost" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="LeilighetId" class="form-label"></label>
+                        <select asp-for="LeilighetId"
+                                class="form-select"
+                                asp-items="ViewBag.LeilighetId">
+                            <option value="">Velg leilighet...</option>
+                        </select>
+                        <span asp-validation-for="LeilighetId" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Lagre
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Avbryt
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
     </div>
+</div>
 
-    <div class="mb-3">
-        <label asp-for="Etternavn" class="form-label"></label>
-        <input asp-for="Etternavn" class="form-control" />
-        <span asp-validation-for="Etternavn" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Epost" class="form-label"></label>
-        <input asp-for="Epost" class="form-control" />
-        <span asp-validation-for="Epost" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="LeilighetId" class="form-label">Leilighet</label>
-
-        <select asp-for="LeilighetId"
-                class="form-select"
-                asp-items="@(new SelectList(ViewBag.Leiligheter, "Id", "Visningsnavn"))">
-            <option value="">Velg leilighet</option>
-        </select>
-
-        <span asp-validation-for="LeilighetId" class="text-danger"></span>
-    </div>
-
-   <button type="submit" class="btn btn-primary">
-        Lagre
-    </button>
-
-    <a asp-action="Index" class="btn btn-secondary">
-        Avbryt
-    </a>
-
-</form>
-
-@section Scripts
-{
+@section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
