@@ -5,6 +5,7 @@ using DugnadAppMvc.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers
@@ -74,18 +75,24 @@ namespace DugnadAppMvc.Controllers
 
         [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int? id)
         {
+            if (id == null)
+                return NotFound();
+
             var beboer = await _context.Beboere.FindAsync(id);
 
             if (beboer == null)
-            {
                 return NotFound();
-            }
 
-            FyllLeiligheter();
+            ViewBag.LeilighetId = new SelectList(
+                _context.Leiligheter.OrderBy(l => l.Seksjonsnummer),
+                "Id",
+                "Seksjonsnummer",
+                beboer.LeilighetId);
 
             return View(beboer);
+
         }
 
         [Authorize(Roles = IdentityRoles.AdminAccess)]
@@ -98,15 +105,32 @@ namespace DugnadAppMvc.Controllers
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Leiligheter = _context.Leiligheter
-                    .OrderBy(l => l.Seksjonsnummer)
-                    .ToList();
+                ViewBag.LeilighetId = new SelectList(
+                _context.Leiligheter.OrderBy(l => l.Seksjonsnummer),
+                "Id",
+                "Seksjonsnummer",
+                beboer.LeilighetId);
 
                 return View(beboer);
+
             }
 
             _context.Update(beboer);
             await _context.SaveChangesAsync();
+
+            if (!string.IsNullOrEmpty(beboer.ApplicationUserId))
+            {
+                var user = await _userManager.FindByIdAsync(beboer.ApplicationUserId);
+
+                if (user != null)
+                {
+                    // Oppdater kun visningsnavn
+                    user.FirstName = beboer.Fornavn;
+                    user.LastName = beboer.Etternavn;
+
+                    await _userManager.UpdateAsync(user);
+                }
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -176,9 +200,11 @@ namespace DugnadAppMvc.Controllers
 
         private void FyllLeiligheter()
         {
-            ViewBag.Leiligheter = _context.Leiligheter
-                .OrderBy(l => l.Seksjonsnummer)
-                .ToList();
+            ViewBag.LeilighetId = new SelectList(
+                _context.Leiligheter
+                    .OrderBy(l => l.Seksjonsnummer),
+                "Id",
+                "Seksjonsnummer");
         }
     }
 }

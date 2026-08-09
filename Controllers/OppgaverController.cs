@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using DugnadAppMvc.Helpers;
 
 public class OppgaverController : Controller
 {
@@ -467,30 +468,7 @@ public class OppgaverController : Controller
         {
             OppgaveId = oppgave.Id,
             OppgaveNavn = oppgave.Navn,
-            TimerAlternativer = new()
-    {
-        new SelectListItem("Velg antall timer", ""),
-        new("0,5", "0.5"),
-        new("1", "1"),
-        new("1,5", "1.5"),
-        new("2", "2"),
-        new("2,5", "2.5"),
-        new("3", "3"),
-        new("3,5", "3.5"),
-        new("4", "4"),
-        new("4,5", "4.5"),
-        new("5", "5"),
-        new("5,5", "5.5"),
-        new("6", "6"),
-        new("6,5", "6.5"),
-        new("7", "7"),
-        new("7,5", "7.5"),
-        new("8", "8"),
-        new("8,5", "8.5"),
-        new("9", "9"),
-        new("9,5", "9.5"),
-        new("10", "10")
-    }
+            TimerAlternativer = TimerAlternativerHelper.Hent()
         };
 
         return View(model);

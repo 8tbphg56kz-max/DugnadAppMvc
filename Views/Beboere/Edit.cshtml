@@ -33,10 +33,10 @@
     <div class="mb-3">
         <label asp-for="LeilighetId" class="form-label">Leilighet</label>
 
-        <select asp-for="LeilighetId"
-                class="form-select"
-                asp-items="@(new SelectList(ViewBag.Leiligheter, "Id", "Visningsnavn"))">
+        <select asp-for="LeilighetId" asp-items="ViewBag.LeilighetId" class="form-select">
+            <option value="">Velg leilighet...</option> 
         </select>
+
 
         <span asp-validation-for="LeilighetId" class="text-danger"></span>
     </div>   

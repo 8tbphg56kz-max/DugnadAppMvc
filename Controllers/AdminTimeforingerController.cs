@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using DugnadAppMvc.Helpers;
 
 namespace DugnadAppMvc.Controllers
 {
@@ -155,7 +156,7 @@ namespace DugnadAppMvc.Controllers
                     })
                     .ToList());
 
-            FyllTimerAlternativer(model.TimerAlternativer);
+            model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
             return View(model);
         }
@@ -201,7 +202,7 @@ namespace DugnadAppMvc.Controllers
                     .ToList();
 
 
-                FyllTimerAlternativer(model.TimerAlternativer);
+                model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
                 return View(model);
             }
@@ -229,31 +230,7 @@ namespace DugnadAppMvc.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
-        }
-
-      
-        
-
-private static void FyllTimerAlternativer(List<SelectListItem> liste)
-    {
-        liste.Clear();
-
-        liste.Add(new SelectListItem
-        {
-            Value = "",
-            Text = "Velg timer..."
-        });
-
-        for (decimal t = 0.5m; t <= 24m; t += 0.5m)
-        {
-            liste.Add(new SelectListItem
-            {
-                Value = t.ToString(CultureInfo.InvariantCulture), // 1.5
-                Text = t.ToString("0.0", CultureInfo.GetCultureInfo("nb-NO")) // 1,5
-            });
-        }
-    }
-
+        }         
 
     [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
@@ -292,7 +269,7 @@ private static void FyllTimerAlternativer(List<SelectListItem> liste)
                     .ToList()
             };
 
-            FyllTimerAlternativer(model.TimerAlternativer);
+            model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
             return View(model);
         }
@@ -315,7 +292,7 @@ private static void FyllTimerAlternativer(List<SelectListItem> liste)
                     .ToList();
 
 
-                FyllTimerAlternativer(model.TimerAlternativer);
+                model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
                 var aktivitet = await _context.Timeforinger
     .Include(t => t.Dugnad)
@@ -383,18 +360,32 @@ private static void FyllTimerAlternativer(List<SelectListItem> liste)
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var timeforing = await _context.Timeforinger.FindAsync(id);
+            var timeforing = await _context.Timeforinger
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (timeforing == null)
-            {
                 return NotFound();
+
+            // Hvis timeføringen gjelder en oppgave,
+            // slett også tilhørende påmelding
+            if (timeforing.OppgaveId.HasValue)
+            {
+                var pamelding = await _context.OppgavePameldinger
+                    .FirstOrDefaultAsync(p =>
+                        p.OppgaveId == timeforing.OppgaveId.Value &&
+                        p.BeboerId == timeforing.BeboerId);
+
+                if (pamelding != null)
+                {
+                    _context.OppgavePameldinger.Remove(pamelding);
+                }
             }
 
             _context.Timeforinger.Remove(timeforing);
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Timeføringen ble slettet.";
+            TempData["SuccessMessage"] = "Timeføringen og tilhørende påmelding ble slettet.";
 
             return RedirectToAction(nameof(Index));
         }

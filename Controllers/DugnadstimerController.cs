@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using DugnadAppMvc.Helpers;
+using System.Globalization;
 
 namespace DugnadAppMvc.Controllers
 {
@@ -43,7 +45,8 @@ namespace DugnadAppMvc.Controllers
             }
 
             FyllDugnader(model);
-            FyllTimerAlternativer(model.TimerAlternativer);
+          
+            model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
             return View(model);
         }
@@ -57,7 +60,9 @@ namespace DugnadAppMvc.Controllers
             if (!ModelState.IsValid)
             {
                 FyllDugnader(model);
-                FyllTimerAlternativer(model.TimerAlternativer);
+              
+                model.TimerAlternativer = TimerAlternativerHelper.Hent();
+
                 return View(model);
             }
 
@@ -72,7 +77,7 @@ namespace DugnadAppMvc.Controllers
             {
                 DugnadId = model.DugnadId,
                 BeboerId = beboer.Id,
-                AntallTimer = model.Timer!.Value,
+                AntallTimer = decimal.Parse(model.Timer!, CultureInfo.InvariantCulture),
                 Kommentar = model.Kommentar
             };
 
@@ -182,7 +187,8 @@ namespace DugnadAppMvc.Controllers
                 Kommentar = dugnadstime.Kommentar
             };
 
-            FyllTimerAlternativer(model.TimerAlternativer);
+         
+            model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
             return View(model);
         }
@@ -198,7 +204,10 @@ namespace DugnadAppMvc.Controllers
 
             if (!ModelState.IsValid)
             {
-                FyllTimerAlternativer(model.TimerAlternativer);
+            
+                model.TimerAlternativer = TimerAlternativerHelper.Hent();
+
+
                 return View(model);
             }
 
@@ -299,27 +308,7 @@ namespace DugnadAppMvc.Controllers
                     Text = d.Tittel
                 })
                 .ToList();
-        }
-
-        private void FyllTimerAlternativer(List<SelectListItem> liste)
-        {
-            liste.Clear();
-
-            liste.Add(new SelectListItem
-            {
-                Value = "",
-                Text = "Velg timer..."
-            });
-
-            for (decimal timer = 0.5m; timer <= 10m; timer += 0.5m)
-            {
-                liste.Add(new SelectListItem
-                {
-                    Value = timer.ToString("0.#"),
-                    Text = timer.ToString("0.#")
-                });
-            }
-        }
+        }     
 
         private static bool KanEndresEllerSlettes(Timeforing timeforing)
         {
