@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace DugnadAppMvc.Controllers
 {
@@ -154,12 +155,6 @@ namespace DugnadAppMvc.Controllers
                     })
                     .ToList());
 
-            model.TimerAlternativer.Add(new SelectListItem
-            {
-                Value = "",
-                Text = "Velg timer..."
-            });
-
             FyllTimerAlternativer(model.TimerAlternativer);
 
             return View(model);
@@ -205,11 +200,6 @@ namespace DugnadAppMvc.Controllers
                     })
                     .ToList();
 
-                model.TimerAlternativer.Add(new SelectListItem
-                {
-                    Value = "",
-                    Text = "Velg timer..."
-                });
 
                 FyllTimerAlternativer(model.TimerAlternativer);
 
@@ -219,7 +209,9 @@ namespace DugnadAppMvc.Controllers
             var timeforing = new Timeforing
             {
                 BeboerId = model.BeboerId!.Value,
-                AntallTimer = model.Timer!.Value,
+                AntallTimer = decimal.Parse(
+    model.Timer!,
+    System.Globalization.CultureInfo.InvariantCulture),
                 Kommentar = model.Kommentar
             };
 
@@ -239,19 +231,31 @@ namespace DugnadAppMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private void FyllTimerAlternativer(List<SelectListItem> liste)
-        {
-            for (decimal timer = 0.5m; timer <= 10m; timer += 0.5m)
-            {
-                liste.Add(new SelectListItem
-                {
-                    Value = timer.ToString("0.#"),
-                    Text = timer.ToString("0.#")
-                });
-            }
-        }
+      
+        
 
-        [Authorize(Roles = IdentityRoles.AdminAccess)]
+private static void FyllTimerAlternativer(List<SelectListItem> liste)
+    {
+        liste.Clear();
+
+        liste.Add(new SelectListItem
+        {
+            Value = "",
+            Text = "Velg timer..."
+        });
+
+        for (decimal t = 0.5m; t <= 24m; t += 0.5m)
+        {
+            liste.Add(new SelectListItem
+            {
+                Value = t.ToString(CultureInfo.InvariantCulture), // 1.5
+                Text = t.ToString("0.0", CultureInfo.GetCultureInfo("nb-NO")) // 1,5
+            });
+        }
+    }
+
+
+    [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {

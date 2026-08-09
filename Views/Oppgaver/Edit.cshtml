@@ -5,140 +5,102 @@
     ViewData["Title"] = "Rediger oppgave";
 }
 
-<h2 class="mb-4">Rediger oppgave</h2>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
 
-<form asp-action="Edit">
+                <h3 class="mb-2 d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square text-primary"></i>
+                    Rediger oppgave
+                </h3>
 
-    <input type="hidden" asp-for="Id" />
+                <p class="text-muted mb-4">
+                    Oppdater informasjon om oppgaven.
+                </p>
 
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <form asp-action="Edit">
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <strong>Generelt</strong>
-        </div>
+                    <input type="hidden" asp-for="Id" />
 
-        <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <div class="mb-3">
-                <label asp-for="Navn" class="form-label"></label>
-                <input asp-for="Navn" class="form-control" />
-                <span asp-validation-for="Navn" class="text-danger"></span>
+                    <div class="border rounded-4 p-4 mb-4">
+                        <h5 class="fw-semibold mb-3">Generelt</h5>
+
+                        <div class="mb-3">
+                            <label asp-for="Navn" class="form-label fw-semibold"></label>
+                            <input asp-for="Navn" class="form-control" />
+                            <span asp-validation-for="Navn" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-0">
+                            <label asp-for="Beskrivelse" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Beskrivelse" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Beskrivelse" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-4 p-4 mb-4">
+                        <h5 class="fw-semibold mb-3">Planlegging</h5>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FraDato" class="form-label fw-semibold"></label>
+                                <input asp-for="FraDato" type="date" class="form-control" />
+                                <span asp-validation-for="FraDato" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Frist" class="form-label fw-semibold"></label>
+                                <input asp-for="Frist" type="date" class="form-control" />
+                                <span asp-validation-for="Frist" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <label asp-for="AntallPersoner" class="form-label fw-semibold"></label>
+                            <input asp-for="AntallPersoner" class="form-control" />
+                            <span asp-validation-for="AntallPersoner" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-4 p-4 mb-4">
+                        <h5 class="fw-semibold mb-3">Status og prioritet</h5>
+
+                        <div class="mb-3">
+                            <label asp-for="Prioritet" class="form-label fw-semibold"></label>
+                            <select asp-for="Prioritet" class="form-select">
+                                <option value="Lav">Lav</option>
+                                <option value="Middels">Middels</option>
+                                <option value="Høy">Høy</option>
+                            </select>
+                            <span asp-validation-for="Prioritet" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-check">
+                            <input asp-for="ErUtført" class="form-check-input" />
+                            <label asp-for="ErUtført" class="form-check-label"></label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Lagre
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Avbryt
+                        </a>
+                    </div>
+
+                </form>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="Beskrivelse" class="form-label"></label>
-                <textarea asp-for="Beskrivelse"
-                          class="form-control"
-                          rows="5"></textarea>
-                <span asp-validation-for="Beskrivelse" class="text-danger"></span>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <strong>Planlegging</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div class="row">
-
-                <div class="col-md-6 mb-3">
-                    <label asp-for="FraDato" class="form-label"></label>
-                    <input asp-for="FraDato" class="form-control" />
-                    <span asp-validation-for="FraDato" class="text-danger"></span>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Frist" class="form-label"></label>
-                    <input asp-for="Frist" class="form-control" />
-                    <span asp-validation-for="Frist" class="text-danger"></span>
-                </div>
-
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="AntallPersoner" class="form-label"></label>
-                <input asp-for="AntallPersoner" class="form-control" />
-                <span asp-validation-for="AntallPersoner" class="text-danger"></span>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <strong>Status og prioritet</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div class="mb-3">
-                <label asp-for="Prioritet" class="form-label"></label>
-                <select asp-for="Prioritet"
-                        asp-items="Html.GetEnumSelectList<OppgavePrioritet>()"
-                        class="form-select">
-                </select>
-            </div>
-
-            <div class="form-check mb-2">
-                <input asp-for="ErUtført" class="form-check-input" />
-                <label asp-for="ErUtført" class="form-check-label"></label>
-            </div>
-
-            <div class="form-check mb-2">
-                <input asp-for="KanRegistrereTimer" class="form-check-input" />
-                <label asp-for="KanRegistrereTimer" class="form-check-label"></label>
-            </div>
-
-            <div class="form-check">
-                <input asp-for="KreverBekreftelse" class="form-check-input" />
-                <label asp-for="KreverBekreftelse" class="form-check-label"></label>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <strong>Utstyr</strong>
-        </div>
-
-        <div class="card-body">
-
-            <div class="mb-3">
-                <label asp-for="Utstyr" class="form-label"></label>
-                <textarea asp-for="Utstyr"
-                          class="form-control"
-                          rows="3"></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="UtstyrPlassering" class="form-label"></label>
-                <textarea asp-for="UtstyrPlassering"
-                          class="form-control"
-                          rows="3"></textarea>
-            </div>
-
         </div>
     </div>
-
-    <div class="d-flex gap-2">
-
-        <button type="submit" class="btn btn-primary">
-            Lagre
-        </button>
-
-        <a asp-action="Index" class="btn btn-outline-secondary">
-            Avbryt
-        </a>
-
-    </div>
-
-</form>
+</div>
 
 @section Scripts {
     @{

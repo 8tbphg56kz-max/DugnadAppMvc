@@ -4,66 +4,79 @@
     ViewData["Title"] = "Ny fellesdugnad";
 }
 
-<h2>Ny fellesdugnad</h2>
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
 
-<form asp-action="Create" method="post">
+                <h3 class="mb-4 d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar-event text-primary"></i>
+                    Ny fellesdugnad
+                </h3>
 
-    <div class="mb-3">
-        <label asp-for="Tittel" class="form-label"></label>
-        <input asp-for="Tittel" class="form-control" />
-        <span asp-validation-for="Tittel" class="text-danger"></span>
+                <form asp-action="Create">
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Tittel" class="form-label fw-semibold"></label>
+                        <input asp-for="Tittel" class="form-control" />
+                        <span asp-validation-for="Tittel" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Beskrivelse" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Beskrivelse" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Beskrivelse" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="StartDato" class="form-label fw-semibold"></label>
+                            <input asp-for="StartDato" class="form-control" type="date" />
+                            <span asp-validation-for="StartDato" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="SluttDato" class="form-label fw-semibold"></label>
+                            <input asp-for="SluttDato" class="form-control" type="date" />
+                            <span asp-validation-for="SluttDato" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input asp-for="KreverPamelding" class="form-check-input" />
+                        <label asp-for="KreverPamelding" class="form-check-label"></label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MaksAntallDeltakere" class="form-label fw-semibold"></label>
+                        <input asp-for="MaksAntallDeltakere" class="form-control" />
+                        <span asp-validation-for="MaksAntallDeltakere" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input asp-for="ErSynlig" class="form-check-input" />
+                        <label asp-for="ErSynlig" class="form-check-label"></label>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Lagre
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>
+                            Avbryt
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Beskrivelse" class="form-label"></label>
-        <textarea asp-for="Beskrivelse" class="form-control" rows="4"></textarea>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="StartDato" class="form-label"></label>
-        <input asp-for="StartDato" type="date" class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="SluttDato" class="form-label"></label>
-        <input asp-for="SluttDato" type="date" class="form-control" />
-    </div>
-
-    <div class="form-check mb-3">
-        <input asp-for="KreverPamelding"
-               class="form-check-input"
-               id="HarPamelding" />
-        <label asp-for="KreverPamelding" class="form-check-label">
-            Krever påmelding
-        </label>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="MaksAntallDeltakere" class="form-label">
-            Maks antall deltakere
-        </label>
-
-        <input asp-for="MaksAntallDeltakere"
-               class="form-control"
-               id="MaksAntallDeltakere" />
-    </div>
-
-    <div class="form-check mb-3">
-        <input asp-for="ErSynlig" class="form-check-input" />
-        <label asp-for="ErSynlig" class="form-check-label">
-            Synlig
-        </label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Lagre
-    </button>
-
-    <a asp-action="Index" class="btn btn-secondary">
-        Avbryt
-    </a>
-
-</form>
+</div>
 
 @section Scripts
 {

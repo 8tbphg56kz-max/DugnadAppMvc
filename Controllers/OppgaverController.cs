@@ -149,22 +149,38 @@ public class OppgaverController : Controller
         return View(oppgave);
     }
 
-    [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var oppgave = await _context.Oppgaver.FindAsync(id);
-        if (oppgave != null)
+
+        if (oppgave == null)
         {
-            _context.Oppgaver.Remove(oppgave);
+            return NotFound();
         }
 
+        // Sjekk om oppgaven har timeføringer
+        bool harTimeforinger = await _context.Timeforinger
+            .AnyAsync(t => t.OppgaveId == id);
+
+        if (harTimeforinger)
+        {
+            TempData["Error"] =
+                "Oppgaven kan ikke slettes fordi det finnes registrerte timeføringer på den.";
+
+            return RedirectToAction(nameof(Delete), new { id });
+        }
+
+        _context.Oppgaver.Remove(oppgave);
         await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Oppgaven ble slettet.";
+
         return RedirectToAction(nameof(Index));
     }
 
-    private bool OppgaveExists(int? id)
+    private bool OppgaveExists(int id)
     {
         return _context.Oppgaver.Any(e => e.Id == id);
     }

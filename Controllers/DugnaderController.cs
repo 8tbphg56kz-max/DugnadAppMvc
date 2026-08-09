@@ -141,33 +141,28 @@ namespace DugnadAppMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var dugnad = await _context.Dugnader
-                .FirstOrDefaultAsync(d => d.Id == id);
+            var dugnad = await _context.Dugnader.FindAsync(id);
 
             if (dugnad == null)
             {
                 return NotFound();
             }
 
-            var harTimer = await _context.Timeforinger
-                .AnyAsync(t => t.DugnadId == id);
-
-            if (harTimer)
+            try
             {
-                TempData["ErrorMessage"] =
-                    "Dugnaden kan ikke slettes fordi det finnes registrerte timeføringer.";
+                _context.Dugnader.Remove(dugnad);
+                await _context.SaveChangesAsync();
 
+                TempData["Success"] = "Dugnaden ble slettet.";
                 return RedirectToAction(nameof(Index));
             }
+            catch (DbUpdateException)
+            {
+                TempData["Error"] =
+                    "Dugnaden kan ikke slettes fordi det finnes påmeldinger på den.";
 
-            _context.Dugnader.Remove(dugnad);
-
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] =
-                "Dugnaden ble slettet.";
-
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
     }
 }
