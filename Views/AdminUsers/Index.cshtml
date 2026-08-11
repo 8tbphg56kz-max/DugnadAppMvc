@@ -39,33 +39,35 @@ else
                             <td>
                                 <span class="badge bg-primary">@user.Rolle</span>
                             </td>  
-                    <td>   
-                        <a asp-action="Edit"
-                           asp-route-id="@user.Id"
-                           class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil"></i>
-                        </a>
+                   <td>
+    <a asp-action="Edit"
+       asp-route-id="@user.Id"
+       class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-pencil"></i>
+    </a>
 
-                        <form asp-action="FjernTilgang"
-                              method="post"
-                              class="d-inline">
+    @if (user.Epost != "admin@dugnadapp.no")
+    {
+        <form asp-action="FjernTilgang"
+              method="post"
+              class="d-inline">
 
-                            @Html.AntiForgeryToken()
+            @Html.AntiForgeryToken()
 
-                            <input type="hidden"
-                                   name="userId"
-                                   value="@user.Id" />
+            <input type="hidden"
+                   name="userId"
+                   value="@user.Id" />
 
-                            <button type="submit"
-                                    class="btn btn-outline-danger btn-sm"
-                                    onclick="return confirm('Fjerne styretilgangen for @user.Navn?');">
+            <button type="submit"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Fjerne styretilgangen for @user.Navn?');">
 
-                                <i class="bi bi-person-dash me-1"></i>
-                                Gjør til beboer
-                            </button>
-                        </form>
-
-                    </td>
+                <i class="bi bi-person-dash me-1"></i>
+                Gjør til beboer
+            </button>
+        </form>
+    }
+</td>
                 </tr>
             }
 

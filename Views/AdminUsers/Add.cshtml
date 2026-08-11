@@ -37,11 +37,15 @@
                         Velg tilgang
                     </label>
 
-                    <select asp-for="Rolle" class="form-select">
-                        <option value="">Velg tilgang...</option>
-                        <option value="Styremedlem">Styremedlem</option>
-                        <option value="Administrator">Administrator</option>
-                    </select>
+                        <select asp-for="Rolle" class="form-select">
+                            <option value="@IdentityRoles.Styremedlem">Styremedlem</option>
+                            <option value="@IdentityRoles.Administrator">Administrator</option>
+
+                            @if (User.IsInRole(IdentityRoles.SystemAdministrator))
+                            {
+                                <option value="@IdentityRoles.SystemAdministrator">Systemadministrator</option>
+                            }
+                        </select>
                 </div>
 
                 <button class="btn btn-primary">

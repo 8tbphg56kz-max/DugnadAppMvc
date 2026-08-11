@@ -40,6 +40,11 @@ public class AdminUsersController : Controller
         if (model == null)
             return NotFound();
 
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
+            return NotFound();
+        
         return View(model);
     }
 
@@ -47,16 +52,22 @@ public class AdminUsersController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(EditUserRoleViewModel model)
     {
+        var user = await _userManager.FindByIdAsync(model.Id);
+
+        if (user == null)
+            return NotFound();
+               
+
         if (!ModelState.IsValid)
         {
             model.Roles = IdentityRoles.All
-    .Where(r => r != IdentityRoles.Beboer)
-    .Select(r => new SelectListItem
-    {
-        Text = r,
-        Value = r
-    })
-    .ToList();
+                .Where(r => r != IdentityRoles.Beboer)
+                .Select(r => new SelectListItem
+                {
+                    Text = r,
+                    Value = r
+                })
+                .ToList();
 
             return View(model);
         }
@@ -119,10 +130,28 @@ public class AdminUsersController : Controller
             return NotFound();
         }
 
+        if (model.Rolle == IdentityRoles.SystemAdministrator &&
+    !User.IsInRole(IdentityRoles.SystemAdministrator))
+        {
+            TempData["Error"] =
+                "Kun systemadministrator kan gi systemadministrator-tilgang.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
         if (model.Rolle != IdentityRoles.Styremedlem &&
-            model.Rolle != IdentityRoles.Administrator)
+     model.Rolle != IdentityRoles.Administrator &&
+     model.Rolle != IdentityRoles.SystemAdministrator)
         {
             return BadRequest();
+        }
+
+        if (await _userManager.IsInRoleAsync(user, model.Rolle))
+        {
+            TempData["Error"] =
+                $"{user.FirstName} {user.LastName} har allerede rollen {model.Rolle}.";
+
+            return RedirectToAction(nameof(Index));
         }
 
         await _userManager.RemoveFromRoleAsync(user, IdentityRoles.Beboer);
@@ -147,18 +176,10 @@ public class AdminUsersController : Controller
             return NotFound();
         }
 
-        // Sikkerhet: ikke la siste systemadministrator miste tilgangen
-        var systemadministratorer = await _userManager.GetUsersInRoleAsync(
-            IdentityRoles.SystemAdministrator);
-
-        var erSisteSystemadministrator =
-            systemadministratorer.Count == 1 &&
-            systemadministratorer[0].Id == user.Id;
-
-        if (erSisteSystemadministrator)
+        if (user.Email == "admin@dugnadapp.no")
         {
             TempData["Error"] =
-                "Den siste systemadministratoren kan ikke gjøres om til beboer.";
+                "Systemadministrator kan ikke gjøres om til beboer.";
 
             return RedirectToAction(nameof(Index));
         }
