@@ -4,29 +4,30 @@
     ViewData["Title"] = "Rediger dugnad";
 }
 
+<div class="container" style="max-width: 1100px;">
 <h2>Rediger dugnad</h2>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
 
     <div class="mb-3">
-        <label asp-for="Tittel" class="form-label"></label>
+            <label asp-for="Tittel" class="form-label felt-overskrift"></label>
         <input asp-for="Tittel" class="form-control" />
         <span asp-validation-for="Tittel" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Beskrivelse" class="form-label"></label>
+            <label asp-for="Beskrivelse" class="form-label felt-overskrift"></label>
         <textarea asp-for="Beskrivelse" class="form-control" rows="4"></textarea>
     </div>
 
     <div class="mb-3">
-        <label asp-for="StartDato" class="form-label"></label>
+            <label asp-for="StartDato" class="fform-label felt-overskrift"></label>
         <input asp-for="StartDato" type="date" class="form-control" />
     </div>
 
     <div class="mb-3">
-        <label asp-for="SluttDato" class="form-label"></label>
+            <label asp-for="SluttDato" class="form-label felt-overskrift"></label>
         <input asp-for="SluttDato" type="date" class="form-control" />
     </div>
 
@@ -34,13 +35,13 @@
         <input asp-for="KreverPamelding"
                class="form-check-input"
                id="HarPamelding" />
-        <label asp-for="KreverPamelding" class="form-check-label">
+            <label asp-for="KreverPamelding" class="form-check-label form-label felt-overskrift">
             Krever påmelding
         </label>
     </div>
 
     <div class="mb-3">
-        <label asp-for="MaksAntallDeltakere" class="form-label">
+            <label asp-for="MaksAntallDeltakere" class="form-label felt-overskrift">
             Maks antall deltakere
         </label>
 
@@ -50,8 +51,8 @@
     </div>
 
     <div class="form-check mb-3">
-        <input asp-for="ErSynlig" class="form-check-input" />
-        <label asp-for="ErSynlig" class="form-check-label">
+            <input asp-for="ErSynlig" class="form-check-input form-label felt-overskrift" />
+        <label asp-for="ErSynlig" class="form-check-label form-label felt-overskrift">
             Synlig
         </label>
     </div>
@@ -65,6 +66,7 @@
     </a>
 
 </form>
+</div>
 
 @section Scripts
 {

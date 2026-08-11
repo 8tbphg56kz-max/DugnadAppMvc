@@ -13,25 +13,25 @@
     <input type="hidden" asp-for="Id" />
 
     <div class="mb-3">
-        <label asp-for="Fornavn" class="form-label"></label>
+        <label asp-for="Fornavn" class="form-label felt-overskrift"></label>
         <input asp-for="Fornavn" class="form-control" />
         <span asp-validation-for="Fornavn" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Etternavn" class="form-label"></label>
+        <label asp-for="Etternavn" class="form-label felt-overskrift"></label>
         <input asp-for="Etternavn" class="form-control" />
         <span asp-validation-for="Etternavn" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Epost" class="form-label"></label>
+        <label asp-for="Epost" class="form-label felt-overskrift"></label>
         <input asp-for="Epost" class="form-control" />
         <span asp-validation-for="Epost" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="LeilighetId" class="form-label">Leilighet</label>
+        <label asp-for="LeilighetId" class="form-label felt-overskrift">Leilighet</label>
 
         <select asp-for="LeilighetId" asp-items="ViewBag.LeilighetId" class="form-select">
             <option value="">Velg leilighet...</option> 

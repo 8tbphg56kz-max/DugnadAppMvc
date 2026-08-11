@@ -25,7 +25,7 @@
                     <input asp-for="OppgaveId" type="hidden" />
 
                     <div class="mb-3">
-                        <label asp-for="AntallTimer" class="form-label"></label>
+                        <label asp-for="AntallTimer" class="form-label felt-overskrift"></label>
                         <select asp-for="AntallTimer"
                                 asp-items="Model.TimerAlternativer"
                                 class="form-select">
@@ -34,7 +34,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Kommentar" class="form-label">Kommentar(Valgfritt)</label>
+                        <label asp-for="Kommentar" class="form-label felt-overskrift">Kommentar(Valgfritt)</label>
                         <textarea asp-for="Kommentar"
                                   rows="3"
                                   class="form-control"></textarea>
