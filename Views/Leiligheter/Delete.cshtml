@@ -4,6 +4,11 @@
     ViewData["Title"] = "Slett leilighet";
 }
 
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+
 <h2>Slett leilighet</h2>
 
 @if (Model.Beboere.Any())
@@ -53,8 +58,12 @@
         </button>
     }
 
-    <a asp-action="Index" class="btn btn-secondary">
+    <a asp-action="Index" class="btn btn-secondary mt-2">
         Tilbake
     </a>
 
 </form>
+</div>
+        </div>
+    </div>
+</div>

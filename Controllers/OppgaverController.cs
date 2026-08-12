@@ -586,8 +586,24 @@ return View(model);
 
         var oppgaveId = pamelding.OppgaveId;
 
+        // Sjekk om det finnes registrerte timer på oppgaven for denne beboeren
+        var harTimer = await _context.Timeforinger.AnyAsync(t =>
+            t.OppgaveId == pamelding.OppgaveId &&
+            t.BeboerId == pamelding.BeboerId);
+
+        if (harTimer)
+        {
+            TempData["ErrorMessage"] =
+                "Kan ikke melde av beboeren fordi det er registrert timer på oppgaven.";
+
+            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+        }
+
         _context.OppgavePameldinger.Remove(pamelding);
+
         await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Beboeren ble meldt av.";
 
         return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
     }

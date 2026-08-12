@@ -4,6 +4,11 @@
     ViewData["Title"] = "Leiligheter";
 }
 
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+
     @if (User.HasAdminAccess())
     {
         <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
@@ -54,4 +59,8 @@
         }
     </tbody>
 </table>
+</div>
+            </div>
+        </div>
+    </div>
 </div>
