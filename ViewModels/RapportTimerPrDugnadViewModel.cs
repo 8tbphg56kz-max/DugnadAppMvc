@@ -2,16 +2,16 @@
 {
     public class RapportTimerPrDugnadViewModel
     {
-        public int DugnadId { get; set; }
+        public DateTime Dato { get; set; }
 
-        public string Tittel { get; set; } = string.Empty;
+        public string Dugnad { get; set; } = string.Empty;
 
-        public DateOnly Dato { get; set; }
+        public string Type { get; set; } = string.Empty;
 
-        public int AntallRegistreringer { get; set; }
+        public int Registreringer { get; set; }
 
-        public decimal TotaleTimer { get; set; }
+        public decimal Timer { get; set; }
 
-        public decimal TotalVerdi { get; set; }
+        public decimal Verdi { get; set; }
     }
 }

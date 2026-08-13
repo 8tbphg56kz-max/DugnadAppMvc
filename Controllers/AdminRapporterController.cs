@@ -173,40 +173,46 @@ namespace DugnadAppMvc.Controllers
 
         public async Task<IActionResult> TimerPrDugnad()
         {
-            var innstillinger = await _context.Innstillinger.FirstAsync();
+            var dugnader = await _context.Timeforinger
+     .Where(t => t.DugnadId != null)
+     .GroupBy(t => new
+     {
+         t.Dugnad!.StartDato,
+         Navn = t.Dugnad.Tittel
+     })
+     .Select(g => new RapportTimerPrDugnadViewModel
+     {
+         Dato = g.Min(x => x.RegistrertDato),
+         Dugnad = g.Key.Navn,
+         Type = "Dugnad",
+         Registreringer = g.Count(),
+         Timer = g.Sum(x => x.AntallTimer),
+         Verdi = 0
+     })
+     .ToListAsync();
 
-            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
+            var oppgaver = await _context.Timeforinger
+    .Where(t => t.OppgaveId != null)
+    .GroupBy(t => t.Oppgave!.Navn)
+    .Select(g => new RapportTimerPrDugnadViewModel
+    {
+        Dato = g.Min(x => x.RegistrertDato),
+        Dugnad = g.Key,
+        Type = "Oppgave",
+        Registreringer = g.Count(),
+        Timer = g.Sum(x => x.AntallTimer),
+        Verdi = 0
+    })
+    .ToListAsync();
 
-            var timeverdi = totaleTimerAlle == 0
-                ? 0
-                : (decimal)innstillinger.Dugnadsbudsjett / totaleTimerAlle;
+            var model = dugnader
+                .Concat(oppgaver)
+                .OrderBy(x => x.Type)
+                .ThenBy(x => x.Dato)
+                .ThenBy(x => x.Dugnad)
+                .ToList();
 
-            var rapport = await _context.Timeforinger
-    .Where(t => t.DugnadId != null)
-    .Include(t => t.Dugnad)
-                .GroupBy(d => new
-                {
-                    d.DugnadId,
-                    d.Dugnad.Tittel,
-                    d.Dugnad.StartDato
-                })
-                .Select(g => new RapportTimerPrDugnadViewModel
-                {
-                    DugnadId = g.Key.DugnadId ?? 0,
-                    Tittel = g.Key.Tittel,
-                    Dato = g.Key.StartDato,
-                    AntallRegistreringer = g.Count(),
-                    TotaleTimer = g.Sum(x => x.AntallTimer)
-                })
-                .OrderByDescending(x => x.Dato)
-                .ToListAsync();
-
-            foreach (var rad in rapport)
-            {
-                rad.TotalVerdi = rad.TotaleTimer * timeverdi;
-            }
-
-            return View(rapport);
+            return View(model);
         }
         
             public async Task<IActionResult> DugnadDetaljer(int id)
