@@ -36,20 +36,25 @@
             <ul class="list-group list-group-flush">
 
                 @foreach (var pamelding in Model.Oppgave.Pameldinger)
-                {
+                {                             
+
                     <li class="list-group-item d-flex justify-content-between align-items-center">
 
                         @pamelding.Beboer.Fornavn @pamelding.Beboer.Etternavn
 
+                                 
                         <form asp-action="MeldAvSomAdministrator" method="post">
                             <input type="hidden" name="pameldingId" value="@pamelding.Id" />
                             @Html.AntiForgeryToken()
 
+                                @if (User.HasAdminAccess())
+                                 {
                             <button type="submit"
                                     class="btn btn-sm btn-outline-danger">
                                 <i class="bi bi-person-dash"></i>
                                 Meld av
                             </button>
+                               }
                         </form>
 
                     </li>
@@ -64,47 +69,50 @@
             </p>
         }
 
+                    @if (User.HasAdminAccess())
+                    {
+
         <hr />
 
-        <h5>Legg til beboer</h5>
+                       <h5>Legg til beboer</h5>
 
-        <form asp-action="MeldPaSomAdministrator" method="post">
+                        <form asp-action="MeldPaSomAdministrator" method="post">
 
-            @Html.AntiForgeryToken()
+                            @Html.AntiForgeryToken()
 
-            <input type="hidden"
-                   name="oppgaveId"
-                   value="@Model.Oppgave.Id" />
+                            <input type="hidden"
+                            name="oppgaveId"
+                            value="@Model.Oppgave.Id" />
 
-            <div class="row">
+                            <div class="row">
 
-                <div class="col-md-6">
+                                <div class="col-md-6">
 
-                    <select asp-for="ValgtBeboerId"
-                            asp-items="Model.LedigeBeboere"
-                            class="form-select">
+                                    <select asp-for="ValgtBeboerId"
+                                    asp-items="Model.LedigeBeboere"
+                                    class="form-select">
 
-                        <option value="">
-                            Velg beboer...
-                        </option>
+                                        <option value="">
+                                            Velg beboer...
+                                        </option>
 
-                    </select>
+                                    </select>
 
-                </div>
+                                </div>
 
-                <div class="col-auto">
+                                <div class="col-auto">
 
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-person-plus"></i>
-                        Meld på
-                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-person-plus"></i>
+                                        Meld på
+                                    </button>
 
-                </div>
+                                </div>
 
-            </div>
+                            </div>
 
-        </form>
-
+                        </form>
+                    }
     </div>
     </div>
 

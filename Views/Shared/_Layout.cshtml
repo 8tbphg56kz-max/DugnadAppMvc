@@ -163,6 +163,15 @@
                                         </a>
                                     </li>
 
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Arsstatistikk"
+                                           asp-action="Index">
+                                            <i class="bi bi-bar-chart me-2"></i>
+                                            Årsstatistikk
+                                        </a>
+                                    </li>
+
                                     <li><hr class="dropdown-divider"></li>
 
                                     @if (User.HasBoardAccess())
@@ -183,8 +192,16 @@
                                                 <i class="bi bi-person-gear me-2"></i>
                                                 Styremedlemmer
                                             </a>
-                                        </li>                                       
-                                    
+                                        </li>       
+                                        
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="ArsAvslutning"
+                                               asp-action="Index">
+                                                <i class="bi bi-person-gear me-2"></i>
+                                                Årsavslutning
+                                            </a>
+                                        </li>          
 
                                     <li>
                                         <a class="dropdown-item"

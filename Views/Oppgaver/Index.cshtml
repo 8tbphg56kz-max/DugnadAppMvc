@@ -153,6 +153,8 @@
                 </td>
 
                 <td class="text-nowrap">
+                            @if (User.HasAdminAccess())
+                            {
 
                     <a asp-action="Edit"
                        asp-route-id="@item.Id"
@@ -165,7 +167,7 @@
                        class="btn btn-sm btn-outline-danger">
                         <i class="bi bi-trash"></i>
                     </a>
-
+                            }
                 </td>
 
             </tr>

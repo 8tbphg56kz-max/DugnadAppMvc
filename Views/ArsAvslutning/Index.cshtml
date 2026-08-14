@@ -1,0 +1,171 @@
+﻿@model DugnadAppMvc.ViewModels.ArsAvslutningViewModel
+
+@{
+    ViewData["Title"] = "Årsavslutning";
+}
+
+<div class="container py-4">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-calendar-x me-2"></i>
+                        Årsavslutning @Model.Aar
+                    </h4>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="alert alert-warning">
+                        <strong>Viktig!</strong>
+
+                        <p class="mb-0 mt-2">
+                            Når årsavslutningen gjennomføres, slettes alle
+                            registrerte dugnader, oppgaver, påmeldinger
+                            og timeføringer som ligger i systemet.
+                        </p>
+                    </div>
+
+                    <form asp-action="Index" method="post">
+
+                        <div class="form-check mb-3">
+
+                            <input asp-for="UtbetalingForetatt"
+                                   class="form-check-input" />
+
+                            <label asp-for="UtbetalingForetatt"
+                                   class="form-check-label">
+                                Utbetaling til beboere er foretatt
+                            </label>
+
+                            <div class="text-danger">
+                                <span asp-validation-for="UtbetalingForetatt"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="form-check mb-4">
+
+                            <input asp-for="BekreftSletting"
+                                   class="form-check-input" />
+
+                            <label asp-for="BekreftSletting"
+                                   class="form-check-label">
+                                Jeg bekrefter at årets registreringer kan slettes
+                            </label>
+
+                            <div class="text-danger">
+                                <span asp-validation-for="BekreftSletting"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+
+                            <a asp-controller="Dashboard"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>
+                                Avbryt
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-danger"
+                                    onclick="return confirm(
+                                'Er du sikker på at du vil avslutte året og slette alle registreringer? Denne handlingen kan ikke angres.'
+                                );">
+                                <i class="bi bi-trash me-1"></i>
+                                Avslutt året og slett registreringer
+                            </button>
+
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+
+                                    <h5 class="card-title">
+                                        Registreringer som vil bli slettet
+                                    </h5>
+
+                                    <div class="row text-center">
+
+                                        <div class="col-md-3 mb-3 mb-md-0">
+                                            <div class="fs-4 fw-bold">
+                                                @Model.AntallDugnader
+                                            </div>
+                                            <div class="text-muted">
+                                                Dugnader
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3 mb-md-0">
+                                            <div class="fs-4 fw-bold">
+                                                @Model.AntallOppgaver
+                                            </div>
+                                            <div class="text-muted">
+                                                Oppgaver
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3 mb-md-0">
+                                            <div class="fs-4 fw-bold">
+                                                @Model.AntallPameldinger
+                                            </div>
+                                            <div class="text-muted">
+                                                Påmeldinger
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="fs-4 fw-bold">
+                                                @Model.AntallTimeforinger
+                                            </div>
+                                            <div class="text-muted">
+                                                Timeføringer
+                                            </div>
+                                        </div>
+
+                                        <div class="row text-center mt-4">
+
+                                            <div class="col-md-6 mb-3 mb-md-0">
+                                                <div class="fs-4 fw-bold">
+                                                    @Model.AntallDeltakere
+                                                </div>
+                                                <div class="text-muted">
+                                                    Personer som har deltatt
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="fs-4 fw-bold">
+                                                    @Model.AntallTimer.ToString("0.##")
+                                                </div>
+                                                <div class="text-muted">
+                                                    Totalt antall timer
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
