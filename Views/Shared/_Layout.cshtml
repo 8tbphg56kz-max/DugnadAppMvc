@@ -224,6 +224,18 @@
                                             </a>
                                         </li>
                                     }
+
+                                    @if (User.IsInRole(IdentityRoles.SystemAdministrator))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-controller="Database"
+                                               asp-action="Index">
+                                                <i class="bi bi-database me-2"></i>
+                                                Database
+                                            </a>
+                                        </li>
+                                    }
                                 </ul>
                             </li>
                         }

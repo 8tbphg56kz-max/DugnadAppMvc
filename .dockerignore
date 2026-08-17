@@ -1,7 +1,1 @@
-bin/
-obj/
-.vs/
-.git/
-.gitignore
-Dockerfile
-docker-compose*
+SSH fra laptop: sudo docker cp postgres:/var/lib/postgresql/data/dugnadapp.backup /volume1/docker/postgres-backups/

@@ -1,6 +1,7 @@
 ﻿using DugnadAppMvc.Data;
 using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
+using DugnadAppMvc.Services.Interfaces;
 using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,35 @@ using Microsoft.EntityFrameworkCore;
 public class ArsAvslutningController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IDatabaseBackupService _backupService;
 
-    public ArsAvslutningController(ApplicationDbContext context)
+    public ArsAvslutningController(
+        ApplicationDbContext context,
+        IDatabaseBackupService backupService)
     {
         _context = context;
+        _backupService = backupService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Backup()
+    {
+        try
+        {
+            var result = await _backupService.CreateBackupAsync();
+
+            ViewBag.Success = true;
+            ViewBag.Message = result;
+
+            return View();
+        }
+        catch (Exception ex)
+        {
+            ViewBag.Success = false;
+            ViewBag.Message = ex.Message;
+
+            return View();
+        }
     }
 
     [HttpGet]

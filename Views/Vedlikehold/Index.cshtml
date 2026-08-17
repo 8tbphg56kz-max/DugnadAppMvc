@@ -1,4 +1,6 @@
-﻿@{
+﻿@model List<string>
+
+@{
     ViewData["Title"] = "Vedlikehold";
 }
 
@@ -24,4 +26,88 @@
         </form>
 
     </div>
+
+    <hr class="my-4" />
+
+    <div class="mb-4">
+        <h4>
+            <i class="bi bi-database-up me-2"></i>
+            Sikkerhetskopiering
+        </h4>
+
+        <p class="text-muted">
+            Ta en sikkerhetskopi av DugnadApp-databasen før vedlikehold eller andre større endringer.
+        </p>
+
+        <a asp-controller="ArsAvslutning"
+           asp-action="Backup"
+           class="btn btn-primary">
+            <i class="bi bi-database-check me-1"></i>
+            Ta backup
+        </a>
+
+    </div>
+
+    <hr class="my-4" />
+
+    <h4>
+        <i class="bi bi-database-down me-2"></i>
+        Gjenopprett database
+    </h4>
+
+    <p class="text-muted">
+        Velg en backup av DugnadApp-databasen som skal brukes til gjenoppretting.
+    </p>
+
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Viktig:</strong>
+        DugnadApp stoppes midlertidig under gjenopprettingen.
+        Siden vil derfor kunne bli utilgjengelig i noen minutter.
+        Ikke start en ny restore mens en gjenoppretting pågår.
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning">
+            Ingen backupfiler ble funnet.
+        </div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var backup in Model)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-file-earmark-zip me-2"></i>
+                        @backup
+                    </span>
+
+                    <form asp-action="Restore"
+                          method="post"
+                          class="d-inline"
+                          onsubmit="
+                        if (!confirm('Er du sikker på at du vil gjenopprette databasen fra denne backupen?\n\n@backup\n\nDagens database blir sikkerhetskopiert før restore?'))
+                        return false;
+                        this.querySelector('button[type=submit]').disabled =true;
+                        this.querySelector('button[type=submit]').innerHTML ='<span class=&quot;spinner-border spinner-border-sm me-1&quot;></span> Starter restore...' ;
+                        ">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="backupFile"
+                               value="@backup" />
+
+                        <button type="submit"
+                                class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>
+                            Restore
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
 </div>
