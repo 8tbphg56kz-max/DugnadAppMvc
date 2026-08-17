@@ -1,3 +1,4 @@
+using QuestPDF.Infrastructure;
 using DugnadAppMvc.Configuration;
 using DugnadAppMvc.Data;
 using DugnadAppMvc.Models;
@@ -16,6 +17,7 @@ namespace DugnadAppMvc
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            QuestPDF.Settings.License = LicenseType.Community;
 
             // Database
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
