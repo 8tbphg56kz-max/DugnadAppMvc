@@ -5,13 +5,19 @@
 }
 
 <div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-6">
+    <div class="col-12 col-xl-11">
             <div class="card-body p-4">
 
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     @TempData["ErrorMessage"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Lukk">
+                    </button>
                 </div>
             }
 
@@ -31,43 +37,159 @@
 
     <div class="card-body">
 
-        @if (Model.Oppgave.Pameldinger.Any())
-        {
-            <ul class="list-group list-group-flush">
+                    @if (Model.PameldingStatus.Any())
+                    {
+                        <div class="mb-2">
+                            <strong>@Model.PameldingStatus.Count</strong> påmeldte
+                        </div>
 
-                @foreach (var pamelding in Model.Oppgave.Pameldinger)
-                {                             
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Beboer</th>
+                                        <th>Påmeldt</th>
+                                        <th>Utført</th>
+                                        <th>Registrert timer</th>
+                                        <th>Timer</th>
+                                        <th>Status</th>
+                                        @if (User.HasAdminAccess())
+                                        {
+                                            <th></th>
+                                        }
+                                    </tr>
+                                </thead>
 
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <tbody>
+                                    @foreach (var item in Model.PameldingStatus)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@item.Navn</strong>
 
-                        @pamelding.Beboer.Fornavn @pamelding.Beboer.Etternavn
+                                                @if (!string.IsNullOrWhiteSpace(item.Leilighetsnummer))
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">
+                                                        Leil. @item.Leilighetsnummer
+                                                    </small>
+                                                }
+                                            </td>
 
-                                 
-                        <form asp-action="MeldAvSomAdministrator" method="post">
-                            <input type="hidden" name="pameldingId" value="@pamelding.Id" />
-                            @Html.AntiForgeryToken()
+                                            <td>
+                                                @item.PameldtDato.ToLocalTime().ToString("dd.MM.yyyy")
+                                                <br />
+                                                <small class="text-muted">
+                                                    kl. @item.PameldtDato.ToLocalTime().ToString("HH:mm")
+                                                </small>
+                                            </td>
 
-                                @if (User.HasAdminAccess())
-                                 {
-                            <button type="submit"
-                                    class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-person-dash"></i>
-                                Meld av
-                            </button>
-                               }
-                        </form>
+                                            <td>
+                                                @if (item.ErUtfort)
+                                                {
+                                                    <span class="text-success">
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        Ja
+                                                    </span>
 
-                    </li>
-                }
+                                                    @if (item.UtfortDato.HasValue)
+                                                    {
+                                                        <br />
+                                                        <small class="text-muted">
+                                                            @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                                        </small>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-warning">
+                                                        <i class="bi bi-clock"></i>
+                                                        Ikke utført
+                                                    </span>
+                                                }
+                                            </td>
 
-            </ul>
-        }
-        else
-        {
-            <p class="text-muted mb-0">
-                Ingen er påmeldt denne oppgaven.
-            </p>
-        }
+                                            <td class="align-top">
+                                                @if (item.HarRegistrertTimer)
+                                                {
+                                                    <span class="text-success">
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        Ja
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">
+                                                        <i class="bi bi-dash-circle-fill"></i>
+                                                        Ingen
+                                                    </span>
+                                                }
+                                            </td>
+
+                                            <td class="align-top">
+                                                @if (item.AntallTimer.HasValue)
+                                                {
+                                                    @item.AntallTimer.Value.ToString("0.00")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">–</span>
+                                                }
+                                            </td>
+
+                                            <td class="align-top">
+                                                @if (item.Status == "Fullført")
+                                                {
+                                                    <span class="badge bg-success">
+                                                        Fullført
+                                                    </span>
+                                                }
+                                                else if (item.Status == "Utført")
+                                                {
+                                                    <span class="badge bg-info text-dark">
+                                                        Utført
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        Påmeldt
+                                                    </span>
+                                                }
+                                            </td>
+
+                                            @if (User.HasAdminAccess())
+                                            {
+                                                <td>
+                                                    <form asp-action="MeldAvSomAdministrator"
+                                                          method="post">
+
+                                                        @Html.AntiForgeryToken()
+
+                                                        <input type="hidden"
+                                                               name="pameldingId"
+                                                               value="@item.PameldingId" />
+
+                                                        <button type="submit"
+                                                                class="btn btn-sm btn-outline-danger">
+                                                            <i class="bi bi-person-dash"></i>
+                                                            Meld av
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">
+                            Ingen er påmeldt denne oppgaven.
+                        </p>
+                    }
 
                     @if (User.HasAdminAccess())
                     {

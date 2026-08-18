@@ -32,20 +32,16 @@
 
                     <form asp-action="Index" method="post">
 
-                        <div class="form-check mb-3">
-
+                        <div class="form-check mb-3 p-3 border rounded bg-light">
                             <input asp-for="UtbetalingForetatt"
-                                   class="form-check-input" />
+                                   class="form-check-input"
+                                   style="width: 1.5rem; height: 1.5rem; margin-top: 0.1rem;" />
 
                             <label asp-for="UtbetalingForetatt"
-                                   class="form-check-label">
+                                   class="form-check-label fw-semibold ms-2"
+                                   style="font-size: 1.05rem;">
                                 Utbetaling til beboere er foretatt
                             </label>
-
-                            <div class="text-danger">
-                                <span asp-validation-for="UtbetalingForetatt"></span>
-                            </div>
-
                         </div>
 
                         <div class="form-check mb-4">

@@ -537,38 +537,101 @@ public class OppgaverController : Controller
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     public async Task<IActionResult> AdministrerPameldinger(int id)
     {
-       var oppgave = await _context.Oppgaver
-    .Include(o => o.Pameldinger)
-        .ThenInclude(p => p.Beboer)
-    .FirstOrDefaultAsync(o => o.Id == id);
+        var oppgave = await _context.Oppgaver
+            .Include(o => o.Pameldinger)
+                .ThenInclude(p => p.Beboer)
+                    .ThenInclude(b => b.Leilighet)
+            .FirstOrDefaultAsync(o => o.Id == id);
 
-if (oppgave == null)
-{
-    return NotFound();
-}
-
-var pameldteIder = oppgave.Pameldinger
-    .Select(p => p.BeboerId);
-
-var ledigeBeboere = await _context.Beboere
-    .Where(b => !pameldteIder.Contains(b.Id))
-    .OrderBy(b => b.Etternavn)
-    .ThenBy(b => b.Fornavn)
-    .ToListAsync();
-
-var model = new AdministrerPameldingerViewModel
-{
-    Oppgave = oppgave,
-    LedigeBeboere = ledigeBeboere
-        .Select(b => new SelectListItem
+        if (oppgave == null)
         {
-            Value = b.Id.ToString(),
-            Text = b.Fornavn + " " + b.Etternavn
-        })
-        .ToList()
-};
+            return NotFound();
+        }
 
-return View(model);
+        var pameldteIder = oppgave.Pameldinger
+            .Select(p => p.BeboerId)
+            .ToList();
+
+        var ledigeBeboere = await _context.Beboere
+            .Where(b => !pameldteIder.Contains(b.Id))
+            .OrderBy(b => b.Etternavn)
+            .ThenBy(b => b.Fornavn)
+            .ToListAsync();
+
+        // Hent timeføringer for denne oppgaven
+        var timeforinger = await _context.Timeforinger
+            .Where(t => t.OppgaveId == id)
+            .ToListAsync();
+
+        var pameldingStatus = oppgave.Pameldinger
+            .Select(p =>
+            {
+                var timer = timeforinger
+                    .Where(t => t.BeboerId == p.BeboerId)
+                    .ToList();
+
+                var harTimer = timer.Any();
+
+                var antallTimer = harTimer
+                    ? timer.Sum(t => t.AntallTimer)
+                    : (decimal?)null;
+
+                string status;
+
+                if (p.Status == OppgaveStatus.TimerRegistrert && harTimer)
+                {
+                    status = "Fullført";
+                }
+                else if (p.Status == OppgaveStatus.Utfort)
+                {
+                    status = "Utført";
+                }
+                else
+                {
+                    status = "Påmeldt";
+                }
+
+                return new PameldingStatusViewModel
+                {
+                    PameldingId = p.Id,
+                    BeboerId = p.BeboerId,
+
+                    Navn = $"{p.Beboer.Fornavn} {p.Beboer.Etternavn}",
+
+                    Leilighetsnummer = p.Beboer.Leilighet?.Leilighetsnummer,
+
+                    PameldtDato = p.PameldtDato,
+
+                    UtfortDato = p.UtfortDato,
+
+                    ErUtfort = p.Status == OppgaveStatus.Utfort
+                               || p.Status == OppgaveStatus.TimerRegistrert,
+
+                    HarRegistrertTimer = harTimer,
+
+                    AntallTimer = antallTimer,
+
+                    Status = status
+                };
+            })
+            .ToList();
+
+        var model = new AdministrerPameldingerViewModel
+        {
+            Oppgave = oppgave,
+
+            LedigeBeboere = ledigeBeboere
+                .Select(b => new SelectListItem
+                {
+                    Value = b.Id.ToString(),
+                    Text = b.Fornavn + " " + b.Etternavn
+                })
+                .ToList(),
+
+            PameldingStatus = pameldingStatus
+        };
+
+        return View(model);
     }
 
     [Authorize(Roles = IdentityRoles.BoardAccess)]

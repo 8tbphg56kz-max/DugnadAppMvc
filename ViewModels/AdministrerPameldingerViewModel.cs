@@ -10,4 +10,6 @@ public class AdministrerPameldingerViewModel
     public List<SelectListItem> LedigeBeboere { get; set; } = [];
 
     public int? ValgtBeboerId { get; set; }
+
+    public List<PameldingStatusViewModel> PameldingStatus { get; set; } = new();
 }
