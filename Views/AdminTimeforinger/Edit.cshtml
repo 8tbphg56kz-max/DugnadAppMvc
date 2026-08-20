@@ -55,6 +55,15 @@
                           rows="3"></textarea>
             </div>
 
+                        <div class="mb-3">
+                            <label asp-for="Begrunnelse" class="form-label"></label>
+                            <textarea asp-for="Begrunnelse"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Hvorfor gjøres denne endringen?"></textarea>
+                            <span asp-validation-for="Begrunnelse" class="text-danger"></span>
+                        </div>
+
             <div class="d-flex gap-2 mt-4">
 
                 <button type="submit"

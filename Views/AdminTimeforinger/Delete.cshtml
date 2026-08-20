@@ -6,50 +6,75 @@
 
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
-            <div class="card-body p-4">
 
-<h2 class="mb-4">Slett dugnadstime</h2>
+        <div class="card-body p-4">
 
-<div class="alert alert-warning">
-    Er du sikker på at du vil slette denne registreringen?
-</div>
+            <h2 class="mb-4">Slett dugnadstime</h2>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-
-        <dl class="row">
-            <dt class="col-sm-3">Dugnad</dt>
-            <dd class="col-sm-9">@Model.Aktivitet</dd>
-
-            <dt class="col-sm-3">Beboer</dt>
-            <dd class="col-sm-9">@Model.Beboer</dd>
-
-            <dt class="col-sm-3">Timer</dt>
-            <dd class="col-sm-9">@Model.Timer</dd>
-
-            <dt class="col-sm-3">Kommentar</dt>
-            <dd class="col-sm-9">@Model.Kommentar</dd>
-
-            <dt class="col-sm-3">Registrert</dt>
-            <dd class="col-sm-9">@Model.Registrert.ToString("dd.MM.yyyy HH:mm")</dd>
-        </dl>
-
-        <form asp-action="Delete">
-            <input asp-for="Id" type="hidden" />
-
-            @Html.AntiForgeryToken()
-
-            <button type="submit" class="btn btn-danger">
-                Slett
-            </button>
-
-            <a asp-action="Index" class="btn btn-secondary">
-                Avbryt
-            </a>
-        </form>
-
-    </div>
-</div>
+            <div class="alert alert-warning">
+                <strong>Er du sikker på at du vil slette denne registreringen?</strong>
+                <br />
+                Slettingen kan ikke angres.
             </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Dugnad</dt>
+                        <dd class="col-sm-9">@Model.Aktivitet</dd>
+
+                        <dt class="col-sm-3">Beboer</dt>
+                        <dd class="col-sm-9">@Model.Beboer</dd>
+
+                        <dt class="col-sm-3">Timer</dt>
+                        <dd class="col-sm-9">@Model.Timer</dd>
+
+                        <dt class="col-sm-3">Kommentar</dt>
+                        <dd class="col-sm-9">@Model.Kommentar</dd>
+
+                        <dt class="col-sm-3">Registrert</dt>
+                        <dd class="col-sm-9">
+                            @Model.Registrert.ToString("dd.MM.yyyy HH:mm")
+                        </dd>
+                    </dl>
+
+                    <hr />
+
+                    <form asp-action="Delete" method="post">
+
+                        <input asp-for="Id" type="hidden" />
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="Begrunnelse" class="form-label">
+                                Begrunnelse for sletting
+                            </label>
+
+                            <textarea asp-for="Begrunnelse"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Hvorfor skal denne timeføringen slettes?"></textarea>
+
+                            <span asp-validation-for="Begrunnelse"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>
+                            Slett
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-secondary">
+                            Avbryt
+                        </a>
+
+                    </form>
+
+                </div>
+            </div>
+
         </div>
     </div>
+</div>

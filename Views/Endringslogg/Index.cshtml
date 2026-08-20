@@ -32,11 +32,12 @@
                     <tr>
                         <th>Tidspunkt</th>
                         <th>Beboer</th>
-                        <th>Utført av</th>
-                        <th>Handling</th>
                         <th>Aktivitet</th>
-                        <th>Timer</th>
                         <th>Kommentar</th>
+                        <th>Handling</th>
+                        <th>Timer</th>
+                        <th>Utført av</th>
+                        <th>Begrunnelse</th>
                     </tr>
                 </thead>
 
@@ -53,45 +54,7 @@
                             </td>
 
                             <td>
-                                @(logg.Bruker.FirstName + " " + logg.Bruker.LastName)
-                            </td>
-
-                            <td>
-                                @if (logg.Handling == "Endret")
-                                {
-                                    <span class="badge bg-primary">
-                                        Endret
-                                    </span>
-                                }
-                                else if (logg.Handling == "Slettet")
-                                {
-                                    <span class="badge bg-danger">
-                                        Slettet
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">
-                                        @logg.Handling
-                                    </span>
-                                }
-                            </td>
-
-                            <td>
                                 @logg.Aktivitet
-                            </td>
-
-                            <td>
-                                @if (logg.Handling == "Endret")
-                                {
-                                    <span>
-                                        @logg.GamleTimer → @logg.NyeTimer
-                                    </span>
-                                }
-                                else
-                                {
-                                    @logg.GamleTimer
-                                }
                             </td>
 
                             <td>
@@ -117,6 +80,48 @@
                                 {
                                     @logg.GammelKommentar
                                 }
+                            </td>
+
+                            <td>
+                                @if (logg.Handling == "Endret")
+                                {
+                                    <span class="badge bg-primary">
+                                        Endret
+                                    </span>
+                                }
+                                else if (logg.Handling == "Slettet")
+                                {
+                                    <span class="badge bg-danger">
+                                        Slettet
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @logg.Handling
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (logg.Handling == "Endret")
+                                {
+                                    <span>
+                                        @logg.GamleTimer → @logg.NyeTimer
+                                    </span>
+                                }
+                                else
+                                {
+                                    @logg.GamleTimer
+                                }
+                            </td>
+
+                            <td>
+                                @(logg.Bruker.FirstName + " " + logg.Bruker.LastName)
+                            </td>
+
+                            <td>
+                                @logg.Begrunnelse
                             </td>
                         </tr>
                     }

@@ -16,10 +16,14 @@ namespace DugnadAppMvc.ViewModels
 
         [Required(ErrorMessage = "Velg antall timer.")]
         [Display(Name = "Timer")]
-        public string? Timer { get; set; }
 
+        public string? Timer { get; set; }
         [Display(Name = "Kommentar")]
         public string? Kommentar { get; set; }
+
+        [Required(ErrorMessage = "Du må oppgi en begrunnelse for endringen.")]
+        [Display(Name = "Begrunnelse")]
+        public string? Begrunnelse { get; set; }
 
         public List<SelectListItem> Beboere { get; set; } = [];
 
