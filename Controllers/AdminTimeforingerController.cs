@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using DugnadAppMvc.Helpers;
+using System.Security.Claims;
 
 namespace DugnadAppMvc.Controllers
 {
@@ -255,7 +256,8 @@ namespace DugnadAppMvc.Controllers
                     : timeforing.Dugnad!.Tittel,
 
                 BeboerId = timeforing.BeboerId,
-                Timer = timeforing.AntallTimer,
+                Timer = timeforing.AntallTimer.ToString(
+                 CultureInfo.InvariantCulture),
                 Kommentar = timeforing.Kommentar,
 
                 Beboere = _context.Beboere
@@ -280,7 +282,7 @@ namespace DugnadAppMvc.Controllers
         public async Task<IActionResult> Edit(int id, EditTimeforingViewModel model)
         {
             if (!ModelState.IsValid)
-            {   
+            {
                 model.Beboere = _context.Beboere
                     .OrderBy(b => b.Etternavn)
                     .ThenBy(b => b.Fornavn)
@@ -291,13 +293,12 @@ namespace DugnadAppMvc.Controllers
                     })
                     .ToList();
 
-
                 model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
                 var aktivitet = await _context.Timeforinger
-    .Include(t => t.Dugnad)
-    .Include(t => t.Oppgave)
-    .FirstOrDefaultAsync(t => t.Id == id);
+                    .Include(t => t.Dugnad)
+                    .Include(t => t.Oppgave)
+                    .FirstOrDefaultAsync(t => t.Id == id);
 
                 if (aktivitet != null)
                 {
@@ -309,16 +310,55 @@ namespace DugnadAppMvc.Controllers
                 return View(model);
             }
 
-            var timeforing = await _context.Timeforinger.FindAsync(id);
+            var timeforing = await _context.Timeforinger
+                .Include(t => t.Dugnad)
+                .Include(t => t.Oppgave)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (timeforing == null)
             {
                 return NotFound();
             }
-           
+
+            // Ta vare på verdiene før endringen
+            var gammelBeboerId = timeforing.BeboerId;
+            var gamleTimer = timeforing.AntallTimer;
+            var gammelKommentar = timeforing.Kommentar;
+
+            var aktivitetNavn = timeforing.OppgaveId != null
+            ? timeforing.Oppgave!.Navn
+            : timeforing.Dugnad!.Tittel;
+
+            // Gjør selve endringen
             timeforing.BeboerId = model.BeboerId!.Value;
-            timeforing.AntallTimer = model.Timer!.Value;
+            timeforing.AntallTimer = decimal.Parse(
+            model.Timer!,
+            CultureInfo.InvariantCulture);
             timeforing.Kommentar = model.Kommentar;
+
+            // Hent innlogget bruker
+            var brukerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (brukerId == null)
+            {
+                return Forbid();
+            }
+
+            // Opprett endringslogg
+            var endringslogg = new Endringslogg
+            {
+                BrukerId = brukerId,
+                Handling = "Endret",
+                TimeforingId = timeforing.Id,
+                BeboerId = gammelBeboerId,
+                Aktivitet = aktivitetNavn,
+                GamleTimer = gamleTimer,
+                NyeTimer = timeforing.AntallTimer,
+                GammelKommentar = gammelKommentar,
+                NyKommentar = timeforing.Kommentar
+            };
+
+            _context.Endringslogger.Add(endringslogg);
 
             await _context.SaveChangesAsync();
 
@@ -361,10 +401,48 @@ namespace DugnadAppMvc.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var timeforing = await _context.Timeforinger
+                .Include(t => t.Dugnad)
+                .Include(t => t.Oppgave)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (timeforing == null)
+            {
                 return NotFound();
+            }
+
+            // Ta vare på verdiene før sletting
+            var beboerId = timeforing.BeboerId;
+            var timer = timeforing.AntallTimer;
+            var kommentar = timeforing.Kommentar;
+            var registrertDato = timeforing.RegistrertDato;
+
+            var aktivitet = timeforing.OppgaveId != null
+                ? timeforing.Oppgave!.Navn
+                : timeforing.Dugnad!.Tittel;
+
+            // Hent innlogget bruker
+            var brukerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (brukerId == null)
+            {
+                return Forbid();
+            }
+
+            // Opprett endringslogg
+            var endringslogg = new Endringslogg
+            {
+                BrukerId = brukerId,
+                Handling = "Slettet",
+                TimeforingId = timeforing.Id,
+                BeboerId = beboerId,
+                Aktivitet = aktivitet,
+                GamleTimer = timer,
+                NyeTimer = null,
+                GammelKommentar = kommentar,
+                NyKommentar = null
+            };
+
+            _context.Endringslogger.Add(endringslogg);
 
             // Hvis timeføringen gjelder en oppgave,
             // slett også tilhørende påmelding
@@ -385,7 +463,8 @@ namespace DugnadAppMvc.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Timeføringen og tilhørende påmelding ble slettet.";
+            TempData["SuccessMessage"] =
+                "Timeføringen og tilhørende påmelding ble slettet.";
 
             return RedirectToAction(nameof(Index));
         }

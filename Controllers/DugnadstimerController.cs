@@ -183,7 +183,7 @@ namespace DugnadAppMvc.Controllers
                 Aktivitet = dugnadstime.OppgaveId != null
     ? dugnadstime.Oppgave!.Navn
     : dugnadstime.Dugnad!.Tittel,
-                Timer = dugnadstime.AntallTimer,
+                Timer = dugnadstime.AntallTimer.ToString(CultureInfo.InvariantCulture),
                 Kommentar = dugnadstime.Kommentar
             };
 
@@ -236,7 +236,9 @@ namespace DugnadAppMvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            dugnadstime.AntallTimer = model.Timer!.Value;
+            dugnadstime.AntallTimer = decimal.Parse(
+           model.Timer!,
+           CultureInfo.InvariantCulture);
             dugnadstime.Kommentar = model.Kommentar;
 
             await _context.SaveChangesAsync();

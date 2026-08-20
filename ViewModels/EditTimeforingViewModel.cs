@@ -16,7 +16,7 @@ namespace DugnadAppMvc.ViewModels
 
         [Required(ErrorMessage = "Velg antall timer.")]
         [Display(Name = "Timer")]
-        public decimal? Timer { get; set; }
+        public string? Timer { get; set; }
 
         [Display(Name = "Kommentar")]
         public string? Kommentar { get; set; }

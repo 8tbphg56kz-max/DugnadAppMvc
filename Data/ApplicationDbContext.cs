@@ -21,11 +21,18 @@ namespace DugnadAppMvc.Data
         public DbSet<Oppgave> Oppgaver { get; set; }
         public DbSet<OppgavePamelding> OppgavePameldinger { get; set; }
         public DbSet<Timeforing> Timeforinger { get; set; }
+        public DbSet<Endringslogg> Endringslogger { get; set; }
         public DbSet<BoardMessage> BoardMessages { get; set; }
         public DbSet<Arsstatistikk> Arsstatistikker => Set<Arsstatistikk>();
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Endringslogg>()
+            .HasOne(e => e.Bruker)
+            .WithMany()
+            .HasForeignKey(e => e.BrukerId)
+            .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<OppgavePamelding>()
             .ToTable("OppgavePamelding");
@@ -79,6 +86,12 @@ namespace DugnadAppMvc.Data
                 .HasOne(p => p.Beboer)
                 .WithMany(b => b.OppgavePameldinger)
                 .HasForeignKey(p => p.BeboerId);
+
+            builder.Entity<Endringslogg>()
+           .HasOne(e => e.Beboer)
+           .WithMany()
+           .HasForeignKey(e => e.BeboerId)
+           .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
