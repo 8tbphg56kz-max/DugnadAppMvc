@@ -1,3 +1,4 @@
+@using DugnadAppMvc.Helpers
 @model IEnumerable<BoardMessage>
 
 @{
@@ -38,7 +39,7 @@
                 <td class="align-top">
                     @item.Tittel
                 </td>
-                <td class="align-top" style="white-space: pre-line;">@item.Innhold</td>
+                        <td class="align-top" style="white-space: pre-line;">@Html.Raw(TextHelper.FormaterLinjeskift(item.Innhold))</td>
                 <td class="align-top">
                     @item.PublisertDato.ToString("dd.MM.yy")
                 </td>

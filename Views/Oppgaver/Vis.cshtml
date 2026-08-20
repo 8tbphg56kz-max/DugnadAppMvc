@@ -1,6 +1,7 @@
 ﻿@model DugnadAppMvc.Models.Oppgave
 
 @using DugnadAppMvc.Models.Enums
+@using DugnadAppMvc.Helpers
 
 @{
     var pamelding = ViewBag.Pamelding as DugnadAppMvc.Models.OppgavePamelding;
@@ -51,7 +52,7 @@
                     <h5>Beskrivelse</h5>
 
                     <p class="text-muted">
-                        @Model.Beskrivelse
+                        @Html.Raw(TextHelper.FormaterLinjeskift(Model.Beskrivelse))
                     </p>
 
                 </div>

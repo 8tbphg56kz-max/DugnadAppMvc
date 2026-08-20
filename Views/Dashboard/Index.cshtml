@@ -1,117 +1,135 @@
 ﻿@using DugnadAppMvc.Services
+@using DugnadAppMvc.Helpers
 @model DugnadAppMvc.ViewModels.DashboardViewModel
 @inject SameieService SameieService
+
 @{
     ViewData["Title"] = "Min side";
 }
 
 <div class="dashboard-container">
-<div class="row mb-4">
 
-    <div class="col-12">
+    <div class="row mb-4">
 
-        <div class="card shadow-sm border-0 mb-4 welcome-card">
-                <div <div class="card-body py-2 text-start">
-
-                <h2 class="mb-2">
-                    Hei @Model.FirstName 👋
-                </h2>
-
-                <p class="text-muted mb-0">
-                    Velkommen tilbake til DugnadApp.
-                    Her finner du en oversikt over dugnader, registrerte timer
-                    og beskjeder fra styret.
-                </p>
-
-            </div>
-        </div>
-    </div>
-
-    @if (Model.NesteDugnad != null)
-    {
         <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-body">
 
-                    <div class="mb-3">
-                        <h5 class="card-title mb-0">
-                            🌳 Neste fellesdugnad
-                        </h5>
-                    </div>
+            <div class="card shadow-sm border-0 mb-4 welcome-card">
+                <div class="card-body py-2 text-start">
 
-                    <hr />
+                    <h2 class="mb-2">
+                        Hei @Model.FirstName 👋
+                    </h2>
 
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0">
-                            @Model.NesteDugnad.Tittel
-                        </h5>
-                       
-                    </div>
+                    <p class="text-muted mb-0">
+                        Velkommen tilbake til DugnadApp.
+                        Her finner du en oversikt over dugnader, registrerte timer
+                        og beskjeder fra styret.
+                    </p>
 
-                    @if (Model.NesteDugnad.StartDato == Model.NesteDugnad.SluttDato)
-                    {
-                        <p class="mb-1">
-                            <strong>Dato:</strong>
-                            @Model.NesteDugnad.StartDato.ToString("dd.MM.yy")
-                        </p>
-                    }
-                    else
-                    {
-                        <p class="mb-1">
-                            <strong>Periode:</strong>
-                            @Model.NesteDugnad.StartDato.ToString("dd.MM.yy")
-                            –
-                            @Model.NesteDugnad.SluttDato.ToString("dd.MM.yy")
-                        </p>
-                    }
-
-                    @if (!string.IsNullOrWhiteSpace(Model.NesteDugnad.Beskrivelse))
-                    {
-                        <p class="text-muted mt-3 mb-0">
-                            @Model.NesteDugnad.Beskrivelse
-                        </p>
-                    }
-
-                        <small class="text-success d-block mt-3">
-                        @if (Model.AntallRegistreringerPaAktivDugnad == 1)
-                        {
-                            <small class="text-success">
-                                <i class="bi bi-check-circle"></i>
-                                Mine registreringer: 1
-                            </small>
-                        }
-                        else if (Model.AntallRegistreringerPaAktivDugnad > 1)
-                        {
-                            <small class="text-success">
-                                <i class="bi bi-check-circle"></i>
-                                Mine registreringer: @Model.AntallRegistreringerPaAktivDugnad
-                            </small>
-                        }
-                        
-                        </small>
-                    <a asp-controller="Dugnadstimer"
-                       asp-action="Create"
-                       asp-route-dugnadId="@Model.NesteDugnad.Id"
-                       class="btn btn-outline-primary btn-sm mt-3">
-                        <i class="bi bi-arrow-right-circle me-1"></i>
-
-                        @(Model.AntallRegistreringerPaAktivDugnad > 0
-                            ? "Registrer flere timer"
-                            : "Registrer timer")
-                    </a>
-                      
                 </div>
             </div>
+
         </div>
-    }
+
+        @if (Model.NesteDugnad != null)
+        {
+            <div class="col-12">
+
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+
+                    <div class="card-body">
+
+                        <div class="mb-3">
+                            <h5 class="card-title mb-0">
+                                🌳 Neste fellesdugnad
+                            </h5>
+                        </div>
+
+                        <hr />
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+
+                            <h5 class="mb-0">
+                                @Model.NesteDugnad.Tittel
+                            </h5>
+
+                        </div>
+
+                        @if (Model.NesteDugnad.StartDato == Model.NesteDugnad.SluttDato)
+                        {
+                            <p class="mb-1">
+                                <strong>Dato:</strong>
+                                @Model.NesteDugnad.StartDato.ToString("dd.MM.yy")
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="mb-1">
+                                <strong>Periode:</strong>
+                                @Model.NesteDugnad.StartDato.ToString("dd.MM.yy")
+                                –
+                                @Model.NesteDugnad.SluttDato.ToString("dd.MM.yy")
+                            </p>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.NesteDugnad.Beskrivelse))
+                        {
+                            <p class="text-muted mt-3 mb-0">
+                                @Html.Raw(TextHelper.FormaterLinjeskift(Model.NesteDugnad.Beskrivelse))
+                            </p>
+                        }
+
+                        <small class="text-success d-block mt-3">
+
+                            @if (Model.AntallRegistreringerPaAktivDugnad == 1)
+                            {
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    Mine registreringer: 1
+                                </small>
+                            }
+                            else if (Model.AntallRegistreringerPaAktivDugnad > 1)
+                            {
+                                <small class="text-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    Mine registreringer:
+                                    @Model.AntallRegistreringerPaAktivDugnad
+                                </small>
+                            }
+
+                        </small>
+
+                        <a asp-controller="Dugnadstimer"
+                           asp-action="Create"
+                           asp-route-dugnadId="@Model.NesteDugnad.Id"
+                           class="btn btn-outline-primary btn-sm mt-3">
+
+                            <i class="bi bi-arrow-right-circle me-1"></i>
+
+                            @(Model.AntallRegistreringerPaAktivDugnad > 0
+                                ? "Registrer flere timer"
+                                : "Registrer timer")
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
     </div>
 
-<div class="row g-4">
 
-    <!-- Aktuelle oppgaver -->
-    <div class="col-12 col-lg-6">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body">
+    <div class="row g-4">
+
+        <!-- Aktuelle oppgaver -->
+        <div class="col-12 col-lg-6">
+
+            <div class="card shadow-sm border-0 rounded-4">
+
+                <div class="card-body">
 
                     <h5 class="mb-4">
                         <i class="bi bi-list-check text-primary me-2"></i>
@@ -121,121 +139,143 @@
                     <hr class="my-4" />
 
                     <h6 class="text-primary d-flex align-items-center">
+
                         <i class="bi bi-person-fill me-2"></i>
+
                         Mine oppgaver
 
                         <span class="badge bg-primary rounded-pill ms-2">
                             @Model.MineOppgaver.Count
                         </span>
+
                     </h6>
 
-                @if (Model.MineOppgaver.Any())
-                {
-                    @foreach (var oppgave in Model.MineOppgaver)
+                    @if (Model.MineOppgaver.Any())
                     {
-                        <partial name="_OppgaveCard" model="oppgave" />
+                        @foreach (var oppgave in Model.MineOppgaver)
+                        {
+                            <partial name="_OppgaveCard" model="oppgave" />
+                        }
                     }
-                }
-                else
-                {
-                    <p class="text-muted">
-                        Du er ikke påmeldt noen oppgaver.
-                    </p>
-                }
+                    else
+                    {
+                        <p class="text-muted">
+                            Du er ikke påmeldt noen oppgaver.
+                        </p>
+                    }
+
 
                     <hr class="my-4" />
 
+
                     <h6 class="text-success d-flex align-items-center">
+
                         <i class="bi bi-list-check me-2"></i>
+
                         Ledige oppgaver
 
                         <span class="badge bg-success rounded-pill ms-2">
                             @Model.LedigeOppgaver.Count
                         </span>
+
                     </h6>
 
-                @if (Model.LedigeOppgaver.Any())
-                {
-                    @foreach (var oppgave in Model.LedigeOppgaver)
+                    @if (Model.LedigeOppgaver.Any())
                     {
-                        <partial name="_OppgaveCard" model="oppgave" />
+                        @foreach (var oppgave in Model.LedigeOppgaver)
+                        {
+                            <partial name="_OppgaveCard" model="oppgave" />
+                        }
                     }
-                }
-                else
-                {
-                    <p class="text-muted">
-                        Ingen ledige oppgaver.
-                    </p>
-                }               
+                    else
+                    {
+                        <p class="text-muted">
+                            Ingen ledige oppgaver.
+                        </p>
+                    }
+
+                </div>
+
             </div>
+
         </div>
-    </div>    
 
-    <!-- Mine dugnadstimer -->
-    <!-- Høyre kolonne -->
-    <div class="col-12 col-lg-6">
 
-        <div class="row g-4">
+        <!-- Høyre kolonne -->
+        <div class="col-12 col-lg-6">
 
             <!-- Mine dugnadstimer -->
-            <div class="col-12">
-                <div class="card shadow-sm border-0 rounded-4">
-                    <div class="card-body">
+            <div class="card shadow-sm border-0 rounded-4 mb-2">
 
-                        <h5>
-                            <i class="bi bi-clock-history text-success me-2"></i>
-                            Mine dugnadstimer
-                        </h5>
+                <div class="card-body p-3">
 
-                        <hr />
+                    <h5 class="mb-2">
+                        <i class="bi bi-clock-history text-success me-2"></i>
+                        Mine dugnadstimer
+                    </h5>
 
-                        <h1 class="display-4 text-primary">
-                            @Model.TotalHours
-                        </h1>
+                    <hr class="my-2" />
 
-                        <p class="text-muted">
-                            Registrerte timer i år
-                        </p>
+                    <h1 class="display-4 text-primary mb-1">
+                        @Model.TotalHours
+                    </h1>
 
-                            <a asp-controller="Dugnadstimer"
-                               asp-action="Index"
-                               class="btn btn-outline-primary">
-                                <i class="bi bi-clock-history me-1"></i>
-                                Vis historikk
-                            </a>
+                    <p class="text-muted mb-2">
+                        Registrerte timer i år
+                    </p>
 
-                    </div>
+                    <a asp-controller="Dugnadstimer"
+                       asp-action="Index"
+                       class="btn btn-outline-primary">
+
+                        <i class="bi bi-clock-history me-1"></i>
+                        Vis historikk
+
+                    </a>
+
                 </div>
+
             </div>
 
+
             <!-- Beskjed fra styret -->
-                @if (Model.SisteStyremelding != null)
-                {
-                    <div class="col-12">
-                        <div class="card shadow-sm border-0 rounded-4">
-                            <div class="card-body">
+            @if (Model.SisteStyremelding != null)
+            {
+                <div class="card shadow-sm border-0 rounded-4">
 
-                                <h5>
-                                    <i class="bi bi-megaphone text-primary me-2"></i>
-                                    Styremelding
-                                </h5>
+                    <div class="card-body text-break p-3">
 
-                                <hr />
+                        <h5 class="mb-2">
+                            <i class="bi bi-megaphone text-primary me-2"></i>
+                            Styremelding
+                        </h5>
 
-                                <h6>@Model.SisteStyremelding.Tittel</h6>
+                        <hr class="my-2" />
 
-                                <p class="mt-3" style="white-space: pre-line;">@Model.SisteStyremelding.Innhold</p>
+                        <h6 class="mb-2">
+                            @Model.SisteStyremelding.Tittel
+                        </h6>
 
-                                <div class="text-muted small mt-3">
-                                    <i class="bi bi-calendar-event me-1"></i>
-                                    Publisert @Model.SisteStyremelding.PublisertDato.ToString("dd.MM.yy")
-                                </div>
+                        <p class="mb-2">
+                            @Html.Raw(TextHelper.FormaterLinjeskift(Model.SisteStyremelding.Innhold))
+                         </p>
 
-                            </div>
+                        <div class="text-muted small">
+
+                            <i class="bi bi-calendar-event me-1"></i>
+
+                            Publisert
+                            @Model.SisteStyremelding.PublisertDato.ToString("dd.MM.yy")
+
                         </div>
+
                     </div>
-                }
+
+                </div>
+            }
+
         </div>
-    </div> 
-</div>
+
+    </div>
+
 </div>

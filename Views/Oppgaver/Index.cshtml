@@ -1,5 +1,6 @@
 @model DugnadAppMvc.ViewModels.OppgaveIndexViewModel
 @using DugnadAppMvc.Models.Enums
+@using DugnadAppMvc.Helpers
 
 @{
     ViewData["Title"] = "Oppgaver";
@@ -76,9 +77,9 @@
                     @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
                     {
                         <div class="text-muted small">
-                            @(item.Beskrivelse.Length > 80
+                            @Html.Raw(TextHelper.FormaterLinjeskift(item.Beskrivelse.Length > 80
                                 ? item.Beskrivelse[..80] + "..."
-                                : item.Beskrivelse)
+                                : item.Beskrivelse))
                         </div>
                     }
                 </td>
