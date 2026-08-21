@@ -2,9 +2,7 @@
 
 @{
     ViewData["Title"] = "Timer pr. leilighet";
-}
 
-@{
     var totaltAntallRegistreringer = Model.Sum(x => x.AntallRegistreringer);
     var totaleTimer = Model.Sum(x => x.TotaleTimer);
     var totalVerdi = Model.Sum(x => x.TotalVerdi);
@@ -12,61 +10,83 @@
 
 <div class="container" style="max-width: 1100px;">
 
-<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-    <h2 class="mb-0">Timer pr. leilighet</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+        <h2 class="mb-0">Timer pr. leilighet</h2>
 
-    <a asp-action="Index" class="btn btn-outline-secondary">
-        Tilbake
-    </a>
-</div>
-
-<div class="card shadow-sm">
-
-    <div class="card-header bg-primary text-white">
-        Rapport
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Tilbake
+        </a>
     </div>
 
-    <div class="card-body p-0">
+    <div class="card shadow-sm">
 
-        <table class="table table-hover table-clickable">
+        <div class="card-header bg-primary text-white">
+            Rapport
+        </div>
 
-            <thead class="table-light">
+        <div class="card-body p-0">
 
-                <tr>
-                    <th>Leilighet</th>
-                    <th class="text-end">Registreringer</th>
-                    <th class="text-end">Timer</th>
-                    <th class="text-end">Verdi</th>
-                </tr>
+            <div class="table-responsive">
+                <table class="table table-hover table-clickable mb-0">
 
-            </thead>
+                    <thead class="table-light">
+                        <tr>
+                            <th class="fw-semibold">Leilighet</th>
+                            <th class="text-end fw-semibold">Registreringer</th>
+                            <th class="text-end fw-semibold">Timer</th>
+                            <th class="text-end fw-semibold">Verdi</th>
+                        </tr>
+                    </thead>
 
-            <tbody>
+                    <tbody>
 
-                @foreach (var rad in Model)
-                {
-                    <tr onclick="location.href='@Url.Action("LeilighetDetaljer", new { id = rad.LeilighetId })'">
-                        <td>                            
-                                @rad.Visningsnavn
-                        </td>
-                        <td class="text-end">@rad.AntallRegistreringer</td>
-                        <td class="text-end">@rad.TotaleTimer.ToString("N1")</td>
-                        <td class="text-end">@rad.TotalVerdi.ToString("N0") kr</td>
-                    </tr>
-                }
+                        @foreach (var rad in Model)
+                        {
+                            <tr onclick="location.href='@Url.Action("LeilighetDetaljer", new { id = rad.LeilighetId })'">
 
-            </tbody>
+                                <td>
+                                    @rad.Visningsnavn
+                                </td>
 
-            <tfoot class="table-light fw-bold">
-                <tr>
-                    <td>Totalt</td>
-                    <td class="text-end">@totaltAntallRegistreringer</td>
-                    <td class="text-end">@totaleTimer.ToString("N1")</td>
-                    <td class="text-end">@totalVerdi.ToString("N0") kr</td>
-                </tr>
-            </tfoot>
+                                <td class="text-end">
+                                    @rad.AntallRegistreringer
+                                </td>
 
-        </table>
+                                <td class="text-end">
+                                    @rad.TotaleTimer.ToString("N1")
+                                </td>
+
+                                <td class="text-end">
+                                    @rad.TotalVerdi.ToString("N0") kr
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td>Totalt</td>
+
+                            <td class="text-end">
+                                @totaltAntallRegistreringer
+                            </td>
+
+                            <td class="text-end">
+                                @totaleTimer.ToString("N1")
+                            </td>
+
+                            <td class="text-end">
+                                @totalVerdi.ToString("N0") kr
+                            </td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+            </div>
+
+        </div>
     </div>
-</div>
+
 </div>

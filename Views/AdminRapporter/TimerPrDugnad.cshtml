@@ -2,87 +2,146 @@
 
 @{
     ViewData["Title"] = "Timer pr. aktivitet";
+
+    var dugnadSum = Model.Where(x => x.Type == "Dugnad");
+    var oppgaveSum = Model.Where(x => x.Type == "Oppgave");
 }
 
 <div class="container" style="max-width: 1100px;">
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h2 mb-0">Timer pr. aktivitet</h1>
-    <a asp-action="Index" class="btn btn-outline-secondary mt-2">
-        Tilbake
-    </a>
-</div>
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white"> Rapport </div>
-    <div class="table-responsive">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h2 mb-0">Timer pr. aktivitet</h1>
+
+        <a asp-action="Index" class="btn btn-outline-secondary mt-2">
+            Tilbake
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white">
+            Rapport
+        </div>
+
+        <div class="table-responsive">
+
             <table class="table table-striped table-hover mb-0 align-middle">
-                <thead>
+
+                <thead class="table-light">
                     <tr>
-                        <th>Dato</th>
-                        <th>Aktivitet</th>
-                        <th>Type</th>
-                        <th class="text-end">Registreringer</th>
-                        <th class="text-end">Timer</th>
-                        <th class="text-end">Verdi</th>
+                        <th class="fw-semibold">Dato</th>
+                        <th class="fw-semibold">Aktivitet</th>
+                        <th class="fw-semibold">Type</th>
+                        <th class="text-end fw-semibold">Registreringer</th>
+                        <th class="text-end fw-semibold">Timer</th>
+                        <th class="text-end fw-semibold">Verdi</th>
                     </tr>
                 </thead>
 
                 <tbody>
+
                     @foreach (var item in Model)
                     {
                         <tr>
+
                             <td>
                                 @item.Dato.ToString("dd.MM.yyyy")
                             </td>
-                            <td>@item.Dugnad</td>
+
+                            <td>
+                                @item.Dugnad
+                            </td>
+
                             <td>
                                 @if (item.Type == "Dugnad")
                                 {
-                                    <span class="badge bg-primary">Dugnad</span>
+                                    <span class="badge bg-primary">
+                                        Dugnad
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-success">Oppgave</span>
+                                    <span class="badge bg-success">
+                                        Oppgave
+                                    </span>
                                 }
                             </td>
-                            <td class="text-end">@item.Registreringer</td>
-                            <td class="text-end">@item.Timer.ToString("0.#")</td>
-                            <td class="text-end">@item.Verdi.ToString("N0") kr</td>
+
+                            <td class="text-end">
+                                @item.Registreringer
+                            </td>
+
+                            <td class="text-end">
+                                @item.Timer.ToString("0.#")
+                            </td>
+
+                            <td class="text-end">
+                                @item.Verdi.ToString("N0") kr
+                            </td>
+
                         </tr>
                     }
+
                 </tbody>
 
                 <tfoot class="fw-semibold">
-                    @{
-                        var dugnadSum = Model.Where(x => x.Type == "Dugnad");
-                        var oppgaveSum = Model.Where(x => x.Type == "Oppgave");
-                    }
 
                     <tr class="table-primary">
                         <td></td>
                         <td colspan="2">Sum dugnader</td>
-                        <td class="text-end">@dugnadSum.Sum(x => x.Registreringer)</td>
-                        <td class="text-end">@dugnadSum.Sum(x => x.Timer).ToString("0.#")</td>
-                        <td class="text-end">@dugnadSum.Sum(x => x.Verdi).ToString("N0") kr</td>
+
+                        <td class="text-end">
+                            @dugnadSum.Sum(x => x.Registreringer)
+                        </td>
+
+                        <td class="text-end">
+                            @dugnadSum.Sum(x => x.Timer).ToString("0.#")
+                        </td>
+
+                        <td class="text-end">
+                            @dugnadSum.Sum(x => x.Verdi).ToString("N0") kr
+                        </td>
                     </tr>
 
                     <tr class="table-success">
                         <td></td>
                         <td colspan="2">Sum oppgaver</td>
-                        <td class="text-end">@oppgaveSum.Sum(x => x.Registreringer)</td>
-                        <td class="text-end">@oppgaveSum.Sum(x => x.Timer).ToString("0.#")</td>
-                        <td class="text-end">@oppgaveSum.Sum(x => x.Verdi).ToString("N0") kr</td>
+
+                        <td class="text-end">
+                            @oppgaveSum.Sum(x => x.Registreringer)
+                        </td>
+
+                        <td class="text-end">
+                            @oppgaveSum.Sum(x => x.Timer).ToString("0.#")
+                        </td>
+
+                        <td class="text-end">
+                            @oppgaveSum.Sum(x => x.Verdi).ToString("N0") kr
+                        </td>
                     </tr>
 
                     <tr class="table-secondary fw-bold">
                         <td></td>
                         <td colspan="2">Totalt</td>
-                        <td class="text-end">@Model.Sum(x => x.Registreringer)</td>
-                        <td class="text-end">@Model.Sum(x => x.Timer).ToString("0.#")</td>
-                        <td class="text-end">@Model.Sum(x => x.Verdi).ToString("N0") kr</td>
+
+                        <td class="text-end">
+                            @Model.Sum(x => x.Registreringer)
+                        </td>
+
+                        <td class="text-end">
+                            @Model.Sum(x => x.Timer).ToString("0.#")
+                        </td>
+
+                        <td class="text-end">
+                            @Model.Sum(x => x.Verdi).ToString("N0") kr
+                        </td>
                     </tr>
+
                 </tfoot>
+
             </table>
+
+        </div>
     </div>
-</div>`
+
 </div>

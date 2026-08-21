@@ -2,93 +2,236 @@
 
 <div class="row justify-content-center">
     <div class="col-12 col-lg-12">
+
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4">
 
-    @if (User.HasAdminAccess())
-    {
-        <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-        <h2>Beboere</h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-person-plus me-1"></i>
-            Legg til beboer
-        </a>
-        </div>
-    }
+                @if (User.HasAdminAccess())
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+                        <h2>Beboere</h2>
 
-<div class="table-responsive">
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-1"></i>
+                            Legg til beboer
+                        </a>
+                    </div>
+                }
 
-    <table class="table table-striped align-middle">
-    <thead>
-        <tr>
-            <th>Navn</th>
-            <th>E-post</th>
-            <th>Leilighet</th>
-                <th>Konto</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
 
-        @foreach (var beboer in Model)
-        {
-            <tr>
-                    <td>
-                        @beboer.Fornavn @beboer.Etternavn
-                    </td>
-                <td>@beboer.Epost</td>
-                    <td>
-                        @beboer.Leilighet.Seksjonsnummer /
-                        @beboer.Leilighet.Leilighetsnummer
-                    </td>  
-                    <td>
-                        @if (beboer.ApplicationUser == null)
+                @if (Model.Any())
+                {
+                    <!-- PC / nettbrett -->
+                    <div class="table-responsive d-none d-md-block">
+
+                        <table class="table table-striped align-middle">
+
+                            <thead>
+                                <tr>
+                                    <th>Navn</th>
+                                    <th>E-post</th>
+                                    <th>Leilighet</th>
+                                    <th>Konto</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var beboer in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @beboer.Fornavn @beboer.Etternavn
+                                        </td>
+
+                                        <td>
+                                            @beboer.Epost
+                                        </td>
+
+                                        <td>
+                                            @beboer.Leilighet.Seksjonsnummer /
+                                            @beboer.Leilighet.Leilighetsnummer
+                                        </td>
+
+                                        <td>
+
+                                            @if (beboer.ApplicationUser == null)
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    <i class="bi bi-person-x-fill"></i>
+                                                    Ingen konto
+                                                </span>
+                                            }
+                                            else if (beboer.ApplicationUser.IsActivated)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    Aktiv
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-clock-history"></i>
+                                                    Venter på aktivering
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                        <td class="text-nowrap">
+
+                                            @if (User.HasAdminAccess())
+                                            {
+                                                <a asp-action="Edit"
+                                                   asp-route-id="@beboer.Id"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="Rediger">
+
+                                                    <i class="bi bi-pencil"></i>
+
+                                                </a>
+
+                                                <a asp-action="Delete"
+                                                   asp-route-id="@beboer.Id"
+                                                   class="btn btn-sm btn-outline-danger">
+
+                                                    <i class="bi bi-trash me-1"></i>
+                                                    Slett
+
+                                                </a>
+                                            }
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- Mobil -->
+                    <div class="d-md-none">
+
+                        @foreach (var beboer in Model)
                         {
-                            <span class="badge bg-secondary">
-                                <i class="bi bi-person-x-fill"></i>
-                                Ingen konto
-                            </span>
-                        }
-                        else if (beboer.ApplicationUser.IsActivated)
-                        {
-                            <span class="badge bg-success">
-                                <i class="bi bi-check-circle-fill"></i>
-                                Aktiv
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-warning text-dark">
-                                <i class="bi bi-clock-history"></i>
-                                Venter på aktivering
-                            </span>
-                        }
-                    </td>
-                    <td class="text-nowrap">
-                        @if (User.HasAdminAccess())
-                        {
-                            <a asp-action="Edit"
-                            asp-route-id="@beboer.Id"
-                            class="btn btn-sm btn-outline-primary"
-                            title="Rediger">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            <div class="card shadow-sm border-0 rounded-4 mb-3 w-100 overflow-hidden">
 
-                            <a asp-action="Delete"
-                            asp-route-id="@beboer.Id"
-                            class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash me-1"></i>
-                                Slett
-                            </a>
-                        }
-                    </td>
-            </tr>
-        }
+                                <div class="card-body">
 
-    </tbody>
-</table>
-</div>
+                                    <!-- Navn -->
+                                    <h5 class="card-title mb-3">
+                                        @beboer.Fornavn @beboer.Etternavn
+                                    </h5>
+
+
+                                    <!-- E-post -->
+                                    <div class="small border-bottom py-2">
+
+                                        <div class="text-muted fw-semibold mb-1">
+                                            E-post
+                                        </div>
+
+                                        <div class="text-break">
+                                            @beboer.Epost
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- Leilighet -->
+                                    <div class="small border-bottom py-2">
+
+                                        <div class="text-muted fw-semibold mb-1">
+                                            Leilighet
+                                        </div>
+
+                                        <div>
+                                            @beboer.Leilighet.Seksjonsnummer /
+                                            @beboer.Leilighet.Leilighetsnummer
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- Konto -->
+                                    <div class="small py-2">
+
+                                        <div class="text-muted fw-semibold mb-1">
+                                            Konto
+                                        </div>
+
+                                        <div>
+
+                                            @if (beboer.ApplicationUser == null)
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    <i class="bi bi-person-x-fill"></i>
+                                                    Ingen konto
+                                                </span>
+                                            }
+                                            else if (beboer.ApplicationUser.IsActivated)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    Aktiv
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-clock-history"></i>
+                                                    Venter på aktivering
+                                                </span>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- Handlingsknapper -->
+                                    @if (User.HasAdminAccess())
+                                    {
+                                        <div class="d-flex gap-2 mt-3">
+
+                                            <a asp-action="Edit"
+                                               asp-route-id="@beboer.Id"
+                                               class="btn btn-sm btn-outline-primary flex-fill"
+                                               title="Rediger">
+
+                                                <i class="bi bi-pencil"></i>
+
+                                            </a>
+
+
+                                            <a asp-action="Delete"
+                                               asp-route-id="@beboer.Id"
+                                               class="btn btn-sm btn-outline-danger flex-fill"
+                                               title="Slett">
+
+                                                <i class="bi bi-trash"></i>
+
+                                            </a>
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+                }
             </div>
         </div>
+
     </div>
 </div>

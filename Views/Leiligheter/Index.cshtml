@@ -9,57 +9,121 @@
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4">
 
-    @if (User.HasAdminAccess())
-    {
-        <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-            <h2 class="mb-3">
-                Leiligheter
-            </h2>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>
-            Ny leilighet
-        </a>
-        </div>
-    }
+                @if (User.HasAdminAccess())
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+                        <h2 class="mb-3">
+                            Leiligheter
+                        </h2>
 
-<div class="table-responsive">
-    <table class="table table-striped align-middle">
-    <thead>
-        <tr>
-            <th>Seksjonsnummer</th>
-            <th>Leilighetsnummer</th>
-            <th>Antall beboere</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var leilighet in Model)
-        {
-            <tr>
-                <td>@leilighet.Seksjonsnummer</td>
-                <td>@leilighet.Leilighetsnummer</td>
-                <td>@leilighet.Beboere.Count</td>
-                    <td class="text-nowrap">
-                        @if (User.HasAdminAccess())
-                        {
-                            <a asp-action="Edit"
-                            asp-route-id="@leilighet.Id"
-                            class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                        <a asp-action="Create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Ny leilighet
+                        </a>
+                    </div>
+                }
 
-                            <a asp-action="Delete"
-                            asp-route-id="@leilighet.Id"
-                            class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        }
-                    </td>
-            </tr>
-        }
-    </tbody>
-</table>
-</div>
+                <!-- Desktop / nettbrett -->
+                <div class="table-responsive d-none d-md-block">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Seksjonsnummer</th>
+                                <th>Leilighetsnummer</th>
+                                <th>Antall beboere</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var leilighet in Model)
+                            {
+                                <tr>
+                                    <td>@leilighet.Seksjonsnummer</td>
+                                    <td>@leilighet.Leilighetsnummer</td>
+                                    <td>@leilighet.Beboere.Count</td>
+
+                                    <td class="text-nowrap">
+                                        @if (User.HasAdminAccess())
+                                        {
+                                            <a asp-action="Edit"
+                                               asp-route-id="@leilighet.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Rediger">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <a asp-action="Delete"
+                                               asp-route-id="@leilighet.Id"
+                                               class="btn btn-sm btn-outline-danger"
+                                               title="Slett">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobil -->
+                <div class="d-md-none">
+
+                    @foreach (var leilighet in Model)
+                    {
+                        <div class="border rounded-4 p-3 mb-3 shadow-sm">
+
+                            <div class="fw-semibold fs-5 mb-3">
+                                Leilighet @leilighet.Leilighetsnummer
+                            </div>
+
+                            <div class="mb-2">
+                                <div class="text-muted fw-semibold small">
+                                    Seksjonsnummer
+                                </div>
+                                <div>
+                                    @leilighet.Seksjonsnummer
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="text-muted fw-semibold small">
+                                    Antall beboere
+                                </div>
+                                <div>
+                                    @leilighet.Beboere.Count
+                                </div>
+                            </div>
+
+                            @if (User.HasAdminAccess())
+                            {
+                                <div class="d-flex gap-2">
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@leilighet.Id"
+                                       class="btn btn-sm btn-outline-primary flex-fill"
+                                       title="Rediger">
+                                        <i class="bi bi-pencil me-1"></i>
+                                        Rediger
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@leilighet.Id"
+                                       class="btn btn-sm btn-outline-danger flex-fill"
+                                       title="Slett">
+                                        <i class="bi bi-trash me-1"></i>
+                                        Slett
+                                    </a>
+
+                                </div>
+                            }
+
+                        </div>
+                    }
+
+                </div>
+
             </div>
         </div>
     </div>

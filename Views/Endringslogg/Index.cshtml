@@ -12,6 +12,7 @@
                 <i class="bi bi-clock-history me-2"></i>
                 Endringslogg
             </h2>
+
             <p class="text-muted mb-0">
                 Oversikt over endringer og slettinger av timeføringer.
             </p>
@@ -26,7 +27,8 @@
     }
     else
     {
-        <div class="table-responsive">
+        <!-- Desktop / nettbrett -->
+        <div class="table-responsive d-none d-md-block">
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
@@ -66,6 +68,7 @@
                                             <small class="text-muted">Før:</small>
                                             @logg.GammelKommentar
                                         </div>
+
                                         <div>
                                             <small class="text-muted">Etter:</small>
                                             @logg.NyKommentar
@@ -127,6 +130,160 @@
                     }
                 </tbody>
             </table>
+        </div>
+
+
+        <!-- Mobil -->
+        <div class="d-md-none">
+
+            @foreach (var logg in Model)
+            {
+                <div class="border rounded-4 p-3 mb-3 shadow-sm">
+
+                    <!-- Tidspunkt + handling -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+
+                        <div>
+                            <div class="text-muted fw-semibold small">
+                                Tidspunkt
+                            </div>
+
+                            <div>
+                                @logg.Tidspunkt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                        </div>
+
+                        <div>
+                            @if (logg.Handling == "Endret")
+                            {
+                                <span class="badge bg-primary">
+                                    Endret
+                                </span>
+                            }
+                            else if (logg.Handling == "Slettet")
+                            {
+                                <span class="badge bg-danger">
+                                    Slettet
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    @logg.Handling
+                                </span>
+                            }
+                        </div>
+
+                    </div>
+
+
+                    <!-- Beboer -->
+                    <div class="mb-2">
+                        <div class="text-muted fw-semibold small">
+                            Beboer
+                        </div>
+
+                        <div>
+                            @logg.Beboer.Fornavn @logg.Beboer.Etternavn
+                        </div>
+                    </div>
+
+
+                    <!-- Aktivitet -->
+                    <div class="mb-2">
+                        <div class="text-muted fw-semibold small">
+                            Aktivitet
+                        </div>
+
+                        <div>
+                            @logg.Aktivitet
+                        </div>
+                    </div>
+
+
+                    <!-- Kommentar -->
+                    <div class="mb-2">
+                        <div class="text-muted fw-semibold small">
+                            Kommentar
+                        </div>
+
+                        @if (logg.Handling == "Endret")
+                        {
+                            @if (logg.GammelKommentar != logg.NyKommentar)
+                            {
+                                <div>
+                                    <span class="text-muted small">Før:</span>
+                                    @logg.GammelKommentar
+                                </div>
+
+                                <div>
+                                    <span class="text-muted small">Etter:</span>
+                                    @logg.NyKommentar
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    @logg.NyKommentar
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div>
+                                @logg.GammelKommentar
+                            </div>
+                        }
+                    </div>
+
+
+                    <!-- Timer -->
+                    <div class="mb-2">
+                        <div class="text-muted fw-semibold small">
+                            Timer
+                        </div>
+
+                        <div>
+                            @if (logg.Handling == "Endret")
+                            {
+                                @logg.GamleTimer
+                                <span>→</span> 
+                                @logg.NyeTimer
+                            }
+                            else
+                            {
+                                @logg.GamleTimer
+                            }
+                        </div>
+                    </div>
+
+
+                    <!-- Utført av -->
+                    <div class="mb-2">
+                        <div class="text-muted fw-semibold small">
+                            Utført av
+                        </div>
+
+                        <div>
+                            @(logg.Bruker.FirstName + " " + logg.Bruker.LastName)
+                        </div>
+                    </div>
+
+
+                    <!-- Begrunnelse -->
+                    <div>
+                        <div class="text-muted fw-semibold small">
+                            Begrunnelse
+                        </div>
+
+                        <div>
+                            @logg.Begrunnelse
+                        </div>
+                    </div>
+
+                </div>
+            }
+
         </div>
     }
 </div>

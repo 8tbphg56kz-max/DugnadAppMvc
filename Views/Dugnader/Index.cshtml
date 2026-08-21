@@ -4,133 +4,271 @@
     ViewData["Title"] = "Fellesdugnader";
 }
 
-    @if (User.HasAdminAccess())
-    {
-        <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-            <h2>Fellesdugnader</h2>
+@if (User.HasAdminAccess())
+{
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <h2>Fellesdugnader</h2>
+
         <a asp-action="Create" class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i>Ny fellesdugnad
         </a>
-        </div>
-    }
+    </div>
+}
 
-    @if (Model.Any())
+@if (Model.Any())
 {
-<div class="table-responsive">
+    <!-- PC / nettbrett -->
+    <div class="table-responsive d-none d-md-block">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tittel</th>
+                    <th>Start</th>
+                    <th>Slutt</th>
+                    <th>Påmelding</th>
+                    <th>Status</th>                    
+                    <th></th>
+                </tr>
+            </thead>
 
-<table class="table table-striped">
+            <tbody>
+                @foreach (var dugnad in Model)
+                {
+                    <tr>
+                        <td class="text-nowrap">
+                            @dugnad.Tittel
+                        </td>
 
-    <thead>
-        <tr>
-            <th>Tittel</th>
-            <th>Start</th>
-            <th>Slutt</th>
-            <th>Påmelding</th>
-            <th>Status</th>
-            <th></th>
-        </tr>
-    </thead>
+                        <td class="text-nowrap">
+                            @dugnad.StartDato.ToString("dd.MM.yyyy")
+                        </td>
 
-    <tbody>
+                        <td class="text-nowrap">
+                            @dugnad.SluttDato.ToString("dd.MM.yyyy")
+                        </td>
+
+                        <td class="text-nowrap">
+                            @(dugnad.KreverPamelding ? "Ja" : "Nei")
+                        </td>
+
+                        <td class="text-nowrap">
+                            @if (dugnad.ErSynlig)
+                            {
+                                <span class="badge bg-success">Synlig</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Skjult</span>
+                            }
+                        </td>
+
+                        <td class="text-nowrap">
+                            @if (User.HasAdminAccess())
+                            {
+                                <a asp-action="Edit"
+                                   asp-route-id="@dugnad.Id"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Rediger">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            }
+
+                            <form asp-action="ToggleVisible"
+                                  asp-route-id="@dugnad.Id"
+                                  method="post"
+                                  class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
+                                @if (User.HasAdminAccess())
+                                {
+                                    @if (dugnad.ErSynlig)
+                                    {
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-warning"
+                                                title="Skjul dugnad">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-success"
+                                                title="Vis dugnad">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    }
+                                }
+                            </form>
+
+                            @if (User.HasAdminAccess())
+                            {
+                                <a asp-action="Delete"
+                                   asp-route-id="@dugnad.Id"
+                                   class="btn btn-sm btn-outline-danger"
+                                   title="Slett dugnad">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Mobil -->
+    <div class="d-md-none">
 
         @foreach (var dugnad in Model)
         {
-            <tr>
+            <div class="card shadow-sm border-0 rounded-4 mb-3 w-100 overflow-hidden">
 
-                <td>@dugnad.Tittel</td>
+                <div class="card-body">
 
-                <td>
-                    @dugnad.StartDato.ToString("dd.MM.yyyy")
-                </td>
+                    <!-- Tittel og status -->
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
 
-                <td>
-                    @dugnad.SluttDato.ToString("dd.MM.yyyy")
-                </td>
+                        <h5 class="card-title mb-0 text-break">
+                            @dugnad.Tittel
+                        </h5>
 
-                <td>
-                    @(dugnad.KreverPamelding ? "Ja" : "Nei")
-                </td>
-                <td>
-                    @if (dugnad.ErSynlig)
-                    {
-                        <span class="badge bg-success">Synlig</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Skjult</span>
-                    }
-                </td>
+                        @if (dugnad.ErSynlig)
+                        {
+                            <span class="badge bg-success flex-shrink-0">
+                                Synlig
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary flex-shrink-0">
+                                Skjult
+                            </span>
+                        }
 
-                <td>
+                    </div>
 
+
+                    <!-- Informasjon -->
+                    <div class="small">
+
+                        <div class="row border-bottom py-2">
+                            <div class="col-5 text-muted">
+                                Start
+                            </div>
+
+                            <div class="col-7">
+                                @dugnad.StartDato.ToString("dd.MM.yyyy")
+                            </div>
+                        </div>
+
+
+                        <div class="row border-bottom py-2">
+                            <div class="col-5 text-muted">
+                                Slutt
+                            </div>
+
+                            <div class="col-7">
+                                @dugnad.SluttDato.ToString("dd.MM.yyyy")
+                            </div>
+                        </div>
+
+
+                        <div class="row py-2">
+                            <div class="col-5 text-muted">
+                                Påmelding
+                            </div>
+
+                            <div class="col-7">
+                                @(dugnad.KreverPamelding ? "Ja" : "Nei")
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Handlingsknapper -->
                     @if (User.HasAdminAccess())
                     {
-                        <a asp-action="Edit"
-                        asp-route-id="@dugnad.Id"
-                        class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                    }
+                        <div class="d-flex gap-2 mt-3">
 
-                    <form asp-action="ToggleVisible"
-                          asp-route-id="@dugnad.Id"
-                          method="post"
-                          class="d-inline">
+                            <a asp-action="Edit"
+                               asp-route-id="@dugnad.Id"
+                               class="btn btn-sm btn-outline-primary flex-fill"
+                               title="Rediger">
 
-                        @Html.AntiForgeryToken()
+                                <i class="bi bi-pencil"></i>
 
-                        @if (User.HasAdminAccess())
-                            {
+                            </a>
+
+
+                            <form asp-action="ToggleVisible"
+                                  asp-route-id="@dugnad.Id"
+                                  method="post"
+                                  class="flex-fill">
+
+                                @Html.AntiForgeryToken()
+
                                 @if (dugnad.ErSynlig)
                                 {
                                     <button type="submit"
-                                    class="btn btn-sm btn-outline-warning"
-                                    title="Skjul dugnad">
+                                            class="btn btn-sm btn-outline-warning w-100"
+                                            title="Skjul dugnad">
+
                                         <i class="bi bi-eye-slash"></i>
+
                                     </button>
                                 }
                                 else
                                 {
                                     <button type="submit"
-                                    class="btn btn-sm btn-outline-success"
-                                    title="Vis dugnad">
+                                            class="btn btn-sm btn-outline-success w-100"
+                                            title="Vis dugnad">
+
                                         <i class="bi bi-eye"></i>
+
                                     </button>
                                 }
-                            }
-                        </form>
 
-                    @if (User.HasAdminAccess())
-                    {
-                        <a asp-action="Delete"
-                        asp-route-id="@dugnad.Id"
-                        class="btn btn-sm btn-outline-danger"
-                        title="Slett dugnad">
-                            <i class="bi bi-trash"></i>
-                        </a>
+                            </form>
+
+
+                            <a asp-action="Delete"
+                               asp-route-id="@dugnad.Id"
+                               class="btn btn-sm btn-outline-danger flex-fill"
+                               title="Slett dugnad">
+
+                                <i class="bi bi-trash"></i>
+
+                            </a>
+
+                        </div>
                     }
-                </td>
 
-            </tr>
+                </div>
+            </div>
         }
 
-    </tbody>
-
-</table>
     </div>
 }
 else
 {
     <div class="card shadow-sm border-0 rounded-4">
         <div class="card-body text-center py-5">
-            <i class="bi bi-calendar-x text-muted" style="font-size: 2.5rem;"></i>
 
-            <h5 class="mt-3 mb-2">Ingen fellesdugnader</h5>
+            <i class="bi bi-calendar-x text-muted"
+               style="font-size: 2.5rem;"></i>
+
+            <h5 class="mt-3 mb-2">
+                Ingen fellesdugnader
+            </h5>
 
             <p class="text-muted mb-0">
                 Det er ingen fellesdugnader registrert akkurat nå.
             </p>
+
         </div>
     </div>
-
 }
+
