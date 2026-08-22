@@ -21,7 +21,7 @@ namespace DugnadAppMvc.Controllers
         {
             var leiligheter = await _context.Leiligheter
                 .Include(l => l.Beboere)
-                .OrderBy(l => l.Seksjonsnummer)
+                .OrderBy(l => l.Leilighetsnummer)
                 .ToListAsync();
 
             return View(leiligheter);

@@ -13,13 +13,7 @@
 
 <form asp-action="Edit" method="post">
 
-    <input type="hidden" asp-for="Id" />
-
-    <div class="mb-3">
-        <label asp-for="Seksjonsnummer" class="form-label felt-overskrift"></label>
-        <input asp-for="Seksjonsnummer" class="form-control" />
-        <span asp-validation-for="Seksjonsnummer" class="text-danger"></span>
-    </div>
+    <input type="hidden" asp-for="Id" />  
 
     <div class="mb-3">
         <label asp-for="Leilighetsnummer" class="form-label felt-overskrift"></label>

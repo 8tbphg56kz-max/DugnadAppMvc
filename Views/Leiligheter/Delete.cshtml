@@ -21,14 +21,7 @@
 <div class="card">
     <div class="card-body">
 
-        <dl class="row">
-            <dt class="col-sm-4">
-                Seksjonsnummer
-            </dt>
-            <dd class="col-sm-8">
-                @Model.Seksjonsnummer
-            </dd>
-
+        <dl class="row">   
             <dt class="col-sm-4">
                 Leilighetsnummer
             </dt>
@@ -53,7 +46,7 @@
 
     @if (!Model.Beboere.Any())
     {
-        <button type="submit" class="btn btn-danger">
+        <button type="submit" class="btn btn-danger mt-2">
             Slett
         </button>
     }

@@ -86,10 +86,8 @@ namespace DugnadAppMvc.Controllers
                 return NotFound();
 
             ViewBag.LeilighetId = new SelectList(
-                _context.Leiligheter.OrderBy(l => l.Seksjonsnummer),
-                "Id",
-                "Seksjonsnummer",
-                beboer.LeilighetId);
+                   "Id",
+                 beboer.LeilighetId);
 
             return View(beboer);
 
@@ -106,9 +104,7 @@ namespace DugnadAppMvc.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.LeilighetId = new SelectList(
-                _context.Leiligheter.OrderBy(l => l.Seksjonsnummer),
                 "Id",
-                "Seksjonsnummer",
                 beboer.LeilighetId);
 
                 return View(beboer);
@@ -201,10 +197,7 @@ namespace DugnadAppMvc.Controllers
         private void FyllLeiligheter()
         {
             ViewBag.LeilighetId = new SelectList(
-                _context.Leiligheter
-                    .OrderBy(l => l.Seksjonsnummer),
-                "Id",
-                "Seksjonsnummer");
+                 "Id");
         }
     }
 }

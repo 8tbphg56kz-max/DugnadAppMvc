@@ -34,14 +34,13 @@ namespace DugnadAppMvc.Controllers
    .GroupBy(d => new
    {
        d.Beboer.Leilighet.Id,
-       d.Beboer.Leilighet.Seksjonsnummer,
        d.Beboer.Leilighet.Leilighetsnummer
    })
     .Select(g => new RapportTimerPrLeilighetViewModel
     {
         LeilighetId = g.Key.Id,
 
-        Visningsnavn = $"Seksjon {g.Key.Seksjonsnummer} - {g.Key.Leilighetsnummer}",
+        Visningsnavn = g.Key.Leilighetsnummer,
 
         Leilighetsnummer = g.Key.Leilighetsnummer,
 

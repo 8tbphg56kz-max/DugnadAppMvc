@@ -28,7 +28,6 @@
                     <table class="table table-striped align-middle">
                         <thead>
                             <tr>
-                                <th>Seksjonsnummer</th>
                                 <th>Leilighetsnummer</th>
                                 <th>Antall beboere</th>
                                 <th></th>
@@ -38,8 +37,7 @@
                         <tbody>
                             @foreach (var leilighet in Model)
                             {
-                                <tr>
-                                    <td>@leilighet.Seksjonsnummer</td>
+                                <tr>                                    
                                     <td>@leilighet.Leilighetsnummer</td>
                                     <td>@leilighet.Beboere.Count</td>
 
@@ -76,16 +74,7 @@
 
                             <div class="fw-semibold fs-5 mb-3">
                                 Leilighet @leilighet.Leilighetsnummer
-                            </div>
-
-                            <div class="mb-2">
-                                <div class="text-muted fw-semibold small">
-                                    Seksjonsnummer
-                                </div>
-                                <div>
-                                    @leilighet.Seksjonsnummer
-                                </div>
-                            </div>
+                            </div>                           
 
                             <div class="mb-3">
                                 <div class="text-muted fw-semibold small">

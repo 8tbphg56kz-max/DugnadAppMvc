@@ -50,12 +50,7 @@ namespace DugnadAppMvc.Data
                 .WithMany(l => l.Beboere)
                 .HasForeignKey(b => b.LeilighetId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Unik seksjonsnummer
-            builder.Entity<Leilighet>()
-                .HasIndex(l => l.Seksjonsnummer)
-                .IsUnique();
-
+            
             // Unik e-post
             builder.Entity<Beboer>()
                 .HasIndex(b => b.Epost)

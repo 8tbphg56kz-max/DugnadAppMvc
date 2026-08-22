@@ -56,8 +56,7 @@ namespace DugnadAppMvc.Controllers
             // Opprett første leilighet
             var leilighet = new Leilighet
             {
-                Seksjonsnummer = 1,
-                Leilighetsnummer = model.Leilighet
+               Leilighetsnummer = model.Leilighet
             };
 
             _context.Leiligheter.Add(leilighet);
