@@ -4,9 +4,45 @@
     ViewData["Title"] = "Administrer påmeldinger";
 }
 
+<style>
+    /* Mobilvisning */
+    @@media (max-width: 767.98px) {
+
+        .pamelding-table {
+            display: none;
+        }
+
+        .pamelding-card {
+            display: block;
+        }
+
+        .legg-til-form .form-select {
+            width: 100%;
+        }
+
+        .legg-til-form .btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .tilbake-knapp {
+            width: 100%;
+        }
+    }
+
+    /* PC/nettbrett */
+    @@media (min-width: 768px) {
+
+        .pamelding-card {
+            display: none;
+        }
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-12 col-xl-11">
-            <div class="card-body p-4">
+
+        <div class="card-body p-4">
 
             @if (TempData["ErrorMessage"] != null)
             {
@@ -28,23 +64,29 @@
                 </div>
             }
 
-<h2>@Model.Oppgave.Navn</h2>
+            <h2>@Model.Oppgave.Navn</h2>
 
-<div class="card mt-3">
-    <div class="card-header">
-        Påmeldte
-    </div>
+            <div class="card mt-3">
 
-    <div class="card-body">
+                <div class="card-header">
+                    Påmeldte
+                </div>
+
+                <div class="card-body">
 
                     @if (Model.PameldingStatus.Any())
                     {
-                        <div class="mb-2">
+                        <div class="mb-3">
                             <strong>@Model.PameldingStatus.Count</strong> påmeldte
                         </div>
 
-                        <div class="table-responsive">
+                        <!-- ========================= -->
+                        <!-- PC / NETTBRETT - TABELL -->
+                        <!-- ========================= -->
+
+                        <div class="table-responsive pamelding-table">
                             <table class="table table-hover align-middle">
+
                                 <thead>
                                     <tr>
                                         <th>Beboer</th>
@@ -53,6 +95,7 @@
                                         <th>Registrert timer</th>
                                         <th>Timer</th>
                                         <th>Status</th>
+
                                         @if (User.HasAdminAccess())
                                         {
                                             <th></th>
@@ -61,9 +104,11 @@
                                 </thead>
 
                                 <tbody>
+
                                     @foreach (var item in Model.PameldingStatus)
                                     {
                                         <tr>
+
                                             <td>
                                                 <strong>@item.Navn</strong>
 
@@ -96,7 +141,9 @@
                                                     {
                                                         <br />
                                                         <small class="text-muted">
-                                                            @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                                            @item.UtfortDato.Value
+                                                            .ToLocalTime()
+                                                            .ToString("dd.MM.yyyy")
                                                         </small>
                                                     }
                                                 }
@@ -109,7 +156,7 @@
                                                 }
                                             </td>
 
-                                            <td class="align-top">
+                                            <td>
                                                 @if (item.HarRegistrertTimer)
                                                 {
                                                     <span class="text-success">
@@ -126,7 +173,7 @@
                                                 }
                                             </td>
 
-                                            <td class="align-top">
+                                            <td>
                                                 @if (item.AntallTimer.HasValue)
                                                 {
                                                     @item.AntallTimer.Value.ToString("0.00")
@@ -137,7 +184,7 @@
                                                 }
                                             </td>
 
-                                            <td class="align-top">
+                                            <td>
                                                 @if (item.Status == "Fullført")
                                                 {
                                                     <span class="badge bg-success">
@@ -160,7 +207,8 @@
 
                                             @if (User.HasAdminAccess())
                                             {
-                                                <td>
+                                                <td class="text-nowrap">
+
                                                     <form asp-action="MeldAvSomAdministrator"
                                                           method="post">
 
@@ -172,17 +220,222 @@
 
                                                         <button type="submit"
                                                                 class="btn btn-sm btn-outline-danger">
+
                                                             <i class="bi bi-person-dash"></i>
                                                             Meld av
+
                                                         </button>
+
                                                     </form>
+
                                                 </td>
                                             }
+
                                         </tr>
                                     }
+
                                 </tbody>
+
                             </table>
                         </div>
+
+
+                        <!-- ========================= -->
+                        <!-- MOBIL - KORTVISNING -->
+                        <!-- ========================= -->
+
+                        <div class="pamelding-card">
+
+                            @foreach (var item in Model.PameldingStatus)
+                            {
+                                <div class="card border mb-3">
+
+                                    <div class="card-body">
+
+                                        <div class="mb-3">
+
+                                            <h5 class="mb-1">
+                                                @item.Navn
+                                            </h5>
+
+                                            @if (!string.IsNullOrWhiteSpace(item.Leilighetsnummer))
+                                            {
+                                                <div class="text-muted small">
+                                                    Leil. @item.Leilighetsnummer
+                                                </div>
+                                            }
+
+                                        </div>
+
+
+                                        <div class="row g-3">
+
+                                            <div class="col-6">
+
+                                                <div class="text-muted small">
+                                                    Påmeldt
+                                                </div>
+
+                                                <div>
+                                                    @item.PameldtDato.ToLocalTime().ToString("dd.MM.yyyy")
+
+                                                    <br />
+
+                                                    <small class="text-muted">
+                                                        kl.
+                                                        @item.PameldtDato.ToLocalTime().ToString("HH:mm")
+                                                    </small>
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="col-6">
+
+                                                <div class="text-muted small">
+                                                    Utført
+                                                </div>
+
+                                                @if (item.ErUtfort)
+                                                {
+                                                    <div class="text-success">
+
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        Ja
+
+                                                        @if (item.UtfortDato.HasValue)
+                                                        {
+                                                            <br />
+
+                                                            <small class="text-muted">
+                                                                @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                                            </small>
+                                                        }
+
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-warning">
+
+                                                        <i class="bi bi-clock"></i>
+                                                        Ikke utført
+
+                                                    </div>
+                                                }
+
+                                            </div>
+
+
+                                            <div class="col-6">
+
+                                                <div class="text-muted small">
+                                                    Registrert timer
+                                                </div>
+
+                                                @if (item.HarRegistrertTimer)
+                                                {
+                                                    <div class="text-success">
+
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        Ja
+
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-muted">
+
+                                                        <i class="bi bi-dash-circle-fill"></i>
+                                                        Ingen
+
+                                                    </div>
+                                                }
+
+                                            </div>
+
+
+                                            <div class="col-6">
+
+                                                <div class="text-muted small">
+                                                    Timer
+                                                </div>
+
+                                                <div>
+                                                    @if (item.AntallTimer.HasValue)
+                                                    {
+                                                        @item.AntallTimer.Value.ToString("0.00")
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">–</span>
+                                                    }
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="col-12">
+
+                                                <div class="text-muted small mb-1">
+                                                    Status
+                                                </div>
+
+                                                @if (item.Status == "Fullført")
+                                                {
+                                                    <span class="badge bg-success">
+                                                        Fullført
+                                                    </span>
+                                                }
+                                                else if (item.Status == "Utført")
+                                                {
+                                                    <span class="badge bg-info text-dark">
+                                                        Utført
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        Påmeldt
+                                                    </span>
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+
+                                        @if (User.HasAdminAccess())
+                                        {
+                                            <hr />
+
+                                            <form asp-action="MeldAvSomAdministrator"
+                                                  method="post">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="pameldingId"
+                                                       value="@item.PameldingId" />
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger w-100">
+
+                                                    <i class="bi bi-person-dash"></i>
+                                                    Meld av
+
+                                                </button>
+
+                                            </form>
+                                        }
+
+                                    </div>
+
+                                </div>
+                            }
+
+                        </div>
+
                     }
                     else
                     {
@@ -191,28 +444,30 @@
                         </p>
                     }
 
+
                     @if (User.HasAdminAccess())
                     {
+                        <hr />
 
-        <hr />
+                        <h5>Legg til beboer</h5>
 
-                       <h5>Legg til beboer</h5>
-
-                        <form asp-action="MeldPaSomAdministrator" method="post">
+                        <form asp-action="MeldPaSomAdministrator"
+                              method="post"
+                              class="legg-til-form">
 
                             @Html.AntiForgeryToken()
 
                             <input type="hidden"
-                            name="oppgaveId"
-                            value="@Model.Oppgave.Id" />
+                                   name="oppgaveId"
+                                   value="@Model.Oppgave.Id" />
 
-                            <div class="row">
+                            <div class="row g-2">
 
                                 <div class="col-md-6">
 
                                     <select asp-for="ValgtBeboerId"
-                                    asp-items="Model.LedigeBeboere"
-                                    class="form-select">
+                                            asp-items="Model.LedigeBeboere"
+                                            class="form-select">
 
                                         <option value="">
                                             Velg beboer...
@@ -224,9 +479,12 @@
 
                                 <div class="col-auto">
 
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit"
+                                            class="btn btn-primary">
+
                                         <i class="bi bi-person-plus"></i>
                                         Meld på
+
                                     </button>
 
                                 </div>
@@ -235,14 +493,24 @@
 
                         </form>
                     }
-    </div>
-    </div>
 
-<div class="mt-3">
-    <a asp-action="Index" class="btn btn-secondary">
-        Tilbake
-    </a>
-</div>
+                </div>
+
+            </div>
+
+
+            <div class="mt-3">
+
+                <a asp-action="Index"
+                   class="btn btn-secondary tilbake-knapp">
+
+                    Tilbake
+
+                </a>
+
+            </div>
+
         </div>
+
     </div>
 </div>

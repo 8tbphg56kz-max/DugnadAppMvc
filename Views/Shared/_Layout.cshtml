@@ -20,7 +20,9 @@
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DugnadAppMvc.styles.css" asp-append-version="true" />    
+    <link rel="stylesheet" href="~/DugnadAppMvc.styles.css" asp-append-version="true" />  
+    <link rel="manifest" href="~/manifest.json">
+    <meta name="theme-color" content="#ffffff">
 </head>
 <body>
     <header>
@@ -350,5 +352,13 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/service-worker.js');
+        });
+        }
+    </script>
 </body>
 </html>

@@ -6,192 +6,531 @@
     ViewData["Title"] = "Oppgaver";
 }
 
-<div class="d-flex justify-content-between align-items-end mb-3 mt-3">
+<style>
+    @@media (max-width: 767.98px) {
 
-    <div class="d-flex align-items-end gap-4">
-
-        <h2 class="mb-0">Oppgaver</h2>
-
-        <form asp-action="Index" method="get" class="mb-0">
-
-            <div class="d-flex align-items-center gap-2">
-                <label asp-for="ErUtfort" class="form-label mb-0 fw-semibold">
-                    Status
-                </label>
-
-                <select asp-for="ErUtfort"
-                        class="form-select"
-                        style="width: 220px;"
-                        onchange="this.form.submit()">
-                    <option value="">Alle</option>
-                    <option value="false">Aktive</option>
-                    <option value="true">Utførte</option>
-                </select>
-            </div>
-
-        </form>
-
-    </div>
-
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i>
-        Ny oppgave
-    </a>
-
-</div>
-
-@if (Model.Oppgaver.Any())
-{
-<div class="table-responsive">
-
-<table class="table table-striped table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>Oppgave</th>
-            <th>Fra dato</th>
-            <th>Frist</th>
-            <th>Prioritet</th>
-            <th>Status</th>
-            <th>Påmeldt</th>
-            <th>Timer</th>
-            <th>Bekreftelse</th>
-            <th></th>
-        </tr>
-    </thead>
-
-    <tbody>
-
-        @foreach (var item in Model.Oppgaver)
-        {            
-            <tr class="@(item.ErUtført ? "table-success" : "")">
-
-                <td>
-                    <strong>
-                        <a asp-action="Edit"
-                           asp-route-id="@item.Id"
-                           class="text-decoration-none">
-                            @item.Navn
-                        </a>
-                    </strong>
-
-                    @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
-                    {
-                        <div class="text-muted small">
-                            @Html.Raw(TextHelper.FormaterLinjeskift(item.Beskrivelse.Length > 80
-                                ? item.Beskrivelse[..80] + "..."
-                                : item.Beskrivelse))
-                        </div>
-                    }
-                </td>
-
-                <td>
-                    @item.FraDato.ToString("dd.MM.yyyy")
-                </td>
-
-                <td>
-                    @item.Frist.ToString("dd.MM.yyyy")
-                </td>
-
-                <td>
-
-                    @switch (item.Prioritet)
-                    {
-                        case OppgavePrioritet.Høy:
-                            <span class="badge bg-danger">Høy</span>
-                            break;
-
-                        case OppgavePrioritet.Normal:
-                            <span class="badge bg-warning text-dark">Normal</span>
-                            break;
-
-                        default:
-                            <span class="badge bg-success">Lav</span>
-                            break;
-                    }
-
-                </td>
-
-                <td>
-
-                    @if (item.ErUtført)
-                    {
-                        <span class="badge bg-success">Utført</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Aktiv</span>
-                    }
-
-                </td>
-
-                <td>
-                    @{
-                        var antallPameldte = item.Pameldinger.Count;
-
-                        var badgeClass =
-                            antallPameldte == 0
-                                ? "bg-danger"
-                                : antallPameldte < item.AntallPersoner
-                                    ? "bg-warning text-dark"
-                                    : "bg-success";
-                    }
-
-                    <a asp-action="AdministrerPameldinger"
-                       asp-route-id="@item.Id"
-                       class="text-decoration-none">
-                        <span class="badge @badgeClass">
-                            @antallPameldte / @item.AntallPersoner
-                        </span>
-                    </a>
-                </td>
-
-                <td>
-                    @(item.KanRegistrereTimer ? "Ja" : "Nei")
-                </td>
-
-                <td>
-                    @(item.KreverBekreftelse ? "Ja" : "Nei")
-                </td>
-
-                <td class="text-nowrap">
-                            @if (User.HasAdminAccess())
-                            {
-
-                    <a asp-action="Edit"
-                       asp-route-id="@item.Id"
-                       class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-
-                    <a asp-action="Delete"
-                       asp-route-id="@item.Id"
-                       class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                    </a>
-                            }
-                </td>
-
-            </tr>
+        .oppgave-header {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
         }
 
-    </tbody>
-</table>
-    </div>
-}
-else
-{
-    <div class="card shadow-sm border-0 rounded-4 mt-3">
-        <div class="card-body text-center py-5">
+        .oppgave-header-left {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
 
-            <i class="bi bi-check2-square text-muted" style="font-size: 2.5rem;"></i>
+        .oppgave-header h2 {
+            margin-bottom: 0;
+        }
 
-            <h5 class="mt-3 mb-2">Ingen oppgaver</h5>
+        .oppgave-filter {
+            width: 100%;
+        }
 
-            <p class="text-muted mb-0">
-                Det finnes ingen oppgaver som matcher valgt filter.
-            </p>
+            .oppgave-filter .form-select {
+                width: 100% !important;
+            }
+
+        .oppgave-header .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="container-fluid px-2 px-md-4">
+
+    <!-- Topp -->
+    <div class="oppgave-header mb-3 mt-3">
+
+        <div class="oppgave-header-left">
+
+            <h2>Oppgaver</h2>
+
+            <form asp-action="Index"
+                  method="get"
+                  class="oppgave-filter">
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <label asp-for="ErUtfort"
+                           class="form-label mb-0 fw-semibold">
+                        Status
+                    </label>
+
+                    <select asp-for="ErUtfort"
+                            class="form-select"
+                            onchange="this.form.submit()">
+
+                        <option value="">Alle</option>
+                        <option value="false">Aktive</option>
+                        <option value="true">Utførte</option>
+
+                    </select>
+
+                </div>
+
+            </form>
 
         </div>
+
+
+        @if (User.HasAdminAccess())
+        {
+            <a asp-action="Create"
+               class="btn btn-primary text-nowrap">
+
+                <i class="bi bi-plus-circle me-1"></i>
+                Ny oppgave
+
+            </a>
+        }
+
     </div>
 
-}
+
+    @if (Model.Oppgaver.Any())
+    {
+        <!-- PC / nettbrett -->
+        <div class="table-responsive d-none d-md-block">
+
+            <table class="table table-striped table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>Oppgave</th>
+                        <th>Fra dato</th>
+                        <th>Frist</th>
+                        <th>Prioritet</th>
+                        <th>Status</th>
+                        <th>Påmeldt</th>
+                        <th>Timer</th>
+                        <th>Bekreftelse</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in Model.Oppgaver)
+                    {
+                        <tr class="@(item.ErUtført ? "table-success" : "")">
+
+                            <td style="min-width: 180px;">
+
+                                <strong>
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="text-decoration-none">
+
+                                        @item.Navn
+
+                                    </a>
+                                </strong>
+
+                                @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
+                                {
+                                    <div class="text-muted small">
+
+                                        @Html.Raw(
+                                            TextHelper.FormaterLinjeskift(
+                                                item.Beskrivelse.Length > 80
+                                                    ? item.Beskrivelse[..80] + "..."
+                                                    : item.Beskrivelse
+                                            )
+                                        )
+
+                                    </div>
+                                }
+
+                            </td>
+
+
+                            <td>
+                                @item.FraDato.ToString("dd.MM.yyyy")
+                            </td>
+
+
+                            <td>
+                                @item.Frist.ToString("dd.MM.yyyy")
+                            </td>
+
+
+                            <td>
+
+                                @switch (item.Prioritet)
+                                {
+                                    case OppgavePrioritet.Høy:
+
+                                        <span class="badge bg-danger">
+                                            Høy
+                                        </span>
+
+                                        break;
+
+                                    case OppgavePrioritet.Normal:
+
+                                        <span class="badge bg-warning text-dark">
+                                            Normal
+                                        </span>
+
+                                        break;
+
+                                    default:
+
+                                        <span class="badge bg-success">
+                                            Lav
+                                        </span>
+
+                                        break;
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                @if (item.ErUtført)
+                                {
+                                    <span class="badge bg-success">
+                                        Utført
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        Aktiv
+                                    </span>
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                @{
+                                    var antallPameldte = item.Pameldinger.Count;
+
+                                    var badgeClass =
+                                        antallPameldte == 0
+                                            ? "bg-danger"
+                                            : antallPameldte < item.AntallPersoner
+                                                ? "bg-warning text-dark"
+                                                : "bg-success";
+                                }
+
+                                <a asp-action="AdministrerPameldinger"
+                                   asp-route-id="@item.Id"
+                                   class="text-decoration-none">
+
+                                    <span class="badge @badgeClass">
+                                        @antallPameldte / @item.AntallPersoner
+                                    </span>
+
+                                </a>
+
+                            </td>
+
+
+                            <td>
+                                @(item.KanRegistrereTimer ? "Ja" : "Nei")
+                            </td>
+
+
+                            <td>
+                                @(item.KreverBekreftelse ? "Ja" : "Nei")
+                            </td>
+
+
+                            <td class="text-nowrap">
+
+                                @if (User.HasAdminAccess())
+                                {
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Rediger">
+
+                                        <i class="bi bi-pencil"></i>
+
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-danger"
+                                       title="Slett">
+
+                                        <i class="bi bi-trash"></i>
+
+                                    </a>
+                                }
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Mobil -->
+        <div class="d-md-none">
+
+            @foreach (var item in Model.Oppgaver)
+            {
+                var antallPameldte = item.Pameldinger.Count;
+
+                var badgeClass =
+                    antallPameldte == 0
+                        ? "bg-danger"
+                        : antallPameldte < item.AntallPersoner
+                            ? "bg-warning text-dark"
+                            : "bg-success";
+
+                <div class="card shadow-sm border-0 rounded-4 mb-3
+                    @(item.ErUtført ? "border border-success" : "")">
+
+                    <div class="card-body">
+
+                        <!-- Tittel og status -->
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+
+                            <div class="flex-grow-1">
+
+                                <h5 class="card-title mb-1">
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="text-decoration-none">
+
+                                        @item.Navn
+
+                                    </a>
+
+                                </h5>
+
+                                @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
+                                {
+                                    <div class="text-muted small">
+
+                                        @Html.Raw(
+                                            TextHelper.FormaterLinjeskift(
+                                                item.Beskrivelse.Length > 120
+                                                    ? item.Beskrivelse[..120] + "..."
+                                                    : item.Beskrivelse
+                                            )
+                                        )
+
+                                    </div>
+                                }
+
+                            </div>
+
+
+                            @if (item.ErUtført)
+                            {
+                                <span class="badge bg-success flex-shrink-0">
+                                    Utført
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary flex-shrink-0">
+                                    Aktiv
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <!-- Frist -->
+                        <div class="row border-bottom py-2">
+
+                            <div class="col-5 text-muted fw-semibold">
+                                Frist
+                            </div>
+
+                            <div class="col-7">
+                                @item.Frist.ToString("dd.MM.yyyy")
+                            </div>
+
+                        </div>
+
+
+                        <!-- Prioritet -->
+                        <div class="row border-bottom py-2">
+
+                            <div class="col-5 text-muted fw-semibold">
+                                Prioritet
+                            </div>
+
+                            <div class="col-7">
+
+                                @switch (item.Prioritet)
+                                {
+                                    case OppgavePrioritet.Høy:
+
+                                        <span class="badge bg-danger">
+                                            Høy
+                                        </span>
+
+                                        break;
+
+                                    case OppgavePrioritet.Normal:
+
+                                        <span class="badge bg-warning text-dark">
+                                            Normal
+                                        </span>
+
+                                        break;
+
+                                    default:
+
+                                        <span class="badge bg-success">
+                                            Lav
+                                        </span>
+
+                                        break;
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Påmeldt -->
+                        <div class="row border-bottom py-2">
+
+                            <div class="col-5 text-muted fw-semibold">
+                                Påmeldt
+                            </div>
+
+                            <div class="col-7">
+
+                                <a asp-action="AdministrerPameldinger"
+                                   asp-route-id="@item.Id"
+                                   class="text-decoration-none">
+
+                                    <span class="badge @badgeClass">
+                                        @antallPameldte / @item.AntallPersoner
+                                    </span>
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Fra dato -->
+                        <div class="row border-bottom py-2">
+
+                            <div class="col-5 text-muted fw-semibold">
+                                Fra dato
+                            </div>
+
+                            <div class="col-7">
+                                @item.FraDato.ToString("dd.MM.yyyy")
+                            </div>
+
+                        </div>
+
+
+                        <!-- Timer -->
+                        <div class="row border-bottom py-2">
+
+                            <div class="col-5 text-muted fw-semibold">
+                                Timer
+                            </div>
+
+                            <div class="col-7">
+                                @(item.KanRegistrereTimer ? "Ja" : "Nei")
+                            </div>
+
+                        </div>
+
+
+                        <!-- Bekreftelse -->
+                        <div class="row py-2">
+
+                            <div class="col-5 text-muted fw-semibold">
+                                Bekreftelse
+                            </div>
+
+                            <div class="col-7">
+                                @(item.KreverBekreftelse ? "Ja" : "Nei")
+                            </div>
+
+                        </div>
+
+
+                        <!-- Admin-knapper -->
+                        @if (User.HasAdminAccess())
+                        {
+                            <div class="d-flex gap-2 mt-3">
+
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-primary flex-fill"
+                                   title="Rediger">
+
+                                    <i class="bi bi-pencil me-1"></i>
+                                    Rediger
+
+                                </a>
+
+
+                                <a asp-action="Delete"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-danger flex-fill"
+                                   title="Slett">
+
+                                    <i class="bi bi-trash me-1"></i>
+                                    Slett
+
+                                </a>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-4 mt-3">
+
+            <div class="card-body text-center py-5">
+
+                <i class="bi bi-check2-square text-muted"
+                   style="font-size: 2.5rem;"></i>
+
+                <h5 class="mt-3 mb-2">
+                    Ingen oppgaver
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Det finnes ingen oppgaver som matcher valgt filter.
+                </p>
+
+            </div>
+
+        </div>
+    }
+
+</div>
