@@ -32,8 +32,13 @@ namespace DugnadAppMvc.Controllers
             {
                 AntallBeboere = await _context.Beboere.CountAsync(),
 
-                AntallAktiveDugnader = await _context.Dugnader
-        .CountAsync(d => d.ErSynlig),
+                AntallAktiveDugnader =
+    await _context.Dugnader.CountAsync(d => d.ErSynlig)
+    + await _context.Oppgaver.CountAsync(o => !o.ErUtført),
+
+                AntallUtforteDugnader =
+    await _context.Dugnader.CountAsync(d => !d.ErSynlig)
+    + await _context.Oppgaver.CountAsync(o => o.ErUtført),
 
                 RegistrerteTimer = registrerteTimer,
 

@@ -6,6 +6,8 @@
 
         public int AntallAktiveDugnader { get; set; }
 
+        public int AntallUtforteDugnader { get; set; }
+
         public decimal RegistrerteTimer { get; set; }
 
         public int Dugnadsbudsjett { get; set; }
