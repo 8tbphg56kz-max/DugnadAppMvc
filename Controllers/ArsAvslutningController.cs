@@ -222,6 +222,15 @@ public class ArsAvslutningController : Controller
             _context.Dugnader.RemoveRange(dugnader);
 
             // ---------------------------------------------
+            // Slett Endringslogger
+            // ---------------------------------------------
+
+            var endringslogger =
+                await _context.Endringslogger.ToListAsync();
+
+            _context.Endringslogger.RemoveRange(endringslogger);
+
+            // ---------------------------------------------
             // Lagre statistikk + sletting
             // ---------------------------------------------
 
