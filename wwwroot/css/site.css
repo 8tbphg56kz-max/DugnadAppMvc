@@ -249,3 +249,50 @@ body {
     font-size: 0.95rem;
 }
 
+/* -------------------------------------------------
+   Mobilmeny
+   ------------------------------------------------- */
+@media (max-width: 991.98px) {
+
+    /* Selve menyområdet legges på egen rad */
+    .navbar-collapse.show,
+    .navbar-collapse.collapsing {
+        display: flex !important;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    /* Hovedmenyen på én rad */
+    .navbar-collapse .primary-nav {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        flex-grow: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Brukermenyen på samme rad */
+    .navbar-collapse .account-nav {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        margin-left: auto !important;
+    }
+
+    /* Litt mindre avstand på mobil */
+    .navbar-collapse .nav-link {
+        white-space: nowrap;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Unngå at dropdown-menyen påvirker bredden */
+    .navbar-collapse .dropdown-menu {
+        position: absolute;
+    }
+}
+

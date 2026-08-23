@@ -50,7 +50,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav flex-grow-1 primary-nav">
 
                         @if (User.HasAdminAccess())
                         {
@@ -252,7 +252,7 @@
                         }
 
                     </ul>
-                    <ul class="navbar-nav ms-4">
+                    <ul class="navbar-nav ms-4 account-nav">
 
                         @{
                             ApplicationUser? currentUser = null;
