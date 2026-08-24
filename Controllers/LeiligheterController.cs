@@ -21,8 +21,22 @@ namespace DugnadAppMvc.Controllers
         {
             var leiligheter = await _context.Leiligheter
                 .Include(l => l.Beboere)
-                .OrderBy(l => l.Leilighetsnummer)
                 .ToListAsync();
+
+            leiligheter = leiligheter
+                .OrderBy(l =>
+                {
+                    var deler = l.Leilighetsnummer.Split(
+                        ' ',
+                        StringSplitOptions.RemoveEmptyEntries);
+
+                    return deler.Length >= 2 &&
+                           int.TryParse(deler[1], out var nummer)
+                        ? nummer
+                        : int.MaxValue;
+                })
+                .ThenBy(l => l.Leilighetsnummer)
+                .ToList();
 
             return View(leiligheter);
         }

@@ -68,7 +68,7 @@ namespace DugnadAppMvc.Controllers
     .Select(b => new SelectListItem
     {
         Value = b.Id.ToString(),
-        Text = b.Fornavn + " " + b.Etternavn
+        Text = b.Etternavn + ", " + b.Fornavn
     })
     .ToListAsync();
 
@@ -110,7 +110,7 @@ namespace DugnadAppMvc.Controllers
                     Id = d.Id,
                     Registrert = d.RegistrertDato,
                     Aktivitet = d.OppgaveId != null ? d.Oppgave!.Navn : d.Dugnad!.Tittel,
-                    Beboer = d.Beboer.Fornavn + " " + d.Beboer.Etternavn,
+                    Beboer = d.Beboer.Etternavn + ", " + d.Beboer.Fornavn,
                     Timer = d.AntallTimer,
                     Kommentar = d.Kommentar
                 })

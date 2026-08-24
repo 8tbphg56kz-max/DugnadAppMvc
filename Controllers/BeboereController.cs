@@ -11,19 +11,16 @@ using Microsoft.EntityFrameworkCore;
 namespace DugnadAppMvc.Controllers
 {
     [Authorize(Roles = IdentityRoles.BoardAccess)]
-      public class BeboereController : Controller
+    public class BeboereController : Controller
     {
         private readonly ApplicationDbContext _context;
-   
         private readonly UserProvisioningService _userProvisioningService;
-
-
         private readonly UserManager<ApplicationUser> _userManager;
 
         public BeboereController(
-    ApplicationDbContext context,
-    UserProvisioningService userProvisioningService,
-    UserManager<ApplicationUser> userManager)
+            ApplicationDbContext context,
+            UserProvisioningService userProvisioningService,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userProvisioningService = userProvisioningService;
@@ -33,11 +30,11 @@ namespace DugnadAppMvc.Controllers
         public async Task<IActionResult> Index()
         {
             var beboere = await _context.Beboere
-     .Include(b => b.Leilighet)
-     .Include(b => b.ApplicationUser)
-     .OrderBy(b => b.Etternavn)
-     .ThenBy(b => b.Fornavn)
-     .ToListAsync();
+                .Include(b => b.Leilighet)
+                .Include(b => b.ApplicationUser)
+                .OrderBy(b => b.Etternavn)
+                .ThenBy(b => b.Fornavn)
+                .ToListAsync();
 
             return View(beboere);
         }
@@ -85,12 +82,9 @@ namespace DugnadAppMvc.Controllers
             if (beboer == null)
                 return NotFound();
 
-            ViewBag.LeilighetId = new SelectList(
-                   "Id",
-                 beboer.LeilighetId);
+            FyllLeiligheter(beboer.LeilighetId);
 
             return View(beboer);
-
         }
 
         [Authorize(Roles = IdentityRoles.AdminAccess)]
@@ -103,12 +97,8 @@ namespace DugnadAppMvc.Controllers
 
             if (!ModelState.IsValid)
             {
-                ViewBag.LeilighetId = new SelectList(
-                "Id",
-                beboer.LeilighetId);
-
+                FyllLeiligheter(beboer.LeilighetId);
                 return View(beboer);
-
             }
 
             _context.Update(beboer);
@@ -194,10 +184,26 @@ namespace DugnadAppMvc.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private void FyllLeiligheter()
+        private void FyllLeiligheter(int? valgtLeilighetId = null)
         {
+            var leiligheter = _context.Leiligheter
+                .AsEnumerable()
+                .OrderBy(l =>
+                {
+                    var deler = l.Leilighetsnummer.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    return deler.Length >= 3 && int.TryParse(deler[2].TrimStart('H'), out var etasje)
+                        ? etasje
+                        : int.MaxValue;
+                })
+                .ThenBy(l => l.Leilighetsnummer)
+                .ToList();
+
             ViewBag.LeilighetId = new SelectList(
-                 "Id");
+                leiligheter,
+                "Id",
+                "Visningsnavn",
+                valgtLeilighetId);
         }
     }
 }
