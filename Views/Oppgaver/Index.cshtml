@@ -7,6 +7,32 @@
 }
 
 <style>
+    .oppgave-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        margin-top: 1rem;
+    }
+
+    .oppgave-header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .oppgave-header h2 {
+        margin-bottom: 0;
+    }
+
+    .oppgave-filter {
+        margin-top: 0;
+    }
+
+    .oppgave-header-right {
+        padding-top: 55px;
+    }
+
     @@media (max-width: 767.98px) {
 
         .oppgave-header {
@@ -35,9 +61,13 @@
                 width: 100% !important;
             }
 
-        .oppgave-header .btn {
-            width: 100%;
+        .oppgave-header-right {
+            padding-top: 0;
         }
+
+            .oppgave-header-right .btn {
+                width: 100%;
+            }
     }
 </style>
 
@@ -45,7 +75,7 @@
 <div class="container-fluid px-2 px-md-4">
 
     <!-- Topp -->
-    <div class="oppgave-header mb-3 mt-3">
+    <div class="oppgave-header">
 
         <div class="oppgave-header-left">
 
@@ -81,13 +111,17 @@
 
         @if (User.HasAdminAccess())
         {
-            <a asp-action="Create"
-               class="btn btn-primary text-nowrap">
+            <div class="oppgave-header-right">
 
-                <i class="bi bi-plus-circle me-1"></i>
-                Ny oppgave
+                <a asp-action="Create"
+                   class="btn btn-primary text-nowrap">
 
-            </a>
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Ny oppgave
+
+                </a>
+
+            </div>
         }
 
     </div>
