@@ -190,11 +190,16 @@ namespace DugnadAppMvc.Controllers
                 .AsEnumerable()
                 .OrderBy(l =>
                 {
-                    var deler = l.Leilighetsnummer.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var deler = l.Leilighetsnummer
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                    return deler.Length >= 3 && int.TryParse(deler[2].TrimStart('H'), out var etasje)
-                        ? etasje
-                        : int.MaxValue;
+                    if (deler.Length >= 2 &&
+                        int.TryParse(deler[1], out int nummer))
+                    {
+                        return nummer;
+                    }
+
+                    return int.MaxValue;
                 })
                 .ThenBy(l => l.Leilighetsnummer)
                 .ToList();
