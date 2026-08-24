@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-[Authorize(Roles = IdentityRoles.AdminAccess)]
+[Authorize(Roles = IdentityRoles.BoardAccess)]
 public class ArsstatistikkController : Controller
 {
     private readonly ApplicationDbContext _context;

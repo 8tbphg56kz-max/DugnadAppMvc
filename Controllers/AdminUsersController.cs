@@ -44,7 +44,25 @@ public class AdminUsersController : Controller
 
         if (user == null)
             return NotFound();
-        
+
+        // Administrator kan ikke redigere en systemadministrator
+        if (await _userManager.IsInRoleAsync(user, IdentityRoles.SystemAdministrator) &&
+            !User.IsInRole(IdentityRoles.SystemAdministrator))
+        {
+            TempData["Error"] =
+                "Kun systemadministrator kan redigere en systemadministrator.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Administrator skal ikke få SystemAdministrator som valgmulighet
+        if (!User.IsInRole(IdentityRoles.SystemAdministrator))
+        {
+            model.Roles = model.Roles
+                .Where(r => r.Value != IdentityRoles.SystemAdministrator)
+                .ToList();
+        }
+
         return View(model);
     }
 
@@ -56,20 +74,54 @@ public class AdminUsersController : Controller
 
         if (user == null)
             return NotFound();
-               
+
+        // Kun systemadministrator kan gi SystemAdministrator-rollen
+        if (model.SelectedRole == IdentityRoles.SystemAdministrator &&
+            !User.IsInRole(IdentityRoles.SystemAdministrator))
+        {
+            TempData["Error"] =
+                "Kun systemadministrator kan gi systemadministrator-tilgang.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Administrator kan ikke endre en eksisterende systemadministrator
+        if (await _userManager.IsInRoleAsync(user, IdentityRoles.SystemAdministrator) &&
+            !User.IsInRole(IdentityRoles.SystemAdministrator))
+        {
+            TempData["Error"] =
+                "Kun systemadministrator kan endre en systemadministrator.";
+
+            return RedirectToAction(nameof(Index));
+        }
 
         if (!ModelState.IsValid)
         {
             model.Roles = IdentityRoles.All
                 .Where(r => r != IdentityRoles.Beboer)
+                .Where(r =>
+                    User.IsInRole(IdentityRoles.SystemAdministrator) ||
+                    r != IdentityRoles.SystemAdministrator)
                 .Select(r => new SelectListItem
                 {
                     Text = r,
-                    Value = r
+                    Value = r,
+                    Selected = r == model.SelectedRole
                 })
                 .ToList();
 
             return View(model);
+        }
+
+        // Systemadministrator kan ikke endre sin egen rolle
+        if (user.Id == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value &&
+            await _userManager.IsInRoleAsync(user, IdentityRoles.SystemAdministrator) &&
+            model.SelectedRole != IdentityRoles.SystemAdministrator)
+        {
+            TempData["Error"] =
+                "Systemadministrator kan ikke endre sin egen rolle til et lavere nivå.";
+
+            return RedirectToAction(nameof(Index));
         }
 
         var result = await _userService.UpdateRoleAsync(model);

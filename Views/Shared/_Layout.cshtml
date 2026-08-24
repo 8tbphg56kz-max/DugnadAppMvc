@@ -15,19 +15,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - DugnadApp</title>
+
     <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/DugnadAppMvc.styles.css" asp-append-version="true" />  
+    <link rel="stylesheet" href="~/DugnadAppMvc.styles.css" asp-append-version="true" />
+
     <link rel="manifest" href="~/manifest.json">
     <meta name="theme-color" content="#ffffff">
 </head>
+
 <body>
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
             <div class="container-fluid">
+
                 <a class="navbar-brand d-flex align-items-center"
                    asp-controller="Dashboard"
                    asp-action="Index">
@@ -45,11 +53,20 @@
                     </div>
 
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
                     <ul class="navbar-nav flex-grow-1 primary-nav">
 
                         @if (User.HasAdminAccess())
@@ -58,6 +75,7 @@
                                 <a class="nav-link"
                                    asp-controller="Dashboard"
                                    asp-action="Index">
+
                                     <i class="bi bi-speedometer2 me-1"></i>
                                     Dashboard
                                 </a>
@@ -69,6 +87,7 @@
                                 <a class="nav-link"
                                    asp-controller="Dashboard"
                                    asp-action="Index">
+
                                     <i class="bi bi-speedometer2 me-1"></i>
                                     Min side
                                 </a>
@@ -76,8 +95,9 @@
                         }
 
                         @if (User.HasBoardAccess())
-                        { 
+                        {
                             <li class="nav-item dropdown">
+
                                 <a class="nav-link dropdown-toggle"
                                    href="#"
                                    id="boardDropdown"
@@ -91,21 +111,27 @@
 
                                 <ul class="dropdown-menu">
 
+                                    <!-- Styrefunksjoner -->
+
                                     <li>
                                         <a class="dropdown-item"
                                            asp-controller="Administrasjon"
                                            asp-action="Index">
+
                                             <i class="bi bi-speedometer2 me-2"></i>
                                             Oversikt
                                         </a>
                                     </li>
 
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
 
                                     <li>
                                         <a class="dropdown-item"
                                            asp-controller="Dugnader"
                                            asp-action="Index">
+
                                             <i class="bi bi-calendar-event me-2"></i>
                                             Fellesdugnader
                                         </a>
@@ -115,6 +141,7 @@
                                         <a class="dropdown-item"
                                            asp-controller="Oppgaver"
                                            asp-action="Index">
+
                                             <i class="bi bi-card-checklist me-2"></i>
                                             Oppgaver
                                         </a>
@@ -124,6 +151,7 @@
                                         <a class="dropdown-item"
                                            asp-controller="BoardMessages"
                                            asp-action="Index">
+
                                             <i class="bi bi-megaphone me-2"></i>
                                             Styremeldinger
                                         </a>
@@ -133,6 +161,7 @@
                                         <a class="dropdown-item"
                                            asp-controller="Beboere"
                                            asp-action="Index">
+
                                             <i class="bi bi-people me-2"></i>
                                             Beboere
                                         </a>
@@ -142,6 +171,7 @@
                                         <a class="dropdown-item"
                                            asp-controller="Leiligheter"
                                            asp-action="Index">
+
                                             <i class="bi bi-buildings me-2"></i>
                                             Leiligheter
                                         </a>
@@ -151,6 +181,7 @@
                                         <a class="dropdown-item"
                                            asp-controller="AdminTimeforinger"
                                            asp-action="Index">
+
                                             <i class="bi bi-clock-history me-2"></i>
                                             Timeføringer
                                         </a>
@@ -160,6 +191,7 @@
                                         <a class="dropdown-item"
                                            asp-controller="Endringslogg"
                                            asp-action="Index">
+
                                             <i class="bi bi-clock-history me-2"></i>
                                             Endringslogg
                                         </a>
@@ -169,6 +201,7 @@
                                         <a class="dropdown-item"
                                            asp-controller="AdminRapporter"
                                            asp-action="Index">
+
                                             <i class="bi bi-bar-chart me-2"></i>
                                             Rapporter
                                         </a>
@@ -178,19 +211,25 @@
                                         <a class="dropdown-item"
                                            asp-controller="Arsstatistikk"
                                            asp-action="Index">
+
                                             <i class="bi bi-bar-chart me-2"></i>
                                             Årsstatistikk
                                         </a>
                                     </li>
 
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
 
-                                    @if (User.HasBoardAccess())
+
+                                    <!-- Kun Administrator og Systemadministrator -->
+                                    @if (User.HasAdminAccess())
                                     {
                                         <li>
                                             <a class="dropdown-item"
                                                asp-controller="Kontoadministrasjon"
                                                asp-action="Index">
+
                                                 <i class="bi bi-person-check me-2"></i>
                                                 Brukeradministrasjon
                                             </a>
@@ -200,58 +239,67 @@
                                             <a class="dropdown-item"
                                                asp-controller="AdminUsers"
                                                asp-action="Index">
+
                                                 <i class="bi bi-person-gear me-2"></i>
                                                 Styremedlemmer
                                             </a>
-                                        </li>       
-                                        
+                                        </li>
+
                                         <li>
                                             <a class="dropdown-item"
                                                asp-controller="ArsAvslutning"
                                                asp-action="Index">
+
                                                 <i class="bi bi-calendar-check me-2"></i>
                                                 Årsavslutning
                                             </a>
-                                        </li>          
+                                        </li>
 
-                                    <li>
-                                        <a class="dropdown-item"
-                                           asp-controller="Innstillinger"
-                                           asp-action="Index">
-                                            <i class="bi bi-gear me-2"></i>
-                                            Innstillinger
-                                        </a>
-                                    </li>
-                                    }
-
-                                    @if (User.HasBoardAccess())
-                                    {
                                         <li>
                                             <a class="dropdown-item"
-                                                asp-controller="Vedlikehold"
+                                               asp-controller="Innstillinger"
                                                asp-action="Index">
-                                                <i class="bi bi-tools me-2"></i>
-                                                Vedlikehold
+
+                                                <i class="bi bi-gear me-2"></i>
+                                                Innstillinger
                                             </a>
                                         </li>
                                     }
 
+
+                                    <!-- Kun Systemadministrator -->
                                     @if (User.IsInRole(IdentityRoles.SystemAdministrator))
                                     {
                                         <li>
                                             <a class="dropdown-item"
+                                               asp-controller="Vedlikehold"
+                                               asp-action="Index">
+
+                                                <i class="bi bi-tools me-2"></i>
+                                                Vedlikehold
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
                                                asp-controller="Database"
                                                asp-action="Index">
+
                                                 <i class="bi bi-database me-2"></i>
                                                 Database
                                             </a>
                                         </li>
                                     }
+
                                 </ul>
                             </li>
                         }
 
                     </ul>
+
+
+                    <!-- Konto -->
+
                     <ul class="navbar-nav ms-4 account-nav">
 
                         @{
@@ -265,100 +313,176 @@
 
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
-                               href="#"
-                               role="button"
-                               data-bs-toggle="dropdown"
-                               aria-expanded="false">
-                                <i class="bi bi-person-circle"></i>
-                                @currentUser?.FirstName
-                            </a>
+                            <li class="nav-item dropdown">
 
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li class="dropdown-item">
-                                    Min konto
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger"
-                                       asp-controller="Account"
-                                       asp-action="Logout">
-                                        <i class="bi bi-box-arrow-right me-1"></i>
-                                        Logg ut
-                                    </a>
-                                </li>
-                            </ul>
+                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-1"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <i class="bi bi-person-circle"></i>
+                                    @currentUser?.FirstName
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+
+                                    <li class="dropdown-item">
+                                        Min konto
+                                    </li>
+
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           asp-controller="Account"
+                                           asp-action="Logout">
+
+                                            <i class="bi bi-box-arrow-right me-1"></i>
+                                            Logg ut
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </li>
                         }
                         else
                         {
-                            <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                Logg inn
-                            </a>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Account"
+                                   asp-action="Login">
+
+                                    Logg inn
+                                </a>
+                            </li>
                         }
 
                     </ul>
+
                 </div>
             </div>
         </nav>
     </header>
+
+
     <div class="container-fluid px-2 px-md-4">
+
         <div class="app-content">
+
             <main role="main" class="pb-3">
 
                 @if (TempData["Success"] != null)
                 {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show"
+                         role="alert">
+
                         @TempData["Success"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert">
+                        </button>
+
                     </div>
                 }
 
                 @if (TempData["Error"] != null)
                 {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show"
+                         role="alert">
+
                         @TempData["Error"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert">
+                        </button>
+
                     </div>
                 }
 
                 @if (TempData["Info"] != null)
                 {
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <div class="alert alert-info alert-dismissible fade show"
+                         role="alert">
+
                         @TempData["Info"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert">
+                        </button>
+
                     </div>
                 }
 
                 @RenderBody()
 
             </main>
+
         </div>
+
     </div>
 
+
     <footer class="border-top footer text-muted mt-5">
+
         <div class="container text-center">
+
             &copy; @DateTime.Now.Year DugnadApp
+
             &nbsp;|&nbsp;
-            <a asp-controller="Information" asp-action="Om" class="text-decoration-none">
-                <i class="bi bi-info-circle me-1"></i>Om DugnadApp
+
+            <a asp-controller="Information"
+               asp-action="Om"
+               class="text-decoration-none">
+
+                <i class="bi bi-info-circle me-1"></i>
+                Om DugnadApp
             </a>
+
             &nbsp;|&nbsp;
-            <a asp-controller="Information" asp-action="Personvern" class="text-decoration-none">
-                <i class="bi bi-shield-lock me-1"></i>Personvern
+
+            <a asp-controller="Information"
+               asp-action="Personvern"
+               class="text-decoration-none">
+
+                <i class="bi bi-shield-lock me-1"></i>
+                Personvern
             </a>
+
         </div>
+
     </footer>
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 
+
     <script>
+
         if ('serviceWorker' in navigator) {
+
         window.addEventListener('load', function () {
+
         navigator.serviceWorker.register('/service-worker.js');
+
         });
+
         }
+
     </script>
+
 </body>
 </html>
