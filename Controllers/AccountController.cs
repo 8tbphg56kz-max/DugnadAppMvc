@@ -5,6 +5,8 @@ using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers
 {
@@ -298,7 +300,78 @@ namespace DugnadAppMvc.Controllers
         public IActionResult RequestActivationConfirmation()
         {
             return View();
-        }      
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> MinKonto()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            var beboer = await _context.Beboere
+                .Include(b => b.Leilighet)
+                .FirstOrDefaultAsync(b => b.ApplicationUserId == user.Id);
+
+            var roller = await _userManager.GetRolesAsync(user);
+
+            var model = new MinKontoViewModel
+            {
+                Fornavn = user.FirstName,
+                Etternavn = user.LastName,
+                Epost = user.Email ?? "",
+                Leilighet = beboer?.Leilighet?.Leilighetsnummer ?? "",
+                Rolle = roller.FirstOrDefault() ?? ""
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult EndrePassord()
+        {
+            return View(new EndrePassordViewModel());
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EndrePassord(EndrePassordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Challenge();
+
+            var result = await _userManager.ChangePasswordAsync(
+                user,
+                model.GammeltPassord,
+                model.NyttPassord);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                return View(model);
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
+
+            TempData["Success"] = "Passordet er endret.";
+
+            return RedirectToAction(nameof(MinKonto));
+        }
 
         public IActionResult AccessDenied()
         {
