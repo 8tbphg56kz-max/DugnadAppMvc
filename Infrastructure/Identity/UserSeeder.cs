@@ -10,60 +10,98 @@ public static class UserSeeder
 {
     public static async Task SeedAsync(IServiceProvider serviceProvider)
     {
-        var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var userManager = serviceProvider
+            .GetRequiredService<UserManager<ApplicationUser>>();
 
-        var logger = serviceProvider.GetRequiredService<ILoggerFactory>()
+        var logger = serviceProvider
+            .GetRequiredService<ILoggerFactory>()
             .CreateLogger("UserSeeder");
 
         var options = serviceProvider
             .GetRequiredService<IOptions<DefaultAdminOptions>>()
             .Value;
 
-        // Finnes det allerede en systemadministrator?
-        var admins = await userManager.GetUsersInRoleAsync(
-            IdentityRoles.SystemAdministrator);
+        // Finn Systemadministrator-brukeren på e-postadressen
+        var adminUser = await userManager.FindByEmailAsync(options.Email);
 
-        if (admins.Any())
+        // Brukeren finnes ikke – opprett den
+        if (adminUser == null)
         {
-            logger.LogInformation("SystemAdministrator finnes allerede.");
-            return;
+            logger.LogInformation(
+                "Systemadministrator-brukeren finnes ikke. Oppretter {Email}.",
+                options.Email);
+
+            adminUser = new ApplicationUser
+            {
+                UserName = options.Email,
+                Email = options.Email,
+                EmailConfirmed = true,
+                FirstName = "System",
+                LastName = "Administrator",
+                IsActivated = true,
+                ActivatedDate = DateTime.UtcNow
+            };
+
+            var createResult = await userManager.CreateAsync(
+                adminUser,
+                options.Password);
+
+            if (!createResult.Succeeded)
+            {
+                var errors = string.Join(
+                    Environment.NewLine,
+                    createResult.Errors.Select(e => e.Description));
+
+                throw new InvalidOperationException(
+                    $"Kunne ikke opprette Systemadministrator:{Environment.NewLine}{errors}");
+            }
+
+            logger.LogInformation(
+                "Systemadministrator-brukeren {Email} ble opprettet.",
+                options.Email);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Systemadministrator-brukeren {Email} finnes allerede.",
+                options.Email);
         }
 
-        logger.LogInformation("Oppretter første SystemAdministrator...");
+        // Sørg for at brukeren har Systemadministrator-rollen
+        var harSystemadministratorRolle =
+            await userManager.IsInRoleAsync(
+                adminUser,
+                IdentityRoles.SystemAdministrator);
 
-        var adminUser = new ApplicationUser
+        if (!harSystemadministratorRolle)
         {
-            UserName = options.Email,
-            Email = options.Email,
-            EmailConfirmed = true,
-            FirstName = "System",
-            LastName = "Administrator",
-            IsActivated = true,
-            ActivatedDate = DateTime.UtcNow
-        };
+            logger.LogWarning(
+                "Brukeren {Email} mangler Systemadministrator-rollen. Tildeler rollen.",
+                adminUser.Email);
 
-        var result = await userManager.CreateAsync(adminUser, options.Password);
+            var roleResult = await userManager.AddToRoleAsync(
+                adminUser,
+                IdentityRoles.SystemAdministrator);
 
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(Environment.NewLine,
-                result.Errors.Select(e => e.Description));
+            if (!roleResult.Succeeded)
+            {
+                var errors = string.Join(
+                    Environment.NewLine,
+                    roleResult.Errors.Select(e => e.Description));
 
-            throw new InvalidOperationException(errors);
+                throw new InvalidOperationException(
+                    $"Kunne ikke tildele Systemadministrator-rollen:{Environment.NewLine}{errors}");
+            }
+
+            logger.LogInformation(
+                "Systemadministrator-rollen ble tildelt {Email}.",
+                adminUser.Email);
         }
-
-        var roleResult = await userManager.AddToRoleAsync(
-            adminUser,
-            IdentityRoles.SystemAdministrator);
-
-        if (!roleResult.Succeeded)
+        else
         {
-            var errors = string.Join(Environment.NewLine,
-                roleResult.Errors.Select(e => e.Description));
-
-            throw new InvalidOperationException(errors);
+            logger.LogInformation(
+                "Brukeren {Email} har allerede Systemadministrator-rollen.",
+                adminUser.Email);
         }
-
-        logger.LogInformation("SystemAdministrator opprettet.");
     }
 }

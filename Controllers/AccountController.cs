@@ -64,7 +64,11 @@ namespace DugnadAppMvc.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction(nameof(DashboardController.Index), "Dashboard");
+                await _signInManager.RefreshSignInAsync(user);
+
+                return RedirectToAction(
+                    nameof(DashboardController.Index),
+                    "Dashboard");
             }
 
             ModelState.AddModelError("", "Feil e-postadresse eller passord.");
