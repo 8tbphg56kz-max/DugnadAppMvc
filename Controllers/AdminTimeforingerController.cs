@@ -207,38 +207,146 @@ namespace DugnadAppMvc.Controllers
                     })
                     .ToList();
 
-
                 model.TimerAlternativer = TimerAlternativerHelper.Hent();
 
                 return View(model);
             }
 
-            var timeforing = new Timeforing
-            {
-                BeboerId = model.BeboerId!.Value,
-                AntallTimer = decimal.Parse(
-    model.Timer!,
-    System.Globalization.CultureInfo.InvariantCulture),
-                Kommentar = model.Kommentar
-            };
+            var bruker = await _userManager.GetUserAsync(User);
 
-            if (model.Aktivitet.StartsWith("D-"))
+            if (bruker == null)
             {
-                timeforing.DugnadId = int.Parse(model.Aktivitet[2..]);
-            }
-            else if (model.Aktivitet.StartsWith("O-"))
-            {
-                timeforing.OppgaveId = int.Parse(model.Aktivitet[2..]);
+                return Challenge();
             }
 
-            _context.Timeforinger.Add(timeforing);
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                var timeforing = new Timeforing
+                {
+                    BeboerId = model.BeboerId!.Value,
+                    AntallTimer = decimal.Parse(
+                        model.Timer!,
+                        CultureInfo.InvariantCulture),
+                    Kommentar = model.Kommentar
+                };
 
-            return RedirectToAction(nameof(Index));
-        }         
+                string aktivitetNavn;
 
-    [Authorize(Roles = IdentityRoles.AdminAccess)]
+                if (model.Aktivitet.StartsWith("D-"))
+                {
+                    var dugnadId = int.Parse(model.Aktivitet[2..]);
+
+                    timeforing.DugnadId = dugnadId;
+
+                    aktivitetNavn = await _context.Dugnader
+                        .Where(d => d.Id == dugnadId)
+                        .Select(d => d.Tittel)
+                        .FirstOrDefaultAsync()
+                        ?? "Ukjent dugnad";
+                }
+                else if (model.Aktivitet.StartsWith("O-"))
+                {
+                    var oppgaveId = int.Parse(model.Aktivitet[2..]);
+
+                    timeforing.OppgaveId = oppgaveId;
+
+                    aktivitetNavn = await _context.Oppgaver
+                        .Where(o => o.Id == oppgaveId)
+                        .Select(o => o.Navn)
+                        .FirstOrDefaultAsync()
+                        ?? "Ukjent oppgave";
+                }
+                else
+                {
+                    aktivitetNavn = "Ukjent aktivitet";
+                }
+
+                // Lagre timeføringen først slik at Id blir generert
+                _context.Timeforinger.Add(timeforing);
+
+                await _context.SaveChangesAsync();
+
+                // Nå har timeforing.Id fått sin faktiske database-ID
+                var endringslogg = new Endringslogg
+                {
+                    Tidspunkt = DateTime.UtcNow,
+                    BrukerId = bruker.Id,
+                    Handling = "Registrert",
+                    Begrunnelse = model.Begrunnelse!,
+
+                    TimeforingId = timeforing.Id,
+                    BeboerId = timeforing.BeboerId,
+
+                    Aktivitet = aktivitetNavn,
+
+                    GamleTimer = null,
+                    NyeTimer = timeforing.AntallTimer,
+
+                    GammelKommentar = null,
+                    NyKommentar = timeforing.Kommentar
+                };
+
+                _context.Endringslogger.Add(endringslogg);
+
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] =
+                    "Timeføringen ble registrert og logget.";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                ModelState.AddModelError(
+                    "",
+                    "Det oppstod en feil ved registrering av timeføringen.");
+
+                model.Aktiviteter = new List<SelectListItem>();
+
+                model.Aktiviteter.AddRange(
+                    _context.Dugnader
+                        .Where(d => d.ErSynlig)
+                        .OrderBy(d => d.StartDato)
+                        .Select(d => new SelectListItem
+                        {
+                            Value = $"D-{d.Id}",
+                            Text = $"📅 {d.Tittel}"
+                        })
+                        .ToList());
+
+                model.Aktiviteter.AddRange(
+                    _context.Oppgaver
+                        .OrderBy(o => o.Navn)
+                        .Select(o => new SelectListItem
+                        {
+                            Value = $"O-{o.Id}",
+                            Text = $"🛠 {o.Navn}"
+                        })
+                        .ToList());
+
+                model.Beboere = _context.Beboere
+                    .OrderBy(b => b.Etternavn)
+                    .ThenBy(b => b.Fornavn)
+                    .Select(b => new SelectListItem
+                    {
+                        Value = b.Id.ToString(),
+                        Text = b.Etternavn + ", " + b.Fornavn
+                    })
+                    .ToList();
+
+                model.TimerAlternativer = TimerAlternativerHelper.Hent();
+
+                return View(model);
+            }
+        }
+
+        [Authorize(Roles = IdentityRoles.AdminAccess)]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {

@@ -13,9 +13,13 @@
 
         public string Begrunnelse { get; set; } = null!;
 
-        public int TimeforingId { get; set; }
+        public int? TimeforingId { get; set; }
+
+        public int? OppgaveId { get; set; }
+        public Oppgave? Oppgave { get; set; }
 
         public int BeboerId { get; set; }
+        public Beboer Beboer { get; set; } = null!;
 
         public string? Aktivitet { get; set; }
 
@@ -24,6 +28,5 @@
 
         public string? GammelKommentar { get; set; }
         public string? NyKommentar { get; set; }
-        public Beboer Beboer { get; set; } = null!;        
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DugnadAppMvc.Helpers;
+using System.Security.Claims;
 
 public class OppgaverController : Controller
 {
@@ -294,6 +295,19 @@ public class OppgaverController : Controller
             PameldtDato = DateTime.UtcNow,
             Status = OppgaveStatus.Pameldt
         });
+
+        var endringslogg = new Endringslogg
+        {
+            Tidspunkt = DateTime.UtcNow,
+            BrukerId = currentUser.Id,
+            Handling = "Påmeldt av beboer",
+            Begrunnelse = "Beboeren meldte seg selv på oppgaven.",
+            OppgaveId = oppgave.Id,
+            BeboerId = beboer.Id,
+            Aktivitet = oppgave.Navn
+        };
+
+        _context.Endringslogger.Add(endringslogg);
 
         await _context.SaveChangesAsync();
 
@@ -637,9 +651,29 @@ public class OppgaverController : Controller
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> MeldAvSomAdministrator(int pameldingId)
+    public async Task<IActionResult> MeldAvSomAdministrator(
+    int pameldingId,
+    string? begrunnelse)
     {
+        if (string.IsNullOrWhiteSpace(begrunnelse))
+        {
+            TempData["ErrorMessage"] =
+                "Du må oppgi en begrunnelse for avmeldingen.";
+
+            return RedirectToAction(
+                nameof(AdministrerPameldinger),
+                new
+                {
+                    id = await _context.OppgavePameldinger
+                        .Where(p => p.Id == pameldingId)
+                        .Select(p => p.OppgaveId)
+                        .FirstOrDefaultAsync()
+                });
+        }
+
         var pamelding = await _context.OppgavePameldinger
+            .Include(p => p.Oppgave)
+            .Include(p => p.Beboer)
             .FirstOrDefaultAsync(p => p.Id == pameldingId);
 
         if (pamelding == null)
@@ -649,40 +683,83 @@ public class OppgaverController : Controller
 
         var oppgaveId = pamelding.OppgaveId;
 
-        // Sjekk om det finnes registrerte timer på oppgaven for denne beboeren
-        var harTimer = await _context.Timeforinger.AnyAsync(t =>
-            t.OppgaveId == pamelding.OppgaveId &&
-            t.BeboerId == pamelding.BeboerId);
+        // Sjekk om det finnes registrerte timer
+        var harTimer = await _context.Timeforinger
+            .AnyAsync(t =>
+                t.OppgaveId == oppgaveId &&
+                t.BeboerId == pamelding.BeboerId);
 
         if (harTimer)
         {
             TempData["ErrorMessage"] =
                 "Kan ikke melde av beboeren fordi det er registrert timer på oppgaven.";
 
-            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+            return RedirectToAction(
+                nameof(AdministrerPameldinger),
+                new { id = oppgaveId });
         }
 
+        // Hent innlogget bruker direkte fra Identity-claim
+        var brukerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(brukerId))
+        {
+            return Forbid();
+        }
+
+        // Opprett endringslogg
+        var endringslogg = new Endringslogg
+        {
+            Tidspunkt = DateTime.UtcNow,
+            BrukerId = brukerId,
+            Handling = "Avmeldt av styret",
+            Begrunnelse = begrunnelse.Trim(),
+            OppgaveId = oppgaveId,
+            BeboerId = pamelding.BeboerId,
+            Aktivitet = pamelding.Oppgave?.Navn
+        };
+
+        _context.Endringslogger.Add(endringslogg);
+
+        // Meld beboeren av
         _context.OppgavePameldinger.Remove(pamelding);
 
         await _context.SaveChangesAsync();
 
-        TempData["SuccessMessage"] = "Beboeren ble meldt av.";
+        TempData["SuccessMessage"] =
+            "Beboeren ble meldt av.";
 
-        return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+        return RedirectToAction(
+            nameof(AdministrerPameldinger),
+            new { id = oppgaveId });
     }
 
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> MeldPaSomAdministrator(int oppgaveId, int? valgtBeboerId)
+    public async Task<IActionResult> MeldPaSomAdministrator(
+    int oppgaveId,
+    int? valgtBeboerId,
+    string? begrunnelse)
     {
-
         if (!valgtBeboerId.HasValue)
         {
             TempData["Error"] = "Du må velge en beboer.";
-            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+
+            return RedirectToAction(
+                nameof(AdministrerPameldinger),
+                new { id = oppgaveId });
         }
 
+        if (string.IsNullOrWhiteSpace(begrunnelse))
+        {
+            TempData["Error"] =
+                "Du må oppgi en begrunnelse for påmeldingen.";
+
+            return RedirectToAction(
+                nameof(AdministrerPameldinger),
+                new { id = oppgaveId });
+        }
 
         var oppgave = await _context.Oppgaver
             .Include(o => o.Pameldinger)
@@ -693,29 +770,43 @@ public class OppgaverController : Controller
             return NotFound();
         }
 
-        // Finnes beboeren?
         var beboer = await _context.Beboere
-            .FindAsync(valgtBeboerId);
+            .FindAsync(valgtBeboerId.Value);
 
         if (beboer == null)
         {
             return NotFound();
         }
 
-        // Allerede påmeldt?
-        if (oppgave.Pameldinger.Any(p => p.BeboerId == valgtBeboerId))
+        if (oppgave.Pameldinger.Any(p => p.BeboerId == valgtBeboerId.Value))
         {
-            TempData["Info"] = "Beboeren er allerede påmeldt.";
-            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+            TempData["Info"] =
+                "Beboeren er allerede påmeldt.";
+
+            return RedirectToAction(
+                nameof(AdministrerPameldinger),
+                new { id = oppgaveId });
         }
 
-        // Full oppgave?
         if (oppgave.Pameldinger.Count >= oppgave.AntallPersoner)
         {
-            TempData["Error"] = "Oppgaven er fulltegnet.";
-            return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+            TempData["Error"] =
+                "Oppgaven er fulltegnet.";
+
+            return RedirectToAction(
+                nameof(AdministrerPameldinger),
+                new { id = oppgaveId });
         }
 
+        // Hent innlogget bruker direkte fra Identity-claim
+        var brukerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(brukerId))
+        {
+            return Forbid();
+        }
+
+        // Opprett påmelding
         _context.OppgavePameldinger.Add(new OppgavePamelding
         {
             OppgaveId = oppgaveId,
@@ -724,10 +815,27 @@ public class OppgaverController : Controller
             Status = OppgaveStatus.Pameldt
         });
 
+        // Opprett endringslogg
+        var endringslogg = new Endringslogg
+        {
+            Tidspunkt = DateTime.UtcNow,
+            BrukerId = brukerId,
+            Handling = "Påmeldt av styret",
+            Begrunnelse = begrunnelse.Trim(),
+            OppgaveId = oppgaveId,
+            BeboerId = beboer.Id,
+            Aktivitet = oppgave.Navn
+        };
+
+        _context.Endringslogger.Add(endringslogg);
+
         await _context.SaveChangesAsync();
 
-        TempData["Success"] = "Beboeren ble meldt på.";
+        TempData["SuccessMessage"] =
+            "Beboeren ble meldt på.";
 
-        return RedirectToAction(nameof(AdministrerPameldinger), new { id = oppgaveId });
+        return RedirectToAction(
+            nameof(AdministrerPameldinger),
+            new { id = oppgaveId });
     }
 }

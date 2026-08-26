@@ -44,6 +44,7 @@
 
         <div class="card-body p-4">
 
+            <!-- Meldinger -->
             @if (TempData["ErrorMessage"] != null)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -59,8 +60,40 @@
 
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="alert alert-success">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
                     @TempData["SuccessMessage"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Lukk">
+                    </button>
+                </div>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Lukk">
+                    </button>
+                </div>
+            }
+
+            @if (TempData["Info"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    @TempData["Info"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Lukk">
+                    </button>
                 </div>
             }
 
@@ -80,11 +113,12 @@
                             <strong>@Model.PameldingStatus.Count</strong> påmeldte
                         </div>
 
-                        <!-- ========================= -->
+                        <!-- ================================================= -->
                         <!-- PC / NETTBRETT - TABELL -->
-                        <!-- ========================= -->
+                        <!-- ================================================= -->
 
                         <div class="table-responsive pamelding-table">
+
                             <table class="table table-hover align-middle">
 
                                 <thead>
@@ -109,6 +143,7 @@
                                     {
                                         <tr>
 
+                                            <!-- Beboer -->
                                             <td>
                                                 <strong>@item.Navn</strong>
 
@@ -121,15 +156,20 @@
                                                 }
                                             </td>
 
+                                            <!-- Påmeldt -->
                                             <td>
                                                 @item.PameldtDato.ToLocalTime().ToString("dd.MM.yyyy")
                                                 <br />
+
                                                 <small class="text-muted">
-                                                    kl. @item.PameldtDato.ToLocalTime().ToString("HH:mm")
+                                                    kl.
+                                                    @item.PameldtDato.ToLocalTime().ToString("HH:mm")
                                                 </small>
                                             </td>
 
+                                            <!-- Utført -->
                                             <td>
+
                                                 @if (item.ErUtfort)
                                                 {
                                                     <span class="text-success">
@@ -140,10 +180,9 @@
                                                     @if (item.UtfortDato.HasValue)
                                                     {
                                                         <br />
+
                                                         <small class="text-muted">
-                                                            @item.UtfortDato.Value
-                                                            .ToLocalTime()
-                                                            .ToString("dd.MM.yyyy")
+                                                            @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
                                                         </small>
                                                     }
                                                 }
@@ -154,9 +193,12 @@
                                                         Ikke utført
                                                     </span>
                                                 }
+
                                             </td>
 
+                                            <!-- Registrert timer -->
                                             <td>
+
                                                 @if (item.HarRegistrertTimer)
                                                 {
                                                     <span class="text-success">
@@ -171,9 +213,12 @@
                                                         Ingen
                                                     </span>
                                                 }
+
                                             </td>
 
+                                            <!-- Timer -->
                                             <td>
+
                                                 @if (item.AntallTimer.HasValue)
                                                 {
                                                     @item.AntallTimer.Value.ToString("0.00")
@@ -182,9 +227,12 @@
                                                 {
                                                     <span class="text-muted">–</span>
                                                 }
+
                                             </td>
 
+                                            <!-- Status -->
                                             <td>
+
                                                 @if (item.Status == "Fullført")
                                                 {
                                                     <span class="badge bg-success">
@@ -203,30 +251,25 @@
                                                         Påmeldt
                                                     </span>
                                                 }
+
                                             </td>
 
+                                            <!-- Meld av -->
                                             @if (User.HasAdminAccess())
                                             {
                                                 <td class="text-nowrap">
 
-                                                    <form asp-action="MeldAvSomAdministrator"
-                                                          method="post">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#meldAvModal"
+                                                            data-pamelding-id="@item.PameldingId"
+                                                            data-beboer-navn="@item.Navn">
 
-                                                        @Html.AntiForgeryToken()
+                                                        <i class="bi bi-person-dash"></i>
+                                                        Meld av
 
-                                                        <input type="hidden"
-                                                               name="pameldingId"
-                                                               value="@item.PameldingId" />
-
-                                                        <button type="submit"
-                                                                class="btn btn-sm btn-outline-danger">
-
-                                                            <i class="bi bi-person-dash"></i>
-                                                            Meld av
-
-                                                        </button>
-
-                                                    </form>
+                                                    </button>
 
                                                 </td>
                                             }
@@ -237,12 +280,13 @@
                                 </tbody>
 
                             </table>
+
                         </div>
 
 
-                        <!-- ========================= -->
+                        <!-- ================================================= -->
                         <!-- MOBIL - KORTVISNING -->
-                        <!-- ========================= -->
+                        <!-- ================================================= -->
 
                         <div class="pamelding-card">
 
@@ -252,6 +296,7 @@
 
                                     <div class="card-body">
 
+                                        <!-- Beboer -->
                                         <div class="mb-3">
 
                                             <h5 class="mb-1">
@@ -270,6 +315,7 @@
 
                                         <div class="row g-3">
 
+                                            <!-- Påmeldt -->
                                             <div class="col-6">
 
                                                 <div class="text-muted small">
@@ -290,6 +336,7 @@
                                             </div>
 
 
+                                            <!-- Utført -->
                                             <div class="col-6">
 
                                                 <div class="text-muted small">
@@ -327,6 +374,7 @@
                                             </div>
 
 
+                                            <!-- Registrert timer -->
                                             <div class="col-6">
 
                                                 <div class="text-muted small">
@@ -355,6 +403,7 @@
                                             </div>
 
 
+                                            <!-- Timer -->
                                             <div class="col-6">
 
                                                 <div class="text-muted small">
@@ -375,6 +424,7 @@
                                             </div>
 
 
+                                            <!-- Status -->
                                             <div class="col-12">
 
                                                 <div class="text-muted small mb-1">
@@ -405,28 +455,22 @@
                                         </div>
 
 
+                                        <!-- Meld av -->
                                         @if (User.HasAdminAccess())
                                         {
                                             <hr />
 
-                                            <form asp-action="MeldAvSomAdministrator"
-                                                  method="post">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger w-100"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#meldAvModal"
+                                                    data-pamelding-id="@item.PameldingId"
+                                                    data-beboer-navn="@item.Navn">
 
-                                                @Html.AntiForgeryToken()
+                                                <i class="bi bi-person-dash"></i>
+                                                Meld av
 
-                                                <input type="hidden"
-                                                       name="pameldingId"
-                                                       value="@item.PameldingId" />
-
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-outline-danger w-100">
-
-                                                    <i class="bi bi-person-dash"></i>
-                                                    Meld av
-
-                                                </button>
-
-                                            </form>
+                                            </button>
                                         }
 
                                     </div>
@@ -445,6 +489,9 @@
                     }
 
 
+                    <!-- ================================================= -->
+                    <!-- LEGG TIL BEBOER -->
+                    <!-- ================================================= -->
                     @if (User.HasAdminAccess())
                     {
                         <hr />
@@ -477,17 +524,30 @@
 
                                 </div>
 
-                                <div class="col-auto">
+                            </div>
 
-                                    <button type="submit"
-                                            class="btn btn-primary">
+                            <div class="mt-3">
 
-                                        <i class="bi bi-person-plus"></i>
-                                        Meld på
+                                <label class="form-label">
+                                    Begrunnelse
+                                </label>
 
-                                    </button>
+                                <textarea name="begrunnelse"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Hvorfor melder styret beboeren på oppgaven?"></textarea>
 
-                                </div>
+                            </div>
+
+                            <div class="mt-3">
+
+                                <button type="submit"
+                                        class="btn btn-primary">
+
+                                    <i class="bi bi-person-plus"></i>
+                                    Meld på
+
+                                </button>
 
                             </div>
 
@@ -499,11 +559,13 @@
             </div>
 
 
+            <!-- Tilbake -->
             <div class="mt-3">
 
                 <a asp-action="Index"
                    class="btn btn-secondary tilbake-knapp">
 
+                    <i class="bi bi-arrow-left me-1"></i>
                     Tilbake
 
                 </a>
@@ -514,3 +576,153 @@
 
     </div>
 </div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL - MELD AV BEBOER -->
+<!-- ========================================================= -->
+@if (User.HasAdminAccess())
+{
+    <div class="modal fade"
+         id="meldAvModal"
+         tabindex="-1"
+         aria-labelledby="meldAvModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <form asp-action="MeldAvSomAdministrator"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title"
+                            id="meldAvModalLabel">
+
+                            Meld av beboer
+
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Lukk">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <p>
+                            Du er i ferd med å melde av:
+                        </p>
+
+                        <p class="fw-bold"
+                           id="meldAvBeboerNavn">
+                        </p>
+
+                        <input type="hidden"
+                               name="pameldingId"
+                               id="meldAvPameldingId" />
+
+                        <div class="mb-3">
+
+                            <label for="meldAvBegrunnelse"
+                                   class="form-label">
+
+                                Begrunnelse
+
+                            </label>
+
+                            <textarea name="begrunnelse"
+                                      id="meldAvBegrunnelse"
+                                      class="form-control"
+                                      rows="4"
+                                      required
+                                      placeholder="Hvorfor melder styret beboeren av oppgaven?"></textarea>
+
+                        </div>
+
+                        <div class="alert alert-warning mb-0">
+
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+
+                            Avmeldingen blir registrert i endringsloggen.
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+
+                            Avbryt
+
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-danger">
+
+                            <i class="bi bi-person-dash me-1"></i>
+                            Meld av
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+
+@section Scripts {
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            var meldAvModal = document.getElementById("meldAvModal");
+
+            if (meldAvModal) {
+
+                meldAvModal.addEventListener("show.bs.modal", function (event) {
+
+                    var button = event.relatedTarget;
+
+                    if (!button) {
+                        return;
+                    }
+
+                    var pameldingId =
+                        button.getAttribute("data-pamelding-id");
+
+                    var beboerNavn =
+                        button.getAttribute("data-beboer-navn");
+
+                    document.getElementById("meldAvPameldingId").value =
+                        pameldingId;
+
+                    document.getElementById("meldAvBeboerNavn").textContent =
+                        beboerNavn;
+
+                    document.getElementById("meldAvBegrunnelse").value = "";
+
+                });
+
+            }
+
+        });
+    </script>
+
+}
