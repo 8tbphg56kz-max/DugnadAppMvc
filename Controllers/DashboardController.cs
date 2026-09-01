@@ -78,7 +78,7 @@ namespace DugnadAppMvc.Controllers
             var iDag = DateOnly.FromDateTime(DateTime.Today);
 
             var nesteDugnad = await _context.Dugnader
-            .Where(d => d.ErSynlig)
+            .Where(d => d.ErSynlig && !d.ErUtført)
             .OrderBy(d => d.StartDato)
             .FirstOrDefaultAsync();
 

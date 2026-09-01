@@ -17,5 +17,6 @@ public class Timeforing
 
     public string? Kommentar { get; set; }
 
+
     public DateTime RegistrertDato { get; set; } = DateTime.UtcNow;
 }

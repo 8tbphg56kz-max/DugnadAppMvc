@@ -372,7 +372,7 @@ namespace DugnadAppMvc.Controllers
                 Timer = timeforing.AntallTimer.ToString(
                  CultureInfo.InvariantCulture),
                 Kommentar = timeforing.Kommentar,
-
+                
                 Beboere = _context.Beboere
                     .OrderBy(b => b.Etternavn)
                     .ThenBy(b => b.Fornavn)
@@ -445,9 +445,9 @@ namespace DugnadAppMvc.Controllers
             // Gjør selve endringen
             timeforing.BeboerId = model.BeboerId!.Value;
             timeforing.AntallTimer = decimal.Parse(
-            model.Timer!,
-            CultureInfo.InvariantCulture);
-            timeforing.Kommentar = model.Kommentar;
+                model.Timer!,
+                CultureInfo.InvariantCulture);
+            timeforing.Kommentar = model.Kommentar;           
 
             // Hent innlogget bruker
             var brukerId = User.FindFirstValue(ClaimTypes.NameIdentifier);

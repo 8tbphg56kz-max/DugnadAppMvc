@@ -19,6 +19,8 @@ namespace DugnadAppMvc.Models
 
         public bool ErSynlig { get; set; } = true;
 
+        public bool ErUtført { get; set; }
+
         public ICollection<Dugnadstime> Dugnadstimer { get; set; } = new List<Dugnadstime>();
     }
 }

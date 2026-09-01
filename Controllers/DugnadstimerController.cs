@@ -36,7 +36,10 @@ namespace DugnadAppMvc.Controllers
                 model.DugnadId = dugnadId.Value;
 
                 var dugnad = _context.Dugnader
-                    .FirstOrDefault(d => d.Id == dugnadId.Value);
+    .FirstOrDefault(d =>
+        d.Id == dugnadId.Value &&
+        d.ErSynlig &&
+        !d.ErUtført);
 
                 if (dugnad != null)
                 {
@@ -71,6 +74,20 @@ namespace DugnadAppMvc.Controllers
             if (beboer == null)
             {
                 return Challenge();
+            }
+
+            var dugnad = await _context.Dugnader
+    .FirstOrDefaultAsync(d =>
+        d.Id == model.DugnadId &&
+        d.ErSynlig &&
+        !d.ErUtført);
+
+            if (dugnad == null)
+            {
+                TempData["ErrorMessage"] =
+                    "Dugnaden er ikke lenger tilgjengelig for registrering.";
+
+                return RedirectToAction("Index", "Dashboard");
             }
 
             var timeforing = new Timeforing
@@ -302,7 +319,7 @@ namespace DugnadAppMvc.Controllers
         private void FyllDugnader(TimeforingViewModel model)
         {
             model.Dugnader = _context.Dugnader
-                .Where(d => d.ErSynlig)
+                .Where(d => d.ErSynlig && !d.ErUtført)
                 .OrderBy(d => d.StartDato)
                 .Select(d => new SelectListItem
                 {
@@ -310,7 +327,7 @@ namespace DugnadAppMvc.Controllers
                     Text = d.Tittel
                 })
                 .ToList();
-        }     
+        }
 
         private static bool KanEndresEllerSlettes(Timeforing timeforing)
         {

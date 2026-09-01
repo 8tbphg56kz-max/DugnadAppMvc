@@ -3,6 +3,7 @@ using System;
 using DugnadAppMvc.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DugnadAppMvc.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260901160544_AddErDugnadToTimeforing")]
+    partial class AddErDugnadToTimeforing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -204,9 +207,6 @@ namespace DugnadAppMvc.Migrations
                         .HasColumnType("text");
 
                     b.Property<bool>("ErSynlig")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("ErUtført")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("KreverPamelding")
@@ -615,6 +615,9 @@ namespace DugnadAppMvc.Migrations
 
                     b.Property<int?>("DugnadId")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("ErDugnad")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Kommentar")
                         .HasColumnType("text");
