@@ -59,6 +59,20 @@ namespace DugnadAppMvc.Controllers
                 return View(beboer);
             }
 
+            // Kontroller om e-postadressen allerede er registrert
+            var eksisterendeBruker = await _userManager.FindByEmailAsync(beboer.Epost);
+
+            if (eksisterendeBruker != null)
+            {
+                ModelState.AddModelError(
+                    nameof(beboer.Epost),
+                    "E-postadressen er allerede registrert."
+                );
+
+                FyllLeiligheter();
+                return View(beboer);
+            }
+
             _context.Beboere.Add(beboer);
             await _context.SaveChangesAsync();
 
