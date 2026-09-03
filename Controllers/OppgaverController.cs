@@ -48,15 +48,14 @@ public class OppgaverController : Controller
     public IActionResult Create()
     {
         var model = new Oppgave
-        {
-            FraDato = DateTime.Today,
-            Frist = DateTime.Today.AddDays(14),
-            Prioritet = OppgavePrioritet.Normal,
-            AntallPersoner = 1,
-            KanRegistrereTimer = true,
-            KanUtføresFlereGanger = false,
-            KreverBekreftelse = true
-        };
+{
+    FraDato = DateTime.Today,
+    Frist = DateTime.Today.AddDays(14),
+    Prioritet = OppgavePrioritet.Normal,
+    AntallPersoner = 1,
+    KanRegistrereTimer = true,
+    KanUtføresFlereGanger = false
+};
 
         return View(model);
     }
@@ -64,7 +63,7 @@ public class OppgaverController : Controller
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave)
+    public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave)
     {
         if (ModelState.IsValid)
         {
@@ -157,14 +156,14 @@ public class OppgaverController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var oppgave = await _context.Oppgaver.FindAsync(id);
+        var oppgave = await _context.Oppgaver
+            .FirstOrDefaultAsync(o => o.Id == id);
 
         if (oppgave == null)
-        {
             return NotFound();
-        }
 
-        // Sjekk om oppgaven har timeføringer
+        // Oppgaver med registrerte timer kan ikke slettes.
+        // Timeføringene må beholdes som historikk.
         bool harTimeforinger = await _context.Timeforinger
             .AnyAsync(t => t.OppgaveId == id);
 
@@ -176,7 +175,19 @@ public class OppgaverController : Controller
             return RedirectToAction(nameof(Delete), new { id });
         }
 
+        // Endringslogger skal beholdes.
+        // Vi kobler dem derfor fra oppgaven før oppgaven slettes.
+        var endringslogger = await _context.Endringslogger
+            .Where(e => e.OppgaveId == id)
+            .ToListAsync();
+
+        foreach (var logg in endringslogger)
+        {
+            logg.OppgaveId = null;
+        }
+
         _context.Oppgaver.Remove(oppgave);
+
         await _context.SaveChangesAsync();
 
         TempData["Success"] = "Oppgaven ble slettet.";

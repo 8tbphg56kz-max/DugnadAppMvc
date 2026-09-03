@@ -28,8 +28,7 @@ namespace DugnadAppMvc.Models
         [Display(Name = "Frist")]
         public DateTime Frist { get; set; }
 
-        [Range(1, 100,
-            ErrorMessage = "Antall personer må være mellom 1 og 100.")]
+        [Range(1, 100, ErrorMessage = "Antall personer må være mellom 1 og 100.")]
         [Display(Name = "Antall personer")]
         public int AntallPersoner { get; set; } = 1;
 
@@ -38,9 +37,6 @@ namespace DugnadAppMvc.Models
 
         [Display(Name = "Kan utføres flere ganger")]
         public bool KanUtføresFlereGanger { get; set; } = false;
-
-        [Display(Name = "Krever bekreftelse")]
-        public bool KreverBekreftelse { get; set; } = true;
 
         [StringLength(500, ErrorMessage = "Utstyr kan ikke være lengre enn 500 tegn.")]
         [Display(Name = "Utstyr")]
@@ -60,9 +56,11 @@ namespace DugnadAppMvc.Models
         public DateTime Opprettet { get; set; } = DateTime.UtcNow;
 
         public string? OpprettetAvId { get; set; }
+
         public ApplicationUser? OpprettetAv { get; set; }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        public IEnumerable<ValidationResult> Validate(
+            ValidationContext validationContext)
         {
             if (Frist < FraDato)
             {
@@ -79,6 +77,6 @@ namespace DugnadAppMvc.Models
         public OppgaveStatus? MinStatus { get; set; }
 
         public ICollection<OppgavePamelding> Pameldinger { get; set; }
-    = new List<OppgavePamelding>();
+            = new List<OppgavePamelding>();
     }
 }

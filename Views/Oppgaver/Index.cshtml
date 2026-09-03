@@ -277,12 +277,6 @@
                                 @(item.KanRegistrereTimer ? "Ja" : "Nei")
                             </td>
 
-
-                            <td>
-                                @(item.KreverBekreftelse ? "Ja" : "Nei")
-                            </td>
-
-
                             <td class="text-nowrap">
 
                                 @if (User.HasAdminAccess())
@@ -500,11 +494,7 @@
 
                             <div class="col-5 text-muted fw-semibold">
                                 Bekreftelse
-                            </div>
-
-                            <div class="col-7">
-                                @(item.KreverBekreftelse ? "Ja" : "Nei")
-                            </div>
+                            </div>                           
 
                         </div>
 
