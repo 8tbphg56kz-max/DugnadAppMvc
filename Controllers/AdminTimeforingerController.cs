@@ -27,18 +27,56 @@ namespace DugnadAppMvc.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index(int? leilighetId, string? aktivitet, int? beboerId)
+        public async Task<IActionResult> Index(
+    int? leilighetId,
+    string? aktivitet,
+    int? beboerId)
         {
-             var query = _context.Timeforinger
-    .Include(d => d.Dugnad)
-    .Include(d => d.Oppgave)
-    .Include(d => d.Beboer)
-        .ThenInclude(b => b.Leilighet)
-    .AsQueryable();
+            // Hent alle registrerte timeføringer
+            var alleTimeforinger = _context.Timeforinger
+                .Include(d => d.Dugnad)
+                .Include(d => d.Oppgave)
+                .Include(d => d.Beboer)
+                    .ThenInclude(b => b.Leilighet)
+                .AsQueryable();
+
+            // ---------------------------------------------------------
+            // Bygg filtergrunnlag for dropdownene
+            // ---------------------------------------------------------
+
+            var registrerteBeboerIds = await alleTimeforinger
+                .Select(t => t.BeboerId)
+                .Distinct()
+                .ToListAsync();
+
+            var registrerteLeilighetIds = await alleTimeforinger
+                .Select(t => t.Beboer.LeilighetId)
+                .Distinct()
+                .ToListAsync();
+
+            var registrerteDugnadIds = await alleTimeforinger
+                .Where(t => t.DugnadId.HasValue)
+                .Select(t => t.DugnadId!.Value)
+                .Distinct()
+                .ToListAsync();
+
+            var registrerteOppgaveIds = await alleTimeforinger
+                .Where(t => t.OppgaveId.HasValue)
+                .Select(t => t.OppgaveId!.Value)
+                .Distinct()
+                .ToListAsync();
+
+
+            // ---------------------------------------------------------
+            // Selve filtreringen
+            // ---------------------------------------------------------
+
+            var query = alleTimeforinger;
 
             if (leilighetId.HasValue)
             {
-                query = query.Where(d => d.Beboer.LeilighetId == leilighetId.Value);
+                query = query.Where(d =>
+                    d.Beboer.LeilighetId == leilighetId.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(aktivitet))
@@ -46,62 +84,101 @@ namespace DugnadAppMvc.Controllers
                 if (aktivitet.StartsWith("D-"))
                 {
                     var dugnadId = int.Parse(aktivitet[2..]);
-                    query = query.Where(t => t.DugnadId == dugnadId);
+
+                    query = query.Where(t =>
+                        t.DugnadId == dugnadId);
                 }
                 else if (aktivitet.StartsWith("O-"))
                 {
                     var oppgaveId = int.Parse(aktivitet[2..]);
-                    query = query.Where(t => t.OppgaveId == oppgaveId);
+
+                    query = query.Where(t =>
+                        t.OppgaveId == oppgaveId);
                 }
             }
 
             if (beboerId.HasValue)
             {
-                query = query.Where(d => d.BeboerId == beboerId.Value);
+                query = query.Where(d =>
+                    d.BeboerId == beboerId.Value);
             }
+
+
+            // ---------------------------------------------------------
+            // ViewModel
+            // ---------------------------------------------------------
 
             var model = new AdminTimeforingerIndexViewModel();
 
+
+            // ---------------------------------------------------------
+            // Beboere
+            // ---------------------------------------------------------
+
             model.Beboere = await _context.Beboere
-    .OrderBy(b => b.Etternavn)
-    .ThenBy(b => b.Fornavn)
-    .Select(b => new SelectListItem
-    {
-        Value = b.Id.ToString(),
-        Text = b.Etternavn + ", " + b.Fornavn
-    })
-    .ToListAsync();
+                .Where(b => registrerteBeboerIds.Contains(b.Id))
+                .OrderBy(b => b.Etternavn)
+                .ThenBy(b => b.Fornavn)
+                .Select(b => new SelectListItem
+                {
+                    Value = b.Id.ToString(),
+                    Text = b.Etternavn + ", " + b.Fornavn,
+                    Selected = b.Id == beboerId
+                })
+                .ToListAsync();
+
+
+            // ---------------------------------------------------------
+            // Leiligheter
+            // ---------------------------------------------------------
 
             model.Leiligheter = await _context.Leiligheter
+                .Where(l => registrerteLeilighetIds.Contains(l.Id))
                 .OrderBy(l => l.Leilighetsnummer)
                 .Select(l => new SelectListItem
                 {
                     Value = l.Id.ToString(),
-                    Text = l.Leilighetsnummer
+                    Text = l.Leilighetsnummer,
+                    Selected = l.Id == leilighetId
                 })
                 .ToListAsync();
+
+
+            // ---------------------------------------------------------
+            // Aktiviteter
+            // ---------------------------------------------------------
 
             model.Aktiviteter = new List<SelectListItem>();
 
             model.Aktiviteter.AddRange(
                 await _context.Dugnader
+                    .Where(d => registrerteDugnadIds.Contains(d.Id))
                     .OrderBy(d => d.Tittel)
                     .Select(d => new SelectListItem
                     {
                         Value = $"D-{d.Id}",
-                        Text = $"📅 {d.Tittel}"
+                        Text = $"📅 {d.Tittel}",
+                        Selected = aktivitet == $"D-{d.Id}"
                     })
                     .ToListAsync());
 
+
             model.Aktiviteter.AddRange(
                 await _context.Oppgaver
+                    .Where(o => registrerteOppgaveIds.Contains(o.Id))
                     .OrderBy(o => o.Navn)
                     .Select(o => new SelectListItem
                     {
                         Value = $"O-{o.Id}",
-                        Text = $"🛠 {o.Navn}"
+                        Text = $"🛠 {o.Navn}",
+                        Selected = aktivitet == $"O-{o.Id}"
                     })
                     .ToListAsync());
+
+
+            // ---------------------------------------------------------
+            // Timeføringene
+            // ---------------------------------------------------------
 
             model.Dugnadstimer = await query
                 .OrderByDescending(d => d.RegistrertDato)
@@ -109,15 +186,20 @@ namespace DugnadAppMvc.Controllers
                 {
                     Id = d.Id,
                     Registrert = d.RegistrertDato,
-                    Aktivitet = d.OppgaveId != null ? d.Oppgave!.Navn : d.Dugnad!.Tittel,
+                    Aktivitet = d.OppgaveId != null
+                        ? d.Oppgave!.Navn
+                        : d.Dugnad!.Tittel,
                     Beboer = d.Beboer.Etternavn + ", " + d.Beboer.Fornavn,
                     Timer = d.AntallTimer,
                     Kommentar = d.Kommentar
                 })
                 .ToListAsync();
 
+
+            // Behold valgte filtre
             model.LeilighetId = leilighetId;
             model.Aktivitet = aktivitet;
+            model.BeboerId = beboerId;
 
             return View(model);
         }
