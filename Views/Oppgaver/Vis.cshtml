@@ -7,7 +7,6 @@
     var pamelding = ViewBag.Pamelding as DugnadAppMvc.Models.OppgavePamelding;
 }
 
-
 @{
     ViewData["Title"] = Model.Navn;
 }
@@ -26,7 +25,7 @@
                     <i class="bi bi-arrow-left"></i>
                     Tilbake til Min side
                 </a>
-                
+
                 <h2 class="mb-3">
                     @Model.Navn
                 </h2>
@@ -47,6 +46,14 @@
 
                 </div>
 
+                @if (Model.KanUtføresFlereGanger)
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Denne oppgaven kan utføres flere ganger i løpet av perioden.
+                    </div>
+                }
+
                 <div class="mb-4">
 
                     <h5>Beskrivelse</h5>
@@ -57,7 +64,7 @@
 
                 </div>
 
-                <div class="d-grid">
+                <div class="d-grid gap-2">
 
                     @if ((bool?)ViewBag.ErPameldt == true)
                     {
@@ -69,44 +76,93 @@
                             </div>
                         }
 
-                        @if (pamelding?.Status == OppgaveStatus.Pameldt)
+                        @* GJENTAKENDE OPPGAVE *@
+                        @if (Model.KanUtføresFlereGanger)
                         {
-                            <form asp-action="MarkerSomUtfort"
+                            @if (Model.KanRegistrereTimer)
+                            {
+                                <a asp-action="RegistrerTimer"
+                                   asp-route-id="@Model.Id"
+                                   class="btn btn-primary w-100">
+                                    <i class="bi bi-clock"></i>
+                                    Registrer timer
+                                </a>
+                            }
+
+                            <div class="small text-muted text-center mt-1">
+                                Du kan registrere timer hver gang du utfører oppgaven.
+                            </div>
+
+                            <form asp-action="TrekkPamelding"
                                   asp-route-id="@Model.Id"
-                                  method="post">
+                                  method="post"
+                                  class="mt-2">
+
                                 @Html.AntiForgeryToken()
 
                                 <button type="submit"
-                                        class="btn btn-success w-100">
-                                    <i class="bi bi-check-circle"></i>
-                                    Jeg har utført oppgaven
-                                </button>
-                            </form>
-                        }
-                        else if (pamelding?.Status == OppgaveStatus.Utfort)
-                        {
-                            <a asp-action="RegistrerTimer"
-                               asp-route-id="@Model.Id"
-                               class="btn btn-primary w-100">
-                                Registrer timer
-                            </a>
-                        }
-                        else if (pamelding?.Status == OppgaveStatus.TimerRegistrert)
-                        {
-                        }
-
-                        @if (pamelding?.Status != OppgaveStatus.TimerRegistrert)
-                        {
-                            <form asp-action="TrekkPamelding"
-                                  asp-route-id="@Model.Id"
-                                  method="post">
-                                @Html.AntiForgeryToken()
-
-                                <button class="btn btn-outline-danger w-100">
+                                        class="btn btn-outline-danger w-100">
                                     <i class="bi bi-person-dash"></i>
                                     Trekk påmelding
                                 </button>
+
                             </form>
+                        }
+
+                        @* VANLIG ENGANGSOPPGAVE *@
+                        else
+                        {
+                            @if (pamelding?.Status == OppgaveStatus.Pameldt)
+                            {
+                                <form asp-action="MarkerSomUtfort"
+                                      asp-route-id="@Model.Id"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-success w-100">
+                                        <i class="bi bi-check-circle"></i>
+                                        Jeg har utført oppgaven
+                                    </button>
+
+                                </form>
+                            }
+                            else if (pamelding?.Status == OppgaveStatus.Utfort)
+                            {
+                                @if (Model.KanRegistrereTimer)
+                                {
+                                    <a asp-action="RegistrerTimer"
+                                       asp-route-id="@Model.Id"
+                                       class="btn btn-primary w-100">
+                                        Registrer timer
+                                    </a>
+                                }
+                            }
+                            else if (pamelding?.Status == OppgaveStatus.TimerRegistrert)
+                            {
+                                <div class="alert alert-success mb-0">
+                                    <i class="bi bi-check-circle"></i>
+                                    Oppgaven er fullført og timene er registrert.
+                                </div>
+                            }
+
+                            @if (pamelding?.Status != OppgaveStatus.TimerRegistrert)
+                            {
+                                <form asp-action="TrekkPamelding"
+                                      asp-route-id="@Model.Id"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-outline-danger w-100">
+                                        <i class="bi bi-person-dash"></i>
+                                        Trekk påmelding
+                                    </button>
+
+                                </form>
+                            }
                         }
                     }
                     else
@@ -114,12 +170,15 @@
                         <form asp-action="MeldPa"
                               asp-route-id="@Model.Id"
                               method="post">
+
                             @Html.AntiForgeryToken()
 
-                            <button class="btn btn-success w-100">
+                            <button type="submit"
+                                    class="btn btn-success w-100">
                                 <i class="bi bi-person-plus"></i>
                                 Meld meg på
                             </button>
+
                         </form>
                     }
 

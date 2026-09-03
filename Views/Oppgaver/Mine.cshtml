@@ -4,91 +4,156 @@
     ViewData["Title"] = "Oppgaver";
 }
 
-<h2>Oppgaver</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
 
-@if (!Model.Any())
-{
-    <div class="alert alert-info">
-        Det finnes ingen aktive oppgaver.
-    </div>
-}
-else
-{
-    <div class="row">
-        @foreach (var oppgave in Model)
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Oppgaver</h2>
+        </div>
+
+        @if (!Model.Any())
         {
-            <div class="col-md-6 mb-3">
-                <div class="card h-100">
-
-                    <div class="card-header d-flex justify-content-between">
-                        <strong>@oppgave.Oppgave.Navn</strong>
-
-                        @await Html.PartialAsync("Badges/_OppgavePrioritetBadge", oppgave.Oppgave.Prioritet)
-                    </div>
-
-                    <div class="card-body">
-
-                        <p>@oppgave.Oppgave.Beskrivelse</p>
-
-                        <dl class="row">
-
-                            <dt class="col-5">Fra dato</dt>
-                            <dd class="col-7">
-                                @oppgave.Oppgave.FraDato.ToString("dd.MM.yyyy")
-                            </dd>
-
-                            <dt class="col-5">Frist</dt>
-                            <dd class="col-7">
-                                @oppgave.Oppgave.Frist.ToString("dd.MM.yyyy")
-                            </dd>
-
-                            <dt class="col-5">Personer</dt>
-                            <dd class="col-7">
-                                @oppgave.Oppgave.AntallPersoner
-                            </dd>
-
-                            <dt class="col-5">Påmeldte</dt>
-                            <dd class="col-7">
-                                @oppgave.Oppgave.Pameldinger.Count av @oppgave.Oppgave.AntallPersoner
-                            </dd>
-
-                        </dl>
-
-                    </div>
-
-                    @if (oppgave.ErPameldt)
-                    {
-                        <span class="badge bg-success mb-2">
-                            <i class="bi bi-check-circle"></i> Du er påmeldt
-                        </span>
-
-                        <form asp-action="TrekkPameldingFraMine"
-                              asp-route-id="@oppgave.Oppgave.Id"
-                              method="post">
-                            @Html.AntiForgeryToken()
-
-                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                <i class="bi bi-person-dash"></i>
-                                Trekk påmelding
-                            </button>
-                        </form>
-                    }
-                    else
-                    {
-                        <form asp-action="MeldPaFraMine"
-                              asp-route-id="@oppgave.Oppgave.Id"
-                              method="post">
-                            @Html.AntiForgeryToken()
-
-                            <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="bi bi-person-plus"></i>
-                                Meld meg på
-                            </button>
-                        </form>
-                    }
-
-                </div>
+            <div class="alert alert-info">
+                Det finnes ingen aktive oppgaver.
             </div>
         }
+        else
+        {
+            <div class="row g-3">
+
+                @foreach (var oppgave in Model)
+                {
+                    <div class="col-12 col-md-6">
+
+                        <div class="card h-100 shadow-sm border-0 rounded-4">
+
+                            <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                                <strong>@oppgave.Oppgave.Navn</strong>
+
+                                @await Html.PartialAsync(
+                                    "Badges/_OppgavePrioritetBadge",
+                                    oppgave.Oppgave.Prioritet)
+                            </div>
+
+                            <div class="card-body">
+
+                                @if (oppgave.Oppgave.KanUtføresFlereGanger)
+                                {
+                                    <div class="alert alert-info py-2">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                        Kan utføres flere ganger
+                                    </div>
+                                }
+
+                                <p class="text-muted">
+                                    @oppgave.Oppgave.Beskrivelse
+                                </p>
+
+                                <dl class="row mb-0">
+
+                                    <dt class="col-5">Fra dato</dt>
+                                    <dd class="col-7">
+                                        @oppgave.Oppgave.FraDato.ToString("dd.MM.yyyy")
+                                    </dd>
+
+                                    <dt class="col-5">Frist</dt>
+                                    <dd class="col-7">
+                                        @oppgave.Oppgave.Frist.ToString("dd.MM.yyyy")
+                                    </dd>
+
+                                    <dt class="col-5">Personer</dt>
+                                    <dd class="col-7">
+                                        @oppgave.Oppgave.AntallPersoner
+                                    </dd>
+
+                                    <dt class="col-5">Påmeldte</dt>
+                                    <dd class="col-7">
+                                        @oppgave.Oppgave.Pameldinger.Count av
+                                        @oppgave.Oppgave.AntallPersoner
+                                    </dd>
+
+                                </dl>
+
+                            </div>
+
+                            <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+
+                                @if (oppgave.ErPameldt)
+                                {
+                                    <div class="alert alert-success py-2 mb-2">
+                                        <i class="bi bi-check-circle"></i>
+                                        Du er påmeldt
+                                    </div>
+
+                                    @if (oppgave.Oppgave.KanUtføresFlereGanger)
+                                    {
+                                        <div class="small text-muted mb-2">
+                                            Du kan registrere timer hver gang du utfører oppgaven.
+                                        </div>
+                                    }
+
+                                    <div class="d-grid gap-2">
+
+                                        <a asp-action="Vis"
+                                           asp-route-id="@oppgave.Oppgave.Id"
+                                           class="btn btn-primary btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                            Se oppgave
+                                        </a>
+
+                                        <form asp-action="TrekkPameldingFraMine"
+                                              asp-route-id="@oppgave.Oppgave.Id"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger btn-sm w-100">
+                                                <i class="bi bi-person-dash"></i>
+                                                Trekk påmelding
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="d-grid gap-2">
+
+                                        <a asp-action="Vis"
+                                           asp-route-id="@oppgave.Oppgave.Id"
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                            Se oppgave
+                                        </a>
+
+                                        <form asp-action="MeldPaFraMine"
+                                              asp-route-id="@oppgave.Oppgave.Id"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="btn btn-primary btn-sm w-100">
+                                                <i class="bi bi-person-plus"></i>
+                                                Meld meg på
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+
     </div>
-}
+</div>

@@ -99,6 +99,15 @@
 
             <h2>@Model.Oppgave.Navn</h2>
 
+            @if (Model.Oppgave.KanUtføresFlereGanger)
+            {
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="bi bi-arrow-repeat me-1"></i>
+                    Dette er en oppgave som kan utføres flere ganger.
+                    Påmeldte beboere forblir påmeldt selv om de registrerer timer.
+                </div>
+            }
+
             <div class="card mt-3">
 
                 <div class="card-header">
@@ -125,7 +134,12 @@
                                     <tr>
                                         <th>Beboer</th>
                                         <th>Påmeldt</th>
-                                        <th>Utført</th>
+
+                                        @if (!Model.Oppgave.KanUtføresFlereGanger)
+                                        {
+                                            <th>Utført</th>
+                                        }
+
                                         <th>Registrert timer</th>
                                         <th>Timer</th>
                                         <th>Status</th>
@@ -167,34 +181,37 @@
                                                 </small>
                                             </td>
 
-                                            <!-- Utført -->
-                                            <td>
+                                            <!-- Utført - bare vanlig oppgave -->
+                                            @if (!Model.Oppgave.KanUtføresFlereGanger)
+                                            {
+                                                <td>
 
-                                                @if (item.ErUtfort)
-                                                {
-                                                    <span class="text-success">
-                                                        <i class="bi bi-check-circle-fill"></i>
-                                                        Ja
-                                                    </span>
-
-                                                    @if (item.UtfortDato.HasValue)
+                                                    @if (item.ErUtfort)
                                                     {
-                                                        <br />
+                                                        <span class="text-success">
+                                                            <i class="bi bi-check-circle-fill"></i>
+                                                            Ja
+                                                        </span>
 
-                                                        <small class="text-muted">
-                                                            @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
-                                                        </small>
+                                                        @if (item.UtfortDato.HasValue)
+                                                        {
+                                                            <br />
+
+                                                            <small class="text-muted">
+                                                                @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                                            </small>
+                                                        }
                                                     }
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-warning">
-                                                        <i class="bi bi-clock"></i>
-                                                        Ikke utført
-                                                    </span>
-                                                }
+                                                    else
+                                                    {
+                                                        <span class="text-warning">
+                                                            <i class="bi bi-clock"></i>
+                                                            Ikke utført
+                                                        </span>
+                                                    }
 
-                                            </td>
+                                                </td>
+                                            }
 
                                             <!-- Registrert timer -->
                                             <td>
@@ -233,7 +250,13 @@
                                             <!-- Status -->
                                             <td>
 
-                                                @if (item.Status == "Fullført")
+                                                @if (Model.Oppgave.KanUtføresFlereGanger)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        Påmeldt
+                                                    </span>
+                                                }
+                                                else if (item.Status == "Fullført")
                                                 {
                                                     <span class="badge bg-success">
                                                         Fullført
@@ -312,7 +335,6 @@
 
                                         </div>
 
-
                                         <div class="row g-3">
 
                                             <!-- Påmeldt -->
@@ -336,42 +358,45 @@
                                             </div>
 
 
-                                            <!-- Utført -->
-                                            <div class="col-6">
+                                            <!-- Utført - bare vanlig oppgave -->
+                                            @if (!Model.Oppgave.KanUtføresFlereGanger)
+                                            {
+                                                <div class="col-6">
 
-                                                <div class="text-muted small">
-                                                    Utført
+                                                    <div class="text-muted small">
+                                                        Utført
+                                                    </div>
+
+                                                    @if (item.ErUtfort)
+                                                    {
+                                                        <div class="text-success">
+
+                                                            <i class="bi bi-check-circle-fill"></i>
+                                                            Ja
+
+                                                            @if (item.UtfortDato.HasValue)
+                                                            {
+                                                                <br />
+
+                                                                <small class="text-muted">
+                                                                    @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                                                </small>
+                                                            }
+
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="text-warning">
+
+                                                            <i class="bi bi-clock"></i>
+                                                            Ikke utført
+
+                                                        </div>
+                                                    }
+
                                                 </div>
-
-                                                @if (item.ErUtfort)
-                                                {
-                                                    <div class="text-success">
-
-                                                        <i class="bi bi-check-circle-fill"></i>
-                                                        Ja
-
-                                                        @if (item.UtfortDato.HasValue)
-                                                        {
-                                                            <br />
-
-                                                            <small class="text-muted">
-                                                                @item.UtfortDato.Value.ToLocalTime().ToString("dd.MM.yyyy")
-                                                            </small>
-                                                        }
-
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <div class="text-warning">
-
-                                                        <i class="bi bi-clock"></i>
-                                                        Ikke utført
-
-                                                    </div>
-                                                }
-
-                                            </div>
+                                            }
 
 
                                             <!-- Registrert timer -->
@@ -431,7 +456,13 @@
                                                     Status
                                                 </div>
 
-                                                @if (item.Status == "Fullført")
+                                                @if (Model.Oppgave.KanUtføresFlereGanger)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        Påmeldt
+                                                    </span>
+                                                }
+                                                else if (item.Status == "Fullført")
                                                 {
                                                     <span class="badge bg-success">
                                                         Fullført
@@ -690,13 +721,13 @@
 @section Scripts {
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
 
             var meldAvModal = document.getElementById("meldAvModal");
 
             if (meldAvModal) {
 
-                meldAvModal.addEventListener("show.bs.modal", function (event) {
+                meldAvModal.addEventListener("show.bs.modal", function(event) {
 
                     var button = event.relatedTarget;
 

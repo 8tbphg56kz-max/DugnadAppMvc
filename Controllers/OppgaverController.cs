@@ -1,4 +1,5 @@
 using DugnadAppMvc.Data;
+using DugnadAppMvc.Helpers;
 using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.Models.Enums;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using DugnadAppMvc.Helpers;
+using System.Globalization;
 using System.Security.Claims;
 
 public class OppgaverController : Controller
@@ -53,6 +54,7 @@ public class OppgaverController : Controller
             Prioritet = OppgavePrioritet.Normal,
             AntallPersoner = 1,
             KanRegistrereTimer = true,
+            KanUtføresFlereGanger = false,
             KreverBekreftelse = true
         };
 
@@ -62,7 +64,7 @@ public class OppgaverController : Controller
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave)
+    public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave)
     {
         if (ModelState.IsValid)
         {
@@ -100,7 +102,7 @@ public class OppgaverController : Controller
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? id, [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave)
+    public async Task<IActionResult> Edit(int? id, [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave)
     {
         if (id != oppgave.Id)
         {
@@ -494,20 +496,26 @@ public class OppgaverController : Controller
     public async Task<IActionResult> RegistrerTimer(RegistrerTimerViewModel model)
     {
         if (!ModelState.IsValid)
+        {
+            model.TimerAlternativer = TimerAlternativerHelper.Hent();
             return View(model);
+        }
 
         if (!decimal.TryParse(
-        model.AntallTimer,
-        System.Globalization.NumberStyles.Number,
-        System.Globalization.CultureInfo.InvariantCulture,
-        out var antallTimer))
+            model.AntallTimer,
+            NumberStyles.Number,
+            CultureInfo.InvariantCulture,
+            out var antallTimer))
         {
-            ModelState.AddModelError(nameof(model.AntallTimer), "Ugyldig timetall.");
+            ModelState.AddModelError(
+                nameof(model.AntallTimer),
+                "Ugyldig timetall.");
+
+            model.TimerAlternativer = TimerAlternativerHelper.Hent();
             return View(model);
         }
 
         var currentUser = await _userManager.GetUserAsync(User);
-
         if (currentUser == null)
             return Challenge();
 
@@ -518,6 +526,7 @@ public class OppgaverController : Controller
             return NotFound();
 
         var pamelding = await _context.OppgavePameldinger
+            .Include(p => p.Oppgave)
             .FirstOrDefaultAsync(p =>
                 p.OppgaveId == model.OppgaveId &&
                 p.BeboerId == beboer.Id);
@@ -525,6 +534,39 @@ public class OppgaverController : Controller
         if (pamelding == null)
             return NotFound();
 
+        var oppgave = pamelding.Oppgave;
+
+        // Gjentakende oppgave:
+        // Påmeldingen skal bestå, og hver registrering
+        // oppretter en ny timeføring.
+        if (oppgave.KanUtføresFlereGanger)
+        {
+            if (!oppgave.KanRegistrereTimer)
+            {
+                TempData["Error"] = "Det er ikke mulig å registrere timer på denne oppgaven.";
+                return RedirectToAction(nameof(Vis), new { id = model.OppgaveId });
+            }
+
+            _context.Timeforinger.Add(new Timeforing
+            {
+                OppgaveId = model.OppgaveId,
+                BeboerId = beboer.Id,
+                AntallTimer = antallTimer,
+                Kommentar = model.Kommentar,
+                RegistrertDato = DateTime.UtcNow
+            });
+
+            // Status beholdes som Pameldt.
+            // Beboeren kan derfor registrere timer igjen senere.
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Timene er registrert.";
+            return RedirectToAction(nameof(Vis), new { id = model.OppgaveId });
+        }
+
+        // Vanlig engangsoppgave:
+        // Behold dagens eksisterende flyt.
         if (pamelding.Status != OppgaveStatus.Utfort)
         {
             return Forbid();
@@ -677,19 +719,21 @@ public class OppgaverController : Controller
             .FirstOrDefaultAsync(p => p.Id == pameldingId);
 
         if (pamelding == null)
-        {
             return NotFound();
-        }
 
         var oppgaveId = pamelding.OppgaveId;
 
-        // Sjekk om det finnes registrerte timer
         var harTimer = await _context.Timeforinger
             .AnyAsync(t =>
                 t.OppgaveId == oppgaveId &&
                 t.BeboerId == pamelding.BeboerId);
 
-        if (harTimer)
+        // For vanlige engangsoppgaver skal vi fortsatt
+        // hindre avmelding dersom det finnes timer.
+        //
+        // For gjentakende oppgaver kan beboeren meldes av
+        // selv om det finnes tidligere timeføringer.
+        if (harTimer && !pamelding.Oppgave.KanUtføresFlereGanger)
         {
             TempData["ErrorMessage"] =
                 "Kan ikke melde av beboeren fordi det er registrert timer på oppgaven.";
@@ -699,15 +743,11 @@ public class OppgaverController : Controller
                 new { id = oppgaveId });
         }
 
-        // Hent innlogget bruker direkte fra Identity-claim
         var brukerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(brukerId))
-        {
             return Forbid();
-        }
 
-        // Opprett endringslogg
         var endringslogg = new Endringslogg
         {
             Tidspunkt = DateTime.UtcNow,
@@ -721,7 +761,8 @@ public class OppgaverController : Controller
 
         _context.Endringslogger.Add(endringslogg);
 
-        // Meld beboeren av
+        // Selve påmeldingen fjernes.
+        // Eventuelle tidligere timeføringer beholdes.
         _context.OppgavePameldinger.Remove(pamelding);
 
         await _context.SaveChangesAsync();

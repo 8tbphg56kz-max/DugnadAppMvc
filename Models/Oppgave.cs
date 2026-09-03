@@ -36,6 +36,9 @@ namespace DugnadAppMvc.Models
         [Display(Name = "Kan registrere timer")]
         public bool KanRegistrereTimer { get; set; } = true;
 
+        [Display(Name = "Kan utføres flere ganger")]
+        public bool KanUtføresFlereGanger { get; set; } = false;
+
         [Display(Name = "Krever bekreftelse")]
         public bool KreverBekreftelse { get; set; } = true;
 
