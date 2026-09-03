@@ -13,4 +13,6 @@ public class EditUserRoleViewModel
     public string SelectedRole { get; set; } = string.Empty;
 
     public List<SelectListItem> Roles { get; set; } = [];
+
+    public bool ErReserveSystemadministrator { get; set; }
 }

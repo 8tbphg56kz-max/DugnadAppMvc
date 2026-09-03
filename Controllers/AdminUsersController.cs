@@ -1,11 +1,12 @@
-﻿using DugnadAppMvc.Models;
+﻿using System.Security.Claims;
+using DugnadAppMvc.Models;
 using DugnadAppMvc.Services;
 using DugnadAppMvc.Services.Interfaces;
 using DugnadAppMvc.ViewModels;
 using DugnadAppMvc.ViewModels.AdminUsers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace DugnadAppMvc.Controllers;
@@ -14,21 +15,30 @@ namespace DugnadAppMvc.Controllers;
 public class AdminUsersController : Controller
 {
     private readonly IUserAdministrationService _userService;
-
     private readonly UserManager<ApplicationUser> _userManager;
 
+    // Denne brukeren skal alltid være systemadministrator
+    private const string ReservedSystemAdministratorEmail = "admin@dugnadapp.no";
+
     public AdminUsersController(
-    IUserAdministrationService userService,
-    UserManager<ApplicationUser> userManager)
+        IUserAdministrationService userService,
+        UserManager<ApplicationUser> userManager)
     {
         _userService = userService;
         _userManager = userManager;
     }
 
+    private static bool IsReservedSystemAdministrator(ApplicationUser user)
+    {
+        return string.Equals(
+            user.Email,
+            ReservedSystemAdministratorEmail,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
     public async Task<IActionResult> Index()
     {
         var model = await _userService.GetUsersAsync();
-
         return View(model);
     }
 
@@ -45,14 +55,25 @@ public class AdminUsersController : Controller
         if (user == null)
             return NotFound();
 
-        // Administrator kan ikke redigere en systemadministrator
-        if (await _userManager.IsInRoleAsync(user, IdentityRoles.SystemAdministrator) &&
-            !User.IsInRole(IdentityRoles.SystemAdministrator))
-        {
-            TempData["Error"] =
-                "Kun systemadministrator kan redigere en systemadministrator.";
+        model.ErReserveSystemadministrator =
+            IsReservedSystemAdministrator(user);
 
-            return RedirectToAction(nameof(Index));
+        // Reservebrukeren skal alltid være systemadministrator
+        if (model.ErReserveSystemadministrator)
+        {
+            model.SelectedRole = IdentityRoles.SystemAdministrator;
+
+            model.Roles = new List<SelectListItem>
+    {
+        new SelectListItem
+        {
+            Text = IdentityRoles.SystemAdministrator,
+            Value = IdentityRoles.SystemAdministrator,
+            Selected = true
+        }
+    };
+
+            return View(model);
         }
 
         // Administrator skal ikke få SystemAdministrator som valgmulighet
@@ -75,22 +96,29 @@ public class AdminUsersController : Controller
         if (user == null)
             return NotFound();
 
+        // Reservebrukeren kan ALDRI få en annen rolle
+        if (IsReservedSystemAdministrator(user))
+        {
+            if (model.SelectedRole != IdentityRoles.SystemAdministrator)
+            {
+                TempData["Error"] =
+                    "Reservebrukeren kan ikke få en annen rolle enn systemadministrator.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["SuccessMessage"] =
+                "Reservebrukeren er allerede systemadministrator.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // Kun systemadministrator kan gi SystemAdministrator-rollen
         if (model.SelectedRole == IdentityRoles.SystemAdministrator &&
             !User.IsInRole(IdentityRoles.SystemAdministrator))
         {
             TempData["Error"] =
                 "Kun systemadministrator kan gi systemadministrator-tilgang.";
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // Administrator kan ikke endre en eksisterende systemadministrator
-        if (await _userManager.IsInRoleAsync(user, IdentityRoles.SystemAdministrator) &&
-            !User.IsInRole(IdentityRoles.SystemAdministrator))
-        {
-            TempData["Error"] =
-                "Kun systemadministrator kan endre en systemadministrator.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -114,8 +142,11 @@ public class AdminUsersController : Controller
         }
 
         // Systemadministrator kan ikke endre sin egen rolle
-        if (user.Id == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value &&
-            await _userManager.IsInRoleAsync(user, IdentityRoles.SystemAdministrator) &&
+        if (user.Id ==
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value &&
+            await _userManager.IsInRoleAsync(
+                user,
+                IdentityRoles.SystemAdministrator) &&
             model.SelectedRole != IdentityRoles.SystemAdministrator)
         {
             TempData["Error"] =
@@ -130,7 +161,9 @@ public class AdminUsersController : Controller
         {
             TempData["ErrorMessage"] = result.ErrorMessage;
 
-            return RedirectToAction(nameof(Edit), new { id = model.Id });
+            return RedirectToAction(
+                nameof(Edit),
+                new { id = model.Id });
         }
 
         TempData["SuccessMessage"] = "Rollen er oppdatert.";
@@ -138,12 +171,13 @@ public class AdminUsersController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpGet]
     public async Task<IActionResult> Add()
     {
         var alleBrukere = await _userManager.Users
-        .OrderBy(u => u.LastName)
-        .ThenBy(u => u.FirstName)
-        .ToListAsync();
+            .OrderBy(u => u.LastName)
+            .ThenBy(u => u.FirstName)
+            .ToListAsync();
 
         var beboere = new List<SelectListItem>();
 
@@ -168,7 +202,8 @@ public class AdminUsersController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> GiTilgang(LeggTilTilgangViewModel model)
+    public async Task<IActionResult> GiTilgang(
+        LeggTilTilgangViewModel model)
     {
         if (!ModelState.IsValid)
         {
@@ -178,12 +213,20 @@ public class AdminUsersController : Controller
         var user = await _userManager.FindByIdAsync(model.UserId);
 
         if (user == null)
-        {
             return NotFound();
+
+        // Reservebrukeren skal aldri endres
+        if (IsReservedSystemAdministrator(user))
+        {
+            TempData["Error"] =
+                "Reservebrukeren skal alltid være systemadministrator.";
+
+            return RedirectToAction(nameof(Index));
         }
 
+        // Kun systemadministrator kan gi SystemAdministrator
         if (model.Rolle == IdentityRoles.SystemAdministrator &&
-    !User.IsInRole(IdentityRoles.SystemAdministrator))
+            !User.IsInRole(IdentityRoles.SystemAdministrator))
         {
             TempData["Error"] =
                 "Kun systemadministrator kan gi systemadministrator-tilgang.";
@@ -192,8 +235,8 @@ public class AdminUsersController : Controller
         }
 
         if (model.Rolle != IdentityRoles.Styremedlem &&
-     model.Rolle != IdentityRoles.Administrator &&
-     model.Rolle != IdentityRoles.SystemAdministrator)
+            model.Rolle != IdentityRoles.Administrator &&
+            model.Rolle != IdentityRoles.SystemAdministrator)
         {
             return BadRequest();
         }
@@ -206,14 +249,18 @@ public class AdminUsersController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        await _userManager.RemoveFromRoleAsync(user, IdentityRoles.Beboer);
-        await _userManager.AddToRoleAsync(user, model.Rolle);
+        await _userManager.RemoveFromRoleAsync(
+            user,
+            IdentityRoles.Beboer);
+
+        await _userManager.AddToRoleAsync(
+            user,
+            model.Rolle);
 
         TempData["Success"] =
             $"{user.FirstName} {user.LastName} er nå {model.Rolle}.";
 
         return RedirectToAction(nameof(Index));
-
     }
 
     [HttpPost]
@@ -224,19 +271,17 @@ public class AdminUsersController : Controller
         var user = await _userManager.FindByIdAsync(userId);
 
         if (user == null)
-        {
             return NotFound();
-        }
 
-        if (user.Email == "admin@dugnadapp.no")
+        // KUN reservebrukeren er beskyttet
+        if (IsReservedSystemAdministrator(user))
         {
             TempData["Error"] =
-                "Systemadministrator kan ikke gjøres om til beboer.";
+                "Reservebrukeren kan ikke gjøres om til beboer.";
 
             return RedirectToAction(nameof(Index));
         }
 
-        // Fjern alle utvidede roller
         var roller = await _userManager.GetRolesAsync(user);
 
         foreach (var rolle in roller)
@@ -247,10 +292,13 @@ public class AdminUsersController : Controller
             }
         }
 
-        // Sørg for at brukeren har Beboer-rollen
-        if (!await _userManager.IsInRoleAsync(user, IdentityRoles.Beboer))
+        if (!await _userManager.IsInRoleAsync(
+                user,
+                IdentityRoles.Beboer))
         {
-            await _userManager.AddToRoleAsync(user, IdentityRoles.Beboer);
+            await _userManager.AddToRoleAsync(
+                user,
+                IdentityRoles.Beboer);
         }
 
         TempData["Success"] =
@@ -258,5 +306,4 @@ public class AdminUsersController : Controller
 
         return RedirectToAction(nameof(Index));
     }
-
 }
