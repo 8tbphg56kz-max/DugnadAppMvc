@@ -1,6 +1,7 @@
 ﻿using DugnadAppMvc.Data;
 using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
+using DugnadAppMvc.Services;
 using DugnadAppMvc.Services.Interfaces;
 using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -12,13 +13,16 @@ public class ArsAvslutningController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly IDatabaseBackupService _backupService;
+    private readonly DugnadTimerPdfService _pdfService;
 
     public ArsAvslutningController(
         ApplicationDbContext context,
-        IDatabaseBackupService backupService)
+        IDatabaseBackupService backupService,
+        DugnadTimerPdfService pdfService)
     {
         _context = context;
         _backupService = backupService;
+        _pdfService = pdfService;
     }
 
     [HttpGet]
@@ -26,10 +30,39 @@ public class ArsAvslutningController : Controller
     {
         try
         {
-            var result = await _backupService.CreateBackupAsync();
+            // Lag filnavn med dato og klokkeslett
+            var tidspunkt = DateTime.Now.ToString("yyyy-MM-dd-HHmmss");
+
+            var pdfFilnavn =
+                $"dugnadapp-timer-{tidspunkt}.pdf";
+
+            var pdfFilbane =
+                Path.Combine("/app/backups", pdfFilnavn);
+
+            var pdfResult =
+    await _pdfService.GeneratePdfAsync(pdfFilbane);
+
+            if (!System.IO.File.Exists(pdfResult))
+            {
+                throw new InvalidOperationException(
+                    $"PDF ble ikke funnet etter generering: {pdfResult}");
+            }
+
+            var backupResult =
+                await _backupService.CreateBackupAsync();
+
+            if (!System.IO.File.Exists(pdfResult))
+            {
+                throw new InvalidOperationException(
+                    $"PDF-filen forsvant etter databasebackup: {pdfResult}");
+            }
 
             ViewBag.Success = true;
-            ViewBag.Message = result;
+
+            ViewBag.Message =
+                $"Databasebackup gjennomført.\n" +
+                $"PDF-rapport: {Path.GetFileName(pdfResult)}\n\n" +
+                backupResult;
 
             return View();
         }
@@ -41,7 +74,7 @@ public class ArsAvslutningController : Controller
             return View();
         }
     }
-
+   
     [HttpGet]
     public async Task<IActionResult> Index()
     {
