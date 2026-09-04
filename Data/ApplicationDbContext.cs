@@ -24,6 +24,7 @@ namespace DugnadAppMvc.Data
         public DbSet<Endringslogg> Endringslogger { get; set; }
         public DbSet<BoardMessage> BoardMessages { get; set; }
         public DbSet<Arsstatistikk> Arsstatistikker => Set<Arsstatistikk>();
+        public DbSet<ArsstatistikkBygg> ArsstatistikkBygg => Set<ArsstatistikkBygg>();
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -33,6 +34,14 @@ namespace DugnadAppMvc.Data
             .WithMany()
             .HasForeignKey(e => e.BrukerId)
             .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ArsstatistikkBygg>()
+     .HasIndex(x => new
+     {
+         x.Aar,
+         x.ByggKode
+     })
+     .IsUnique();
 
             builder.Entity<OppgavePamelding>()
             .ToTable("OppgavePamelding");

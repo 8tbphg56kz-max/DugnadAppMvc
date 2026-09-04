@@ -80,7 +80,7 @@ public class ArsAvslutningController : Controller
     {
         var model = new ArsAvslutningViewModel
         {
-            Aar = DateTime.Now.Year,
+            Aar = GetDugnadsStartAar(),
 
             AntallDugnader =
                 await _context.Dugnader.CountAsync(),
@@ -130,7 +130,7 @@ public class ArsAvslutningController : Controller
 
         if (!ModelState.IsValid)
         {
-            model.Aar = DateTime.Now.Year;
+            model.Aar = GetDugnadsStartAar();
 
             model.AntallDugnader =
                 await _context.Dugnader.CountAsync();
@@ -144,12 +144,41 @@ public class ArsAvslutningController : Controller
             model.AntallTimeforinger =
                 await _context.Timeforinger.CountAsync();
 
+            model.AntallDeltakere =
+                await _context.Timeforinger
+                    .Select(t => t.BeboerId)
+                    .Distinct()
+                    .CountAsync();
+
+            model.AntallTimer =
+                await _context.Timeforinger
+                    .Select(t => (decimal?)t.AntallTimer)
+                    .SumAsync() ?? 0m;
+
             return View(model);
         }
 
-        var aar = DateTime.Now.Year;
+        // -------------------------------------------------
+        // Finn dugnadsåret
+        // -------------------------------------------------
 
-        // Kontroller at årsstatistikken ikke allerede er lagret
+        var aar = GetDugnadsStartAar();
+
+        // Eksempel:
+        // November 2026 -> Aar = 2025 -> 2025/2026
+
+        if (DateTime.Now.Month != 11)
+        {
+            TempData["Error"] =
+                "Årsavslutning kan bare gjennomføres i november.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // -------------------------------------------------
+        // Kontroller at årsstatistikken ikke allerede finnes
+        // -------------------------------------------------
+
         var eksisterendeStatistikk =
             await _context.Arsstatistikker
                 .AnyAsync(a => a.Aar == aar);
@@ -157,8 +186,8 @@ public class ArsAvslutningController : Controller
         if (eksisterendeStatistikk)
         {
             TempData["Error"] =
-                $"Årsstatistikk for {aar} finnes allerede. " +
-                "Årsavslutningen kan ikke gjennomføres på nytt.";
+                $"Årsstatistikk for dugnadsåret {aar}/{aar + 1} " +
+                "finnes allerede. Årsavslutningen kan ikke gjennomføres på nytt.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -168,9 +197,9 @@ public class ArsAvslutningController : Controller
 
         try
         {
-            // ---------------------------------------------
-            // Hent statistikk FØR registreringene slettes
-            // ---------------------------------------------
+            // -------------------------------------------------
+            // HENT ÅRETS STATISTIKK FØR SLETTING
+            // -------------------------------------------------
 
             var antallDugnader =
                 await _context.Dugnader.CountAsync();
@@ -195,9 +224,10 @@ public class ArsAvslutningController : Controller
                     .Select(t => (decimal?)t.AntallTimer)
                     .SumAsync() ?? 0m;
 
-            // ---------------------------------------------
-            // Lagre årsstatistikk
-            // ---------------------------------------------
+
+            // -------------------------------------------------
+            // LAGRE HOVEDSTATISTIKK
+            // -------------------------------------------------
 
             var arsstatistikk = new Arsstatistikk
             {
@@ -218,62 +248,215 @@ public class ArsAvslutningController : Controller
 
             _context.Arsstatistikker.Add(arsstatistikk);
 
-            // ---------------------------------------------
-            // Slett Timeforinger
-            // ---------------------------------------------
+
+            // -------------------------------------------------
+            // HENT LEILIGHETER
+            // -------------------------------------------------
+
+            var leiligheter =
+                await _context.Leiligheter
+                    .AsNoTracking()
+                    .ToListAsync();
+
+            // Vi har:
+            // HBL = 25 leiligheter
+            // LBL = 14 leiligheter
+
+            var leiligheterPerBygg =
+                leiligheter
+                    .Where(l =>
+                        !string.IsNullOrWhiteSpace(l.Leilighetsnummer) &&
+                        l.Leilighetsnummer.Length >= 3)
+                    .GroupBy(l =>
+                        l.Leilighetsnummer
+                            .Substring(0, 3)
+                            .Trim()
+                            .ToUpper())
+                    .Where(g =>
+                        g.Key == "HBL" ||
+                        g.Key == "LBL")
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Count());
+
+            var totaltAntallLeiligheter =
+                leiligheterPerBygg.Values.Sum();
+
+
+            // -------------------------------------------------
+            // HENT TIMEFØRINGER MED LEILIGHET
+            // -------------------------------------------------
+
+            var timeforingerMedBygg =
+                await _context.Timeforinger
+                    .Include(t => t.Beboer)
+                        .ThenInclude(b => b.Leilighet)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+
+            // -------------------------------------------------
+            // SUMMER TIMER PER BYGG
+            // -------------------------------------------------
+
+            var timerPerBygg =
+                timeforingerMedBygg
+                    .Where(t =>
+                        t.Beboer?.Leilighet != null &&
+                        !string.IsNullOrWhiteSpace(
+                            t.Beboer.Leilighet.Leilighetsnummer) &&
+                        t.Beboer.Leilighet.Leilighetsnummer.Length >= 3)
+                    .GroupBy(t =>
+                        t.Beboer.Leilighet.Leilighetsnummer
+                            .Substring(0, 3)
+                            .Trim()
+                            .ToUpper())
+                    .Where(g =>
+                        g.Key == "HBL" ||
+                        g.Key == "LBL")
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Sum(t => t.AntallTimer));
+
+
+            // -------------------------------------------------
+            // LAGRE BYGGSTATISTIKK
+            // -------------------------------------------------
+
+            var arsstatistikkBygg =
+                new List<ArsstatistikkBygg>();
+
+            foreach (var bygg in leiligheterPerBygg)
+            {
+                var byggKode = bygg.Key;
+
+                var antallLeiligheter =
+                    bygg.Value;
+
+                var dugnadstimer =
+                    timerPerBygg.TryGetValue(
+                        byggKode,
+                        out var timer)
+                        ? timer
+                        : 0m;
+
+                var andelLeiligheter =
+                    totaltAntallLeiligheter > 0
+                        ? (decimal)antallLeiligheter /
+                          totaltAntallLeiligheter * 100m
+                        : 0m;
+
+                var andelDugnadstimer =
+                    antallTimer > 0
+                        ? dugnadstimer /
+                          antallTimer * 100m
+                        : 0m;
+
+                var dugnadsindeks =
+                    andelLeiligheter > 0
+                        ? andelDugnadstimer /
+                          andelLeiligheter * 100m
+                        : 0m;
+
+                arsstatistikkBygg.Add(
+                    new ArsstatistikkBygg
+                    {
+                        Aar = aar,
+
+                        ByggKode = byggKode,
+
+                        AntallLeiligheter =
+                            antallLeiligheter,
+
+                        AndelLeiligheter =
+                            andelLeiligheter,
+
+                        Dugnadstimer =
+                            dugnadstimer,
+
+                        AndelDugnadstimer =
+                            andelDugnadstimer,
+
+                        Dugnadsindeks =
+                            dugnadsindeks
+                    });
+            }
+
+            _context.ArsstatistikkBygg.AddRange(
+                arsstatistikkBygg);
+
+
+            // -------------------------------------------------
+            // SLETT TIMEFØRINGER
+            // -------------------------------------------------
 
             var timeforinger =
                 await _context.Timeforinger.ToListAsync();
 
-            _context.Timeforinger.RemoveRange(timeforinger);
+            _context.Timeforinger.RemoveRange(
+                timeforinger);
 
-            // ---------------------------------------------
-            // Slett Oppgavepåmeldinger
-            // ---------------------------------------------
+
+            // -------------------------------------------------
+            // SLETT OPPGAVEPÅMELDINGER
+            // -------------------------------------------------
 
             var pameldinger =
-                await _context.OppgavePameldinger.ToListAsync();
+                await _context.OppgavePameldinger
+                    .ToListAsync();
 
-            _context.OppgavePameldinger.RemoveRange(pameldinger);
+            _context.OppgavePameldinger.RemoveRange(
+                pameldinger);
 
-            // ---------------------------------------------
-            // Slett Oppgaver
-            // ---------------------------------------------
+
+            // -------------------------------------------------
+            // SLETT OPPGAVER
+            // -------------------------------------------------
 
             var oppgaver =
                 await _context.Oppgaver.ToListAsync();
 
-            _context.Oppgaver.RemoveRange(oppgaver);
+            _context.Oppgaver.RemoveRange(
+                oppgaver);
 
-            // ---------------------------------------------
-            // Slett Dugnader
-            // ---------------------------------------------
+
+            // -------------------------------------------------
+            // SLETT DUGNADER
+            // -------------------------------------------------
 
             var dugnader =
                 await _context.Dugnader.ToListAsync();
 
-            _context.Dugnader.RemoveRange(dugnader);
+            _context.Dugnader.RemoveRange(
+                dugnader);
 
-            // ---------------------------------------------
-            // Slett Endringslogger
-            // ---------------------------------------------
+
+            // -------------------------------------------------
+            // SLETT ENDRINGSLOGGER
+            // -------------------------------------------------
 
             var endringslogger =
-                await _context.Endringslogger.ToListAsync();
+                await _context.Endringslogger
+                    .ToListAsync();
 
-            _context.Endringslogger.RemoveRange(endringslogger);
+            _context.Endringslogger.RemoveRange(
+                endringslogger);
 
-            // ---------------------------------------------
-            // Lagre statistikk + sletting
-            // ---------------------------------------------
+
+            // -------------------------------------------------
+            // LAGRE ALT
+            // -------------------------------------------------
 
             await _context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
+
             TempData["Success"] =
-                $"Årsavslutning for {aar} er gjennomført. " +
-                "Årsstatistikken er lagret og årets registreringer er slettet.";
+                $"Årsavslutning for dugnadsåret " +
+                $"{aar}/{aar + 1} er gjennomført. " +
+                "Årsstatistikk og byggstatistikk er lagret, " +
+                "og årets registreringer er slettet.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -287,5 +470,16 @@ public class ArsAvslutningController : Controller
 
             return RedirectToAction(nameof(Index));
         }
+    }
+    private static int GetDugnadsStartAar()
+    {
+        var now = DateTime.Now;
+
+        // Dugnadsåret går fra desember til november.
+        // Januar–november 2026 = dugnadsåret 2025/2026.
+        // Desember 2026 = nytt dugnadsår 2026/2027.
+        return now.Month >= 12
+            ? now.Year
+            : now.Year - 1;
     }
 }

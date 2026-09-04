@@ -1,11 +1,18 @@
-﻿@model IEnumerable<DugnadAppMvc.Models.Arsstatistikk>
+﻿@model DugnadAppMvc.ViewModels.ArsstatistikkViewModel
 
 @{
     ViewData["Title"] = "Årsstatistikk";
+
+    var byggAar = Model.ByggStatistikk
+        .Select(b => b.Aar)
+        .Distinct()
+        .OrderByDescending(a => a)
+        .ToList();
 }
 
 <div class="container py-4">
 
+    <!-- Overskrift -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0">
             <i class="bi bi-bar-chart me-2"></i>
@@ -20,7 +27,8 @@
         </a>
     </div>
 
-    @if (!Model.Any())
+
+    @if (!Model.Arsstatistikker.Any())
     {
         <div class="alert alert-info">
             Det finnes ingen årsstatistikk ennå.
@@ -28,7 +36,18 @@
     }
     else
     {
-        <div class="card shadow-sm">
+        <!-- ========================================== -->
+        <!-- VANLIG ÅRSSTATISTIKK                       -->
+        <!-- ========================================== -->
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    Årsoversikt
+                </h5>
+            </div>
 
             <div class="table-responsive">
 
@@ -36,7 +55,7 @@
 
                     <thead class="table-light">
                         <tr>
-                            <th>År</th>
+                            <th>Dugnadsår</th>
                             <th class="text-end">Aktiviteter</th>
                             <th class="text-end">Påmeldinger</th>
                             <th class="text-end">Deltakere</th>
@@ -46,10 +65,13 @@
 
                     <tbody>
 
-                        @foreach (var item in Model)
+                        @foreach (var item in Model.Arsstatistikker)
                         {
                             <tr>
-                                <td class="fw-semibold">@item.Aar</td>
+
+                                <td class="fw-semibold">
+                                    @item.DugnadsAar
+                                </td>
 
                                 <td class="text-end">
                                     @item.AntallAktiviteter
@@ -66,6 +88,7 @@
                                 <td class="text-end">
                                     @item.AntallTimer.ToString("0.##")
                                 </td>
+
                             </tr>
                         }
 
@@ -75,6 +98,193 @@
 
             </div>
         </div>
+
+
+        <!-- ========================================== -->
+        <!-- DUGNADSINNSATS PER BYGG                    -->
+        <!-- ========================================== -->
+        @if (Model.ByggStatistikk.Any())
+        {
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-buildings me-2"></i>
+                        Dugnadsinnsats per bygg
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <p class="text-muted mb-4">
+                        Dugnadsindeksen viser dugnadsinnsatsen justert
+                        for antall leiligheter.
+                        <strong>100 %</strong> betyr forholdsmessig innsats
+                        ut fra byggets størrelse.
+                    </p>
+
+                    @foreach (var aar in byggAar)
+                    {
+                        var byggForAar = Model.ByggStatistikk
+                            .Where(b => b.Aar == aar)
+                            .OrderBy(b => b.ByggKode)
+                            .ToList();
+
+                        <h6 class="fw-semibold mt-3 mb-2">
+                            Dugnadsår @aar/@(aar + 1)
+                        </h6>
+
+                        <div class="table-responsive mb-4">
+
+                            <table class="table table-hover align-middle">
+
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Bygg</th>
+                                        <th class="text-end">Leiligheter</th>
+                                        <th class="text-end">Andel leiligheter</th>
+                                        <th class="text-end">Dugnadstimer</th>
+                                        <th class="text-end">Andel timer</th>
+                                        <th class="text-end">Dugnadsindeks</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    @foreach (var bygg in byggForAar)
+                                    {
+                                        <tr>
+
+                                            <td class="fw-semibold">
+                                                @bygg.ByggKode
+                                            </td>
+
+                                            <td class="text-end">
+                                                @bygg.AntallLeiligheter
+                                            </td>
+
+                                            <td class="text-end">
+                                                @bygg.AndelLeiligheter.ToString("0.0") %
+                                            </td>
+
+                                            <td class="text-end">
+                                                @bygg.Dugnadstimer.ToString("0.##")
+                                            </td>
+
+                                            <td class="text-end">
+                                                @bygg.AndelDugnadstimer.ToString("0.0") %
+                                            </td>
+
+                                            <td class="text-end fw-bold">
+                                                @bygg.Dugnadsindeks.ToString("0.0") %
+                                            </td>
+
+                                        </tr>
+                                    }
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+
+            <!-- ========================================== -->
+            <!-- UTVIKLING OVER TID                         -->
+            <!-- ========================================== -->
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Utvikling i dugnadsinnsats
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <p class="text-muted mb-4">
+                        Dugnadsindeks over tid. 100 % er forholdsmessig
+                        innsats basert på antall leiligheter.
+                    </p>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+                                    <th>Bygg</th>
+
+                                    @foreach (var aar in byggAar.OrderBy(a => a))
+                                    {
+                                        <th class="text-end">
+                                            @aar/@(aar + 1)
+                                        </th>
+                                    }
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @{
+                                    var byggKoder = Model.ByggStatistikk
+                                        .Select(b => b.ByggKode)
+                                        .Distinct()
+                                        .OrderBy(b => b)
+                                        .ToList();
+                                }
+
+                                @foreach (var byggKode in byggKoder)
+                                {
+                                    <tr>
+
+                                        <td class="fw-semibold">
+                                            @byggKode
+                                        </td>
+
+                                        @foreach (var aar in byggAar.OrderBy(a => a))
+                                        {
+                                            var statistikk =
+                                                Model.ByggStatistikk
+                                                    .FirstOrDefault(b =>
+                                                        b.ByggKode == byggKode &&
+                                                        b.Aar == aar);
+
+                                            <td class="text-end fw-semibold">
+
+                                                @if (statistikk != null)
+                                                {
+                                                    <text>@statistikk.Dugnadsindeks.ToString("0.0") %</text>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">–</span>
+                                                }
+
+                                            </td>
+                                        }
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
     }
 
 </div>
