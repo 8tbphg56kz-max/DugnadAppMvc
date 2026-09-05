@@ -272,6 +272,7 @@ public class OppgaverController : Controller
         return View(oppgave);
     }
 
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -282,8 +283,6 @@ public class OppgaverController : Controller
         if (oppgave == null)
             return NotFound();
 
-        // Oppgaver med registrerte timer kan ikke slettes.
-        // Timeføringene må beholdes som historikk.
         bool harTimeforinger = await _context.Timeforinger
             .AnyAsync(t => t.OppgaveId == id);
 
@@ -295,8 +294,18 @@ public class OppgaverController : Controller
             return RedirectToAction(nameof(Delete), new { id });
         }
 
-        // Endringslogger skal beholdes.
-        // Vi kobler dem derfor fra oppgaven før oppgaven slettes.
+        // Hent alle bilder som tilhører oppgaven
+        var bilder = await _context.OppgaveBilder
+            .Where(b => b.OppgaveId == id)
+            .ToListAsync();
+
+        // Slett de fysiske bildefilene
+        foreach (var bilde in bilder)
+        {
+            _bildeService.SlettBilde(bilde);
+        }
+
+        // Endringslogger som peker på oppgaven må frikobles først
         var endringslogger = await _context.Endringslogger
             .Where(e => e.OppgaveId == id)
             .ToListAsync();
@@ -306,6 +315,9 @@ public class OppgaverController : Controller
             logg.OppgaveId = null;
         }
 
+        // Oppgaven slettes.
+        // OppgaveBilder slettes automatisk fra databasen
+        // på grunn av Cascade-relasjonen.
         _context.Oppgaver.Remove(oppgave);
 
         await _context.SaveChangesAsync();
