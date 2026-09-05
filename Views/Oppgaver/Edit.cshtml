@@ -20,7 +20,7 @@
                     Oppdater informasjon om oppgaven.
                 </p>
 
-                <form asp-action="Edit">
+                <form asp-action="Edit" enctype="multipart/form-data">
 
                     <input type="hidden" asp-for="Id" />
 
@@ -52,6 +52,63 @@
 
                             <span asp-validation-for="Beskrivelse"
                                   class="text-danger small"></span>
+                        </div>
+
+                        <!-- Bilder -->
+                        <div class="border rounded-4 p-4 mb-4">
+                            <h5 class="fw-semibold mb-3">
+                                <i class="bi bi-images me-1"></i>
+                                Bilder
+                            </h5>
+
+                            @if (Model.Bilder != null && Model.Bilder.Any())
+                            {
+                                <div class="row g-3 mb-4">
+                                    @foreach (var bilde in Model.Bilder)
+                                    {
+                                        <div class="col-6 col-md-4">
+                                            <div class="position-relative">
+                                                <img src="@Url.Action("Bilde", "Oppgaver", new { id = bilde.Id })"
+                                                     alt="@bilde.OriginaltFilnavn"
+                                                     class="img-fluid rounded-3 shadow-sm"
+                                                     style="width: 100%; height: 180px; object-fit: cover;" />
+
+                                                <form asp-action="SlettBilde"
+                                                      method="post"
+                                                      class="mt-2"
+                                                      onsubmit="return confirm('Er du sikker på at du vil slette dette bildet?');">
+
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@bilde.Id" />
+
+                                                    <button type="submit"
+                                                            class="btn btn-outline-danger btn-sm w-100">
+                                                        <i class="bi bi-trash me-1"></i>
+                                                        Slett bilde
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <label class="form-label fw-semibold">
+                                Legg til bilder
+                            </label>
+
+                            <input type="file"
+                                   name="bilder"
+                                   class="form-control"
+                                   accept=".jpg,.jpeg,.png,.webp"
+                                   multiple />
+
+                            <div class="form-text">
+                                JPG, PNG eller WebP. Maks 5 MB per bilde.
+                            </div>
                         </div>
                     </div>
 

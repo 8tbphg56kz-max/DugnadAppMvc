@@ -71,6 +71,7 @@ namespace DugnadAppMvc
             builder.Services.AddScoped<IDatabaseBackupService, DatabaseBackupService>();
             builder.Services.AddScoped<DugnadTimerPdfService>();
             builder.Services.AddScoped<IDatabaseRestoreService, DatabaseRestoreService>();
+            builder.Services.AddScoped<OppgaveBildeService>();
 
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {

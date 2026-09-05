@@ -3,6 +3,7 @@ using DugnadAppMvc.Helpers;
 using DugnadAppMvc.Infrastructure.Identity;
 using DugnadAppMvc.Models;
 using DugnadAppMvc.Models.Enums;
+using DugnadAppMvc.Services;
 using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -11,18 +12,22 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 public class OppgaverController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly OppgaveBildeService _bildeService;
 
     public OppgaverController(
-    ApplicationDbContext context,
-    UserManager<ApplicationUser> userManager)
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        OppgaveBildeService bildeService)
     {
         _context = context;
         _userManager = userManager;
+        _bildeService = bildeService;
     }
 
     public async Task<IActionResult> Index(OppgaveIndexViewModel model)
@@ -63,23 +68,170 @@ public class OppgaverController : Controller
     [Authorize(Roles = IdentityRoles.BoardAccess)]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave)
+    public async Task<IActionResult> Create(
+    [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave,
+    List<IFormFile>? bilder)
     {
         if (ModelState.IsValid)
         {
-            oppgave.FraDato = DateTime.SpecifyKind(oppgave.FraDato, DateTimeKind.Utc);
-            oppgave.Frist = DateTime.SpecifyKind(oppgave.Frist, DateTimeKind.Utc);
+            oppgave.FraDato =
+                DateTime.SpecifyKind(
+                    oppgave.FraDato,
+                    DateTimeKind.Utc);
+
+            oppgave.Frist =
+                DateTime.SpecifyKind(
+                    oppgave.Frist,
+                    DateTimeKind.Utc);
 
             oppgave.ErUtført = false;
             oppgave.Opprettet = DateTime.UtcNow;
 
             _context.Add(oppgave);
+
             await _context.SaveChangesAsync();
+
+            try
+            {
+                var lagredeBilder =
+                    await _bildeService.LagreBilderAsync(
+                        oppgave.Id,
+                        bilder);
+
+                if (lagredeBilder.Count > 0)
+                {
+                    _context.OppgaveBilder.AddRange(lagredeBilder);
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+
+                _context.Oppgaver.Remove(oppgave);
+                await _context.SaveChangesAsync();
+
+                return View(oppgave);
+            }
 
             return RedirectToAction(nameof(Index));
         }
 
         return View(oppgave);
+    }
+
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+     int? id,
+     [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave,
+     List<IFormFile>? bilder)
+    {
+        if (id != oppgave.Id)
+        {
+            return NotFound();
+        }
+
+        if (!ModelState.IsValid)
+        {
+            oppgave.Bilder = await _context.OppgaveBilder
+                .Where(b => b.OppgaveId == oppgave.Id)
+                .ToListAsync();
+
+            return View(oppgave);
+        }
+
+        try
+        {
+            oppgave.FraDato =
+                DateTime.SpecifyKind(
+                    oppgave.FraDato,
+                    DateTimeKind.Utc);
+
+            oppgave.Frist =
+                DateTime.SpecifyKind(
+                    oppgave.Frist,
+                    DateTimeKind.Utc);
+
+            // Hent eksisterende oppgave slik at vi ikke overskriver
+            // navigasjonsegenskaper eller andre data.
+            var eksisterendeOppgave =
+                await _context.Oppgaver
+                    .FirstOrDefaultAsync(o => o.Id == oppgave.Id);
+
+            if (eksisterendeOppgave == null)
+            {
+                return NotFound();
+            }
+
+            eksisterendeOppgave.Navn = oppgave.Navn;
+            eksisterendeOppgave.Beskrivelse = oppgave.Beskrivelse;
+            eksisterendeOppgave.FraDato = oppgave.FraDato;
+            eksisterendeOppgave.Frist = oppgave.Frist;
+            eksisterendeOppgave.AntallPersoner = oppgave.AntallPersoner;
+            eksisterendeOppgave.KanRegistrereTimer = oppgave.KanRegistrereTimer;
+            eksisterendeOppgave.KanUtføresFlereGanger = oppgave.KanUtføresFlereGanger;
+            eksisterendeOppgave.Utstyr = oppgave.Utstyr;
+            eksisterendeOppgave.UtstyrPlassering = oppgave.UtstyrPlassering;
+            eksisterendeOppgave.Prioritet = oppgave.Prioritet;
+            eksisterendeOppgave.ErUtført = oppgave.ErUtført;
+
+            await _context.SaveChangesAsync();
+
+            try
+            {
+                var eksisterendeAntall =
+                    await _context.OppgaveBilder
+                        .CountAsync(b => b.OppgaveId == oppgave.Id);
+
+                var nyeBilder =
+                    bilder?
+                        .Where(f => f != null && f.Length > 0)
+                        .ToList()
+                    ?? new List<IFormFile>();
+
+                if (eksisterendeAntall + nyeBilder.Count > 5)
+                {
+                    throw new InvalidOperationException(
+                        $"Oppgaven kan ha maksimalt 5 bilder. " +
+                        $"Det finnes allerede {eksisterendeAntall} bilder.");
+                }
+
+                var lagredeBilder =
+                    await _bildeService.LagreBilderAsync(
+                        oppgave.Id,
+                        nyeBilder);
+
+                if (lagredeBilder.Count > 0)
+                {
+                    _context.OppgaveBilder.AddRange(lagredeBilder);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+
+                oppgave.Bilder = await _context.OppgaveBilder
+                    .Where(b => b.OppgaveId == oppgave.Id)
+                    .ToListAsync();
+
+                return View(oppgave);
+            }
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!OppgaveExists(oppgave.Id))
+            {
+                return NotFound();
+            }
+
+            throw;
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     [Authorize(Roles = IdentityRoles.BoardAccess)]
@@ -90,47 +242,15 @@ public class OppgaverController : Controller
             return NotFound();
         }
 
-        var oppgave = await _context.Oppgaver.FindAsync(id);
+        var oppgave = await _context.Oppgaver
+            .Include(o => o.Bilder)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
         if (oppgave == null)
         {
             return NotFound();
         }
-        return View(oppgave);
-    }
 
-    [Authorize(Roles = IdentityRoles.BoardAccess)]
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int? id, [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,KreverBekreftelse,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave)
-    {
-        if (id != oppgave.Id)
-        {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                oppgave.FraDato = DateTime.SpecifyKind(oppgave.FraDato, DateTimeKind.Utc);
-                oppgave.Frist = DateTime.SpecifyKind(oppgave.Frist, DateTimeKind.Utc);
-
-                _context.Update(oppgave);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OppgaveExists(oppgave.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
-        }
         return View(oppgave);
     }
 
@@ -249,8 +369,9 @@ public class OppgaverController : Controller
             return NotFound();
 
         var oppgave = await _context.Oppgaver
-            .Include(o => o.Pameldinger)
-            .FirstOrDefaultAsync(o => o.Id == id);
+          .Include(o => o.Pameldinger)
+          .Include(o => o.Bilder)
+          .FirstOrDefaultAsync(o => o.Id == id);
 
         if (oppgave == null)
             return NotFound();
@@ -889,5 +1010,63 @@ public class OppgaverController : Controller
         return RedirectToAction(
             nameof(AdministrerPameldinger),
             new { id = oppgaveId });
+    }
+
+    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> Bilde(int id)
+    {
+        var bilde = await _context.OppgaveBilder
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.Id == id);
+
+        if (bilde == null)
+            return NotFound();
+
+        var filbane = _bildeService.HentFilbane(bilde.Filnavn);
+
+        if (!System.IO.File.Exists(filbane))
+            return NotFound();
+
+        var utvidelse = Path.GetExtension(bilde.Filnavn)
+            .ToLowerInvariant();
+
+        var contentType = utvidelse switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream"
+        };
+
+        return PhysicalFile(filbane, contentType);
+    }
+
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SlettBilde(int id)
+    {
+        var bilde = await _context.OppgaveBilder
+            .FirstOrDefaultAsync(b => b.Id == id);
+
+        if (bilde == null)
+        {
+            return NotFound();
+        }
+
+        var oppgaveId = bilde.OppgaveId;
+
+        // Slett fysisk bildefil
+        _bildeService.SlettBilde(bilde);
+
+        // Slett databasepost
+        _context.OppgaveBilder.Remove(bilde);
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] = "Bildet ble slettet.";
+
+        return RedirectToAction(nameof(Edit), new { id = oppgaveId });
     }
 }

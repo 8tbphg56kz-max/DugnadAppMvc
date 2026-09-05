@@ -78,5 +78,7 @@ namespace DugnadAppMvc.Models
 
         public ICollection<OppgavePamelding> Pameldinger { get; set; }
             = new List<OppgavePamelding>();
+
+        public ICollection<OppgaveBilde> Bilder { get; set; } = new List<OppgaveBilde>();
     }
 }
