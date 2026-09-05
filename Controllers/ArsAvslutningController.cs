@@ -48,6 +48,8 @@ public class ArsAvslutningController : Controller
                     $"PDF ble ikke funnet etter generering: {pdfResult}");
             }
 
+            ViewBag.PdfFilnavn = Path.GetFileName(pdfResult);
+
             var backupResult =
                 await _backupService.CreateBackupAsync();
 
@@ -481,5 +483,34 @@ public class ArsAvslutningController : Controller
         return now.Month >= 12
             ? now.Year
             : now.Year - 1;
+    }
+
+    [HttpGet]
+    public IActionResult LastNedPdf(string filnavn)
+    {
+        if (string.IsNullOrWhiteSpace(filnavn))
+        {
+            return NotFound();
+        }
+
+        // Tillat kun selve filnavnet – ikke mapper/stier
+        filnavn = Path.GetFileName(filnavn);
+
+        if (!filnavn.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            return NotFound();
+        }
+
+        var filbane = Path.Combine("/app/backups", filnavn);
+
+        if (!System.IO.File.Exists(filbane))
+        {
+            return NotFound();
+        }
+
+        return PhysicalFile(
+            filbane,
+            "application/pdf",
+            filnavn);
     }
 }
