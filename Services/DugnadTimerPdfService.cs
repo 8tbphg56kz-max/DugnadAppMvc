@@ -18,11 +18,12 @@ public class DugnadTimerPdfService
     public async Task<string> GeneratePdfAsync(string filbane)
     {
         var timeforinger = await _context.Timeforinger
-            .AsNoTracking()
-            .Include(t => t.Beboer)
-                .ThenInclude(b => b.Leilighet)
-            .Include(t => t.Oppgave)
-            .OrderBy(t => t.Beboer.Etternavn)
+         .AsNoTracking()
+         .Include(t => t.Beboer)
+         .ThenInclude(b => b.Leilighet)
+         .Include(t => t.Oppgave)
+         .Include(t => t.Dugnad)
+         .OrderBy(t => t.Beboer.Etternavn)
             .ThenBy(t => t.Beboer.Fornavn)
             .ThenBy(t => t.RegistrertDato)
             .ToListAsync();
@@ -146,8 +147,10 @@ public class DugnadTimerPdfService
 
                                         table.Cell()
                                             .Element(BodyCellStyle)
-                                            .Text(timeforing.Oppgave?.Navn
-                                                ?? "Ukjent aktivitet");
+                                           .Text(
+                                               timeforing.Oppgave?.Navn
+                                               ?? timeforing.Dugnad?.Tittel
+                                               ?? "Ukjent aktivitet");
 
                                         table.Cell()
                                             .Element(BodyCellStyle)
