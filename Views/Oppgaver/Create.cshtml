@@ -20,167 +20,259 @@
                     Opprett en ny oppgave som kan tildeles en dugnad.
                 </p>
 
-                <form asp-action="Create" enctype="multipart/form-data">
+                <form asp-action="Create"
+                      method="post"
+                      enctype="multipart/form-data">
 
                     <div asp-validation-summary="ModelOnly"
                          class="text-danger mb-3"></div>
 
+
                     <!-- Generelt -->
                     <div class="border rounded-4 p-4 mb-4">
-                        <h5 class="fw-semibold mb-3">Generelt</h5>
+
+                        <h5 class="fw-semibold mb-3">
+                            Generelt
+                        </h5>
 
                         <div class="mb-3">
+
                             <label asp-for="Navn"
-                                   class="form-label fw-semibold"></label>
+                                   class="form-label fw-semibold">
+                            </label>
 
                             <input asp-for="Navn"
                                    class="form-control" />
 
                             <span asp-validation-for="Navn"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
+
                         </div>
 
-                        <div class="mb-0">
+
+                        <div class="mb-3">
+
                             <label asp-for="Beskrivelse"
-                                   class="form-label fw-semibold"></label>
+                                   class="form-label fw-semibold">
+                            </label>
 
                             <textarea asp-for="Beskrivelse"
                                       class="form-control"
-                                      rows="5"></textarea>
+                                      rows="5">
+                            </textarea>
 
                             <span asp-validation-for="Beskrivelse"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
+
                         </div>
 
+
                         <!-- Bilder -->
-                        <div class="border rounded-4 p-4 mb-4">
+                        <div class="border rounded-4 p-4">
+
                             <h5 class="fw-semibold mb-3">
+
                                 <i class="bi bi-images me-1"></i>
                                 Bilder
+
                             </h5>
 
                             <p class="text-muted small mb-3">
-                                Legg gjerne ved bilder som viser eller forklarer oppgaven.
-                                Du kan velge opptil 5 bilder.
+
+                                Legg gjerne ved bilder som viser eller
+                                forklarer oppgaven.
+
+                                Du kan laste opp opptil 5 bilder.
+
                             </p>
 
+
                             <div class="mb-0">
+
                                 <label class="form-label fw-semibold">
-                                    Velg bilder
+                                    Ta bilde eller velg bilder
                                 </label>
 
+
                                 <input type="file"
-                                       name="bilder"
+                                       id="bildeInput"
                                        class="form-control"
-                                       accept=".jpg,.jpeg,.png,.webp"
+                                       accept="image/jpeg,image/png,image/webp"
                                        multiple />
 
+
                                 <div class="form-text">
-                                    JPG, PNG eller WebP. Maks 5 MB per bilde.
+
+                                    JPG, PNG eller WebP.
+                                    Maks 5 MB per bilde.
+
                                 </div>
+
+
+                                <!-- Valgte bilder -->
+
+                                <div id="valgteBilder"
+                                     class="mt-3">
+                                </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
 
                     <!-- Planlegging -->
                     <div class="border rounded-4 p-4 mb-4">
-                        <h5 class="fw-semibold mb-3">Planlegging</h5>
+
+                        <h5 class="fw-semibold mb-3">
+                            Planlegging
+                        </h5>
+
 
                         <div class="row g-3 mb-3">
 
                             <div class="col-md-6">
+
                                 <label asp-for="FraDato"
-                                       class="form-label fw-semibold"></label>
+                                       class="form-label fw-semibold">
+                                </label>
 
                                 <input asp-for="FraDato"
                                        type="date"
                                        class="form-control" />
 
                                 <span asp-validation-for="FraDato"
-                                      class="text-danger"></span>
+                                      class="text-danger">
+                                </span>
+
                             </div>
 
+
                             <div class="col-md-6">
+
                                 <label asp-for="Frist"
-                                       class="form-label fw-semibold"></label>
+                                       class="form-label fw-semibold">
+                                </label>
 
                                 <input asp-for="Frist"
                                        type="date"
                                        class="form-control" />
 
                                 <span asp-validation-for="Frist"
-                                      class="text-danger"></span>
+                                      class="text-danger">
+                                </span>
+
                             </div>
 
                         </div>
 
+
                         <div class="mb-0">
+
                             <label asp-for="AntallPersoner"
-                                   class="form-label fw-semibold"></label>
+                                   class="form-label fw-semibold">
+                            </label>
 
                             <input asp-for="AntallPersoner"
                                    class="form-control" />
 
                             <span asp-validation-for="AntallPersoner"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
+
                         </div>
+
                     </div>
+
 
                     <!-- Utførelse -->
                     <div class="border rounded-4 p-4 mb-4">
-                        <h5 class="fw-semibold mb-3">Utførelse</h5>
+
+                        <h5 class="fw-semibold mb-3">
+                            Utførelse
+                        </h5>
+
 
                         <div class="form-check mb-2">
+
                             <input asp-for="KanRegistrereTimer"
                                    class="form-check-input" />
 
                             <label asp-for="KanRegistrereTimer"
                                    class="form-check-label">
                             </label>
+
                         </div>
 
+
                         <div class="form-check mb-2">
+
                             <input asp-for="KanUtføresFlereGanger"
                                    class="form-check-input" />
 
                             <label asp-for="KanUtføresFlereGanger"
                                    class="form-check-label">
                             </label>
-                        </div>                        
+
+                        </div>
+
                     </div>
+
 
                     <!-- Status og prioritet -->
                     <div class="border rounded-4 p-4 mb-4">
+
                         <h5 class="fw-semibold mb-3">
                             Status og prioritet
                         </h5>
 
+
                         <div class="mb-3">
+
                             <label asp-for="Prioritet"
-                                   class="form-label fw-semibold"></label>
+                                   class="form-label fw-semibold">
+                            </label>
 
                             <select asp-for="Prioritet"
                                     class="form-select">
 
-                                <option value="Lav">Lav</option>
-                                <option value="Middels">Middels</option>
-                                <option value="Høy">Høy</option>
+                                <option value="Lav">
+                                    Lav
+                                </option>
+
+                                <option value="Middels">
+                                    Middels
+                                </option>
+
+                                <option value="Høy">
+                                    Høy
+                                </option>
 
                             </select>
 
                             <span asp-validation-for="Prioritet"
-                                  class="text-danger"></span>
+                                  class="text-danger">
+                            </span>
+
                         </div>
 
+
                         <div class="form-check">
+
                             <input asp-for="ErUtført"
                                    class="form-check-input" />
 
                             <label asp-for="ErUtført"
                                    class="form-check-label">
                             </label>
+
                         </div>
+
                     </div>
+
 
                     <!-- Knapper -->
                     <div class="d-flex gap-2 flex-wrap">
@@ -190,13 +282,16 @@
 
                             <i class="bi bi-check-circle me-1"></i>
                             Lagre
+
                         </button>
+
 
                         <a asp-action="Index"
                            class="btn btn-secondary">
 
                             <i class="bi bi-arrow-left me-1"></i>
                             Avbryt
+
                         </a>
 
                     </div>
@@ -209,8 +304,168 @@
     </div>
 </div>
 
+
 @section Scripts {
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+
+    <script>
+
+        const bildeInput =
+            document.getElementById("bildeInput");
+
+        const valgteBilder =
+            document.getElementById("valgteBilder");
+
+
+        // Vi holder bildene i JavaScript,
+        // slik at iPhone ikke erstatter tidligere bilder.
+        let bilder = [];
+
+
+        bildeInput.addEventListener("change", function() {
+
+            const nyeBilder =
+                Array.from(this.files);
+
+
+            for (const bilde of nyeBilder) {
+
+                if (bilder.length >= 5) {
+
+                    alert(
+                        "Du kan laste opp maksimalt 5 bilder."
+                    );
+
+                    break;
+                }
+
+
+                if (bilde.size > 5 * 1024 * 1024) {
+
+                    alert(
+                        `Bildet "${bilde.name}" er større enn 5 MB.`
+                    );
+
+                    continue;
+                }
+
+
+                const tillatteTyper = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+                ];
+
+
+                if (!tillatteTyper.includes(bilde.type)) {
+
+                    alert(
+                        `Bildet "${bilde.name}" har en filtype som ikke er tillatt.`
+                    );
+
+                    continue;
+                }
+
+
+                bilder.push(bilde);
+            }
+
+
+            visValgteBilder();
+
+
+            // Dette er viktig på iPhone.
+            // Neste gang kameraet åpnes kan et nytt bilde tas.
+            this.value = "";
+
+        });
+
+
+        function visValgteBilder() {
+
+            valgteBilder.innerHTML = "";
+
+
+            bilder.forEach((bilde, index) => {
+
+                const rad =
+                    document.createElement("div");
+
+
+                rad.className =
+                    "d-flex align-items-center justify-content-between border rounded-3 p-2 mb-2";
+
+
+                rad.innerHTML = `
+
+                            <div class="text-truncate">
+
+                                <i class="bi bi-image me-2"></i>
+
+                                <span>
+                                    ${bilde.name}
+                                </span>
+
+                            </div>
+
+
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger ms-2"
+                                    onclick="fjernBilde(${index})"
+                                    title="Fjern bilde">
+
+                                <i class="bi bi-trash"></i>
+
+                            </button>
+
+                        `;
+
+
+                valgteBilder.appendChild(rad);
+
+            });
+
+        }
+
+
+        function fjernBilde(index) {
+
+            bilder.splice(index, 1);
+
+            visValgteBilder();
+
+        }
+
+
+        // Før skjemaet sendes bygger vi opp
+        // input.files med alle bildene vi har samlet.
+        document.querySelector("form")
+            .addEventListener("submit", function() {
+
+                const dataTransfer =
+                    new DataTransfer();
+
+
+                bilder.forEach(function(bilde) {
+
+                    dataTransfer.items.add(bilde);
+
+                });
+
+
+                bildeInput.files =
+                    dataTransfer.files;
+
+
+                // Backend forventer name="bilder"
+                bildeInput.name = "bilder";
+
+            });
+
+    </script>
+
 }

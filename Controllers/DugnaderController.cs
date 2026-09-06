@@ -273,7 +273,9 @@ namespace DugnadAppMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var dugnad = await _context.Dugnader.FindAsync(id);
+            var dugnad = await _context.Dugnader
+                .Include(d => d.Bilder)
+                .FirstOrDefaultAsync(d => d.Id == id);
 
             if (dugnad == null)
             {
@@ -282,10 +284,21 @@ namespace DugnadAppMvc.Controllers
 
             try
             {
+                // Slett bildefilene fysisk fra Synology
+                if (dugnad.Bilder != null)
+                {
+                    foreach (var bilde in dugnad.Bilder)
+                    {
+                        _bildeService.SlettBilde(bilde);
+                    }
+                }
+
                 _context.Dugnader.Remove(dugnad);
+
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Dugnaden ble slettet.";
+
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateException)

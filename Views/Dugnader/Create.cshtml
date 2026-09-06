@@ -6,6 +6,7 @@
 
 <div class="row justify-content-center">
     <div class="col-12 col-md-10 col-lg-8">
+
         <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4">
 
@@ -21,142 +22,351 @@
                     <div asp-validation-summary="ModelOnly"
                          class="text-danger mb-3"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="Tittel"
-                               class="form-label fw-semibold"></label>
-                        <input asp-for="Tittel"
-                               class="form-control" />
-                        <span asp-validation-for="Tittel"
-                              class="text-danger small"></span>
-                    </div>
 
                     <div class="mb-3">
+
+                        <label asp-for="Tittel"
+                               class="form-label fw-semibold">
+                        </label>
+
+                        <input asp-for="Tittel"
+                               class="form-control" />
+
+                        <span asp-validation-for="Tittel"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
                         <label asp-for="Beskrivelse"
-                               class="form-label fw-semibold"></label>
+                               class="form-label fw-semibold">
+                        </label>
+
                         <textarea asp-for="Beskrivelse"
                                   class="form-control"
                                   rows="5"></textarea>
+
                         <span asp-validation-for="Beskrivelse"
-                              class="text-danger small"></span>
+                              class="text-danger small">
+                        </span>
+
                     </div>
 
+
                     <div class="row g-3 mb-3">
+
                         <div class="col-md-6">
+
                             <label asp-for="StartDato"
-                                   class="form-label fw-semibold"></label>
+                                   class="form-label fw-semibold">
+                            </label>
+
                             <input asp-for="StartDato"
                                    class="form-control"
                                    type="date" />
+
                             <span asp-validation-for="StartDato"
-                                  class="text-danger small"></span>
+                                  class="text-danger small">
+                            </span>
+
                         </div>
 
+
                         <div class="col-md-6">
+
                             <label asp-for="SluttDato"
-                                   class="form-label fw-semibold"></label>
+                                   class="form-label fw-semibold">
+                            </label>
+
                             <input asp-for="SluttDato"
                                    class="form-control"
                                    type="date" />
+
                             <span asp-validation-for="SluttDato"
-                                  class="text-danger small"></span>
+                                  class="text-danger small">
+                            </span>
+
                         </div>
+
                     </div>
 
+
                     <div class="form-check mb-3">
+
                         <input asp-for="KreverPamelding"
                                class="form-check-input"
                                id="KreverPamelding" />
 
                         <label asp-for="KreverPamelding"
-                               class="form-check-label"></label>
+                               class="form-check-label">
+                        </label>
+
                     </div>
 
+
                     <div class="mb-3">
+
                         <label asp-for="MaksAntallDeltakere"
-                               class="form-label fw-semibold"></label>
+                               class="form-label fw-semibold">
+                        </label>
 
                         <input asp-for="MaksAntallDeltakere"
                                class="form-control"
                                id="MaksAntallDeltakere" />
 
                         <span asp-validation-for="MaksAntallDeltakere"
-                              class="text-danger small"></span>
+                              class="text-danger small">
+                        </span>
+
                     </div>
+
 
                     <!-- Bilder -->
                     <div class="mb-4">
-                        <label for="bilder"
+
+                        <label for="bildeInput"
                                class="form-label fw-semibold">
+
                             <i class="bi bi-images me-1"></i>
                             Bilder
+
                         </label>
 
+
+                        <p class="text-muted small mb-3">
+
+                            Legg gjerne ved bilder som viser eller
+                            forklarer fellesdugnaden.
+
+                            Du kan laste opp opptil 5 bilder.
+
+                        </p>
+
+
                         <input type="file"
-                               name="bilder"
-                               id="bilder"
+                               id="bildeInput"
                                class="form-control"
-                               accept=".jpg,.jpeg,.png,.webp"
+                               accept="image/jpeg,image/png,image/webp"
                                multiple />
 
+
                         <div class="form-text">
-                            Du kan laste opp opptil 5 bilder.
-                            JPG, JPEG, PNG eller WebP. Maks 5 MB per bilde.
+
+                            JPG, PNG eller WebP.
+                            Maks 5 MB per bilde.
+
                         </div>
+
+
+                        <div id="valgteBilder"
+                             class="mt-3">
+                        </div>
+
                     </div>
 
+
                     <div class="form-check mb-4">
+
                         <input asp-for="ErSynlig"
                                class="form-check-input" />
 
                         <label asp-for="ErSynlig"
-                               class="form-check-label"></label>
+                               class="form-check-label">
+                        </label>
+
                     </div>
 
+
                     <div class="d-flex gap-2 flex-wrap">
+
                         <button type="submit"
                                 class="btn btn-primary">
+
                             <i class="bi bi-check-circle me-1"></i>
                             Lagre
+
                         </button>
+
 
                         <a asp-action="Index"
                            class="btn btn-secondary">
+
                             <i class="bi bi-arrow-left me-1"></i>
                             Avbryt
+
                         </a>
+
                     </div>
 
                 </form>
+
             </div>
         </div>
+
     </div>
 </div>
 
+
 @section Scripts {
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
+
     <script>
-        function toggleMaxDeltakere() {
 
-            const pamelding =
-                document.getElementById("KreverPamelding");
+        const bildeInput =
+            document.getElementById("bildeInput");
 
-            const maks =
-                document.getElementById("MaksAntallDeltakere");
+        const valgteBilder =
+            document.getElementById("valgteBilder");
 
-            maks.disabled = !pamelding.checked;
 
-            if (!pamelding.checked) {
-                maks.value = "";
+        let bilder = [];
+
+
+        bildeInput.addEventListener("change", function () {
+
+            const nyeBilder =
+                Array.from(this.files);
+
+
+            for (const bilde of nyeBilder) {
+
+                if (bilder.length >= 5) {
+
+                    alert(
+                        "Du kan laste opp maksimalt 5 bilder."
+                    );
+
+                    break;
+                }
+
+
+                if (bilde.size > 5 * 1024 * 1024) {
+
+                    alert(
+                        `Bildet "${bilde.name}" er større enn 5 MB.`
+                    );
+
+                    continue;
+                }
+
+
+                const tillatteTyper = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+                ];
+
+
+                if (!tillatteTyper.includes(bilde.type)) {
+
+                    alert(
+                        `Bildet "${bilde.name}" har en filtype som ikke er tillatt.`
+                    );
+
+                    continue;
+                }
+
+
+                bilder.push(bilde);
+
             }
+
+
+            visValgteBilder();
+
+
+            // Viktig på iPhone.
+            this.value = "";
+
+        });
+
+
+        function visValgteBilder() {
+
+            valgteBilder.innerHTML = "";
+
+
+            bilder.forEach((bilde, index) => {
+
+                const rad =
+                    document.createElement("div");
+
+
+                rad.className =
+                    "d-flex align-items-center justify-content-between border rounded-3 p-2 mb-2";
+
+
+                rad.innerHTML = `
+
+                    <div class="text-truncate">
+
+                        <i class="bi bi-image me-2"></i>
+
+                        <span>
+                            ${bilde.name}
+                        </span>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger ms-2"
+                            onclick="fjernBilde(${index})"
+                            title="Fjern bilde">
+
+                        <i class="bi bi-trash"></i>
+
+                    </button>
+
+                `;
+
+
+                valgteBilder.appendChild(rad);
+
+            });
+
         }
 
-        document
-            .getElementById("KreverPamelding")
-            .addEventListener("change", toggleMaxDeltakere);
 
-        toggleMaxDeltakere();
+        function fjernBilde(index) {
+
+            bilder.splice(index, 1);
+
+            visValgteBilder();
+
+        }
+
+
+        document.querySelector("form")
+            .addEventListener("submit", function () {
+
+                const dataTransfer =
+                    new DataTransfer();
+
+
+                bilder.forEach(function (bilde) {
+
+                    dataTransfer.items.add(bilde);
+
+                });
+
+
+                bildeInput.files =
+                    dataTransfer.files;
+
+
+                bildeInput.name =
+                    "bilder";
+
+            });
+
     </script>
+
 }
