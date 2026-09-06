@@ -54,6 +54,7 @@
                     </div>
                 }
 
+                <!-- Beskrivelse -->
                 <div class="mb-4">
 
                     <h5>Beskrivelse</h5>
@@ -62,36 +63,80 @@
                         @Html.Raw(TextHelper.FormaterLinjeskift(Model.Beskrivelse))
                     </p>
 
-                </div>               
+                </div>
 
+                <!-- Bilder -->
                 @if (Model.Bilder != null && Model.Bilder.Any())
                 {
                     <div class="mb-4">
+
                         <h5 class="mb-3">
                             <i class="bi bi-images me-1"></i>
                             Bilder
                         </h5>
 
                         <div class="row g-3">
+
                             @foreach (var bilde in Model.Bilder)
                             {
-                                <div class="col-6 col-md-4">
-                                    <a href="@Url.Action("Bilde", "Oppgaver", new { id = bilde.Id })"
-                                       target="_blank"
-                                       rel="noopener noreferrer"
-                                       class="d-block">
+                                var bildeUrl = Url.Action(
+                                    "Bilde",
+                                    "Oppgaver",
+                                    new { id = bilde.Id });
 
-                                        <img src="@Url.Action("Bilde", "Oppgaver", new { id = bilde.Id })"
+                                <div class="col-6 col-md-4">
+
+                                    <button type="button"
+                                            class="border-0 bg-transparent p-0 w-100"
+                                            onclick="visBilde('@bildeUrl')">
+
+                                        <img src="@bildeUrl"
                                              alt="@bilde.OriginaltFilnavn"
                                              class="img-fluid rounded-3 shadow-sm"
                                              style="width: 100%; height: 180px; object-fit: cover; cursor: pointer;" />
-                                    </a>
+
+                                    </button>
+
                                 </div>
                             }
+
                         </div>
+
                     </div>
                 }
 
+                <!-- Bildevisning -->
+                <div id="bildeModal"
+                     class="position-fixed top-0 start-0 w-100 h-100 d-none"
+                     style="z-index: 1055; background: rgba(0,0,0,0.92);">
+
+                    <!-- Lukk-knapp -->
+                    <button type="button"
+                            class="btn btn-light position-absolute top-0 end-0 m-3 rounded-circle"
+                            style="width: 45px; height: 45px; z-index: 1060;"
+                            onclick="lukkBilde()"
+                            aria-label="Lukk bilde">
+
+                        <i class="bi bi-x-lg"></i>
+
+                    </button>
+
+                    <!-- Stort bilde -->
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center p-3"
+                         onclick="lukkBilde()">
+
+                        <img id="stortBilde"
+                             src=""
+                             alt="Stort bilde"
+                             class="img-fluid"
+                             style="max-height: 90vh; max-width: 95vw; object-fit: contain;"
+                             onclick="event.stopPropagation();" />
+
+                    </div>
+
+                </div>
+
+                <!-- Knapper -->
                 <div class="d-grid gap-2">
 
                     @if ((bool?)ViewBag.ErPameldt == true)
@@ -112,8 +157,10 @@
                                 <a asp-action="RegistrerTimer"
                                    asp-route-id="@Model.Id"
                                    class="btn btn-primary w-100">
+
                                     <i class="bi bi-clock"></i>
                                     Registrer timer
+
                                 </a>
                             }
 
@@ -130,8 +177,10 @@
 
                                 <button type="submit"
                                         class="btn btn-outline-danger w-100">
+
                                     <i class="bi bi-person-dash"></i>
                                     Trekk påmelding
+
                                 </button>
 
                             </form>
@@ -150,8 +199,10 @@
 
                                     <button type="submit"
                                             class="btn btn-success w-100">
+
                                         <i class="bi bi-check-circle"></i>
                                         Jeg har utført oppgaven
+
                                     </button>
 
                                 </form>
@@ -163,15 +214,19 @@
                                     <a asp-action="RegistrerTimer"
                                        asp-route-id="@Model.Id"
                                        class="btn btn-primary w-100">
+
                                         Registrer timer
+
                                     </a>
                                 }
                             }
                             else if (pamelding?.Status == OppgaveStatus.TimerRegistrert)
                             {
                                 <div class="alert alert-success mb-0">
+
                                     <i class="bi bi-check-circle"></i>
                                     Oppgaven er fullført og timene er registrert.
+
                                 </div>
                             }
 
@@ -185,8 +240,10 @@
 
                                     <button type="submit"
                                             class="btn btn-outline-danger w-100">
+
                                         <i class="bi bi-person-dash"></i>
                                         Trekk påmelding
+
                                     </button>
 
                                 </form>
@@ -203,8 +260,10 @@
 
                             <button type="submit"
                                     class="btn btn-success w-100">
+
                                 <i class="bi bi-person-plus"></i>
                                 Meld meg på
+
                             </button>
 
                         </form>
@@ -219,3 +278,23 @@
     </div>
 
 </div>
+
+<script>
+    function visBilde(url) {
+        document.getElementById("stortBilde").src = url;
+        document.getElementById("bildeModal").classList.remove("d-none");
+        document.body.style.overflow = "hidden";
+    }
+
+    function lukkBilde() {
+        document.getElementById("bildeModal").classList.add("d-none");
+        document.getElementById("stortBilde").src = "";
+        document.body.style.overflow = "";
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            lukkBilde();
+        }
+    });
+</script>
