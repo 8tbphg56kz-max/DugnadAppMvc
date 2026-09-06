@@ -1,4 +1,6 @@
-﻿@model IEnumerable<DugnadAppMvc.Models.Dugnad>
+﻿@using DugnadAppMvc.Infrastructure.Identity
+@using DugnadAppMvc.Services
+@model IEnumerable<DugnadAppMvc.Models.Dugnad>
 
 @{
     ViewData["Title"] = "Fellesdugnader";
@@ -19,22 +21,27 @@
 {
     <!-- PC / nettbrett -->
     <div class="table-responsive d-none d-md-block">
+
         <table class="table table-striped">
+
             <thead>
                 <tr>
                     <th>Tittel</th>
                     <th>Start</th>
                     <th>Slutt</th>
                     <th>Påmelding</th>
-                    <th>Status</th>                    
+                    <th>Status</th>
+                    <th>Bilder</th>
                     <th></th>
                 </tr>
             </thead>
 
             <tbody>
+
                 @foreach (var dugnad in Model)
                 {
                     <tr>
+
                         <td class="text-nowrap">
                             @dugnad.Tittel
                         </td>
@@ -52,28 +59,51 @@
                         </td>
 
                         <td class="text-nowrap">
+
                             @if (dugnad.ErUtført)
                             {
-                                <span class="badge bg-success">Utført</span>
+                                <span class="badge bg-success">
+                                    Utført
+                                </span>
                             }
                             else if (dugnad.ErSynlig)
                             {
-                                <span class="badge bg-primary">Synlig</span>
+                                <span class="badge bg-primary">
+                                    Synlig
+                                </span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary">Skjult</span>
+                                <span class="badge bg-secondary">
+                                    Skjult
+                                </span>
                             }
+
                         </td>
 
                         <td class="text-nowrap">
+
+                            @if (dugnad.Bilder != null && dugnad.Bilder.Any())
+                            {
+                                <span class="text-muted">
+                                    <i class="bi bi-images me-1"></i>
+                                    @dugnad.Bilder.Count
+                                </span>
+                            }
+
+                        </td>
+
+                        <td class="text-nowrap">
+
                             @if (User.HasAdminAccess())
                             {
                                 <a asp-action="Edit"
                                    asp-route-id="@dugnad.Id"
                                    class="btn btn-sm btn-outline-primary"
                                    title="Rediger">
+
                                     <i class="bi bi-pencil"></i>
+
                                 </a>
                             }
 
@@ -91,7 +121,9 @@
                                         <button type="submit"
                                                 class="btn btn-sm btn-outline-warning"
                                                 title="Skjul dugnad">
+
                                             <i class="bi bi-eye-slash"></i>
+
                                         </button>
                                     }
                                     else
@@ -99,10 +131,13 @@
                                         <button type="submit"
                                                 class="btn btn-sm btn-outline-success"
                                                 title="Vis dugnad">
+
                                             <i class="bi bi-eye"></i>
+
                                         </button>
                                     }
                                 }
+
                             </form>
 
                             @if (User.HasAdminAccess())
@@ -111,18 +146,26 @@
                                    asp-route-id="@dugnad.Id"
                                    class="btn btn-sm btn-outline-danger"
                                    title="Slett dugnad">
+
                                     <i class="bi bi-trash"></i>
+
                                 </a>
                             }
+
                         </td>
+
                     </tr>
                 }
+
             </tbody>
+
         </table>
+
     </div>
 
 
     <!-- Mobil -->
+
     <div class="d-md-none">
 
         @foreach (var dugnad in Model)
@@ -132,6 +175,7 @@
                 <div class="card-body">
 
                     <!-- Tittel og status -->
+
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
 
                         <h5 class="card-title mb-0 text-break">
@@ -161,9 +205,11 @@
 
 
                     <!-- Informasjon -->
+
                     <div class="small">
 
                         <div class="row border-bottom py-2">
+
                             <div class="col-5 text-muted">
                                 Start
                             </div>
@@ -171,10 +217,12 @@
                             <div class="col-7">
                                 @dugnad.StartDato.ToString("dd.MM.yyyy")
                             </div>
+
                         </div>
 
 
                         <div class="row border-bottom py-2">
+
                             <div class="col-5 text-muted">
                                 Slutt
                             </div>
@@ -182,10 +230,12 @@
                             <div class="col-7">
                                 @dugnad.SluttDato.ToString("dd.MM.yyyy")
                             </div>
+
                         </div>
 
 
                         <div class="row py-2">
+
                             <div class="col-5 text-muted">
                                 Påmelding
                             </div>
@@ -193,9 +243,66 @@
                             <div class="col-7">
                                 @(dugnad.KreverPamelding ? "Ja" : "Nei")
                             </div>
+
                         </div>
 
+
+                        @if (dugnad.Bilder != null && dugnad.Bilder.Any())
+                        {
+                            <div class="row py-2 border-top">
+
+                                <div class="col-5 text-muted">
+                                    Bilder
+                                </div>
+
+                                <div class="col-7">
+
+                                    <i class="bi bi-images me-1"></i>
+                                    @dugnad.Bilder.Count
+
+                                </div>
+
+                            </div>
+                        }
+
                     </div>
+
+
+                    <!-- Bildegalleri -->
+                    @if (dugnad.Bilder != null && dugnad.Bilder.Any())
+                    {
+                        <div class="mt-3">
+
+                            <div class="row g-2">
+
+                                @foreach (var bilde in dugnad.Bilder)
+                                {
+                                    var bildeUrl =
+                                        Url.Action(
+                                            "Bilde",
+                                            "Dugnader",
+                                            new { id = bilde.Id });
+
+                                    <div class="col-6">
+
+                                        <button type="button"
+                                                class="border-0 bg-transparent p-0 w-100"
+                                                onclick="visBilde('@bildeUrl')">
+
+                                            <img src="@bildeUrl"
+                                                 alt="@bilde.OriginaltFilnavn"
+                                                 class="img-fluid rounded-3 shadow-sm"
+                                                 style="width: 100%; height: 150px; object-fit: cover; cursor: pointer;" />
+
+                                        </button>
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+                    }
 
 
                     <!-- Handlingsknapper -->
@@ -257,6 +364,7 @@
                     }
 
                 </div>
+
             </div>
         }
 
@@ -265,6 +373,7 @@
 else
 {
     <div class="card shadow-sm border-0 rounded-4">
+
         <div class="card-body text-center py-5">
 
             <i class="bi bi-calendar-x text-muted"
@@ -279,6 +388,78 @@ else
             </p>
 
         </div>
+
     </div>
 }
 
+
+<!-- Lightbox -->
+
+<div id="bildeModal"
+     class="position-fixed top-0 start-0 w-100 h-100 d-none"
+     style="z-index: 1055; background: rgba(0,0,0,0.92);">
+
+    <button type="button"
+            class="btn btn-light position-absolute top-0 end-0 m-3 rounded-circle"
+            style="width: 45px; height: 45px; z-index: 1060;"
+            onclick="lukkBilde()"
+            aria-label="Lukk bilde">
+
+        <i class="bi bi-x-lg"></i>
+
+    </button>
+
+
+    <div class="w-100 h-100 d-flex align-items-center justify-content-center p-3"
+         onclick="lukkBilde()">
+
+        <img id="stortBilde"
+             src=""
+             alt="Stort bilde"
+             class="img-fluid"
+             style="max-height: 90vh; max-width: 95vw; object-fit: contain;"
+             onclick="event.stopPropagation();" />
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        function visBilde(url) {
+
+            document.getElementById("stortBilde").src = url;
+
+            document
+                .getElementById("bildeModal")
+                .classList.remove("d-none");
+
+            document.body.style.overflow = "hidden";
+        }
+
+
+        function lukkBilde() {
+
+            document
+                .getElementById("bildeModal")
+                .classList.add("d-none");
+
+            document.getElementById("stortBilde").src = "";
+
+            document.body.style.overflow = "";
+        }
+
+
+        document.addEventListener("keydown", function(event) {
+
+            if (event.key === "Escape") {
+                lukkBilde();
+            }
+
+        });
+
+    </script>
+}

@@ -14,59 +14,113 @@
                     Ny fellesdugnad
                 </h3>
 
-                <form asp-action="Create">
+                <form asp-action="Create"
+                      method="post"
+                      enctype="multipart/form-data">
 
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="Tittel" class="form-label fw-semibold"></label>
-                        <input asp-for="Tittel" class="form-control" />
-                        <span asp-validation-for="Tittel" class="text-danger small"></span>
+                        <label asp-for="Tittel"
+                               class="form-label fw-semibold"></label>
+                        <input asp-for="Tittel"
+                               class="form-control" />
+                        <span asp-validation-for="Tittel"
+                              class="text-danger small"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Beskrivelse" class="form-label fw-semibold"></label>
-                        <textarea asp-for="Beskrivelse" class="form-control" rows="5"></textarea>
-                        <span asp-validation-for="Beskrivelse" class="text-danger small"></span>
+                        <label asp-for="Beskrivelse"
+                               class="form-label fw-semibold"></label>
+                        <textarea asp-for="Beskrivelse"
+                                  class="form-control"
+                                  rows="5"></textarea>
+                        <span asp-validation-for="Beskrivelse"
+                              class="text-danger small"></span>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label asp-for="StartDato" class="form-label fw-semibold"></label>
-                            <input asp-for="StartDato" class="form-control" type="date" />
-                            <span asp-validation-for="StartDato" class="text-danger small"></span>
+                            <label asp-for="StartDato"
+                                   class="form-label fw-semibold"></label>
+                            <input asp-for="StartDato"
+                                   class="form-control"
+                                   type="date" />
+                            <span asp-validation-for="StartDato"
+                                  class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="SluttDato" class="form-label fw-semibold"></label>
-                            <input asp-for="SluttDato" class="form-control" type="date" />
-                            <span asp-validation-for="SluttDato" class="text-danger small"></span>
+                            <label asp-for="SluttDato"
+                                   class="form-label fw-semibold"></label>
+                            <input asp-for="SluttDato"
+                                   class="form-control"
+                                   type="date" />
+                            <span asp-validation-for="SluttDato"
+                                  class="text-danger small"></span>
                         </div>
                     </div>
 
                     <div class="form-check mb-3">
-                        <input asp-for="KreverPamelding" class="form-check-input" />
-                        <label asp-for="KreverPamelding" class="form-check-label"></label>
+                        <input asp-for="KreverPamelding"
+                               class="form-check-input"
+                               id="KreverPamelding" />
+
+                        <label asp-for="KreverPamelding"
+                               class="form-check-label"></label>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="MaksAntallDeltakere" class="form-label fw-semibold"></label>
-                        <input asp-for="MaksAntallDeltakere" class="form-control" />
-                        <span asp-validation-for="MaksAntallDeltakere" class="text-danger small"></span>
+                        <label asp-for="MaksAntallDeltakere"
+                               class="form-label fw-semibold"></label>
+
+                        <input asp-for="MaksAntallDeltakere"
+                               class="form-control"
+                               id="MaksAntallDeltakere" />
+
+                        <span asp-validation-for="MaksAntallDeltakere"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <!-- Bilder -->
+                    <div class="mb-4">
+                        <label for="bilder"
+                               class="form-label fw-semibold">
+                            <i class="bi bi-images me-1"></i>
+                            Bilder
+                        </label>
+
+                        <input type="file"
+                               name="bilder"
+                               id="bilder"
+                               class="form-control"
+                               accept=".jpg,.jpeg,.png,.webp"
+                               multiple />
+
+                        <div class="form-text">
+                            Du kan laste opp opptil 5 bilder.
+                            JPG, JPEG, PNG eller WebP. Maks 5 MB per bilde.
+                        </div>
                     </div>
 
                     <div class="form-check mb-4">
-                        <input asp-for="ErSynlig" class="form-check-input" />
-                        <label asp-for="ErSynlig" class="form-check-label"></label>
+                        <input asp-for="ErSynlig"
+                               class="form-check-input" />
+
+                        <label asp-for="ErSynlig"
+                               class="form-check-label"></label>
                     </div>
 
                     <div class="d-flex gap-2 flex-wrap">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit"
+                                class="btn btn-primary">
                             <i class="bi bi-check-circle me-1"></i>
                             Lagre
                         </button>
 
-                        <a asp-action="Index" class="btn btn-secondary">
+                        <a asp-action="Index"
+                           class="btn btn-secondary">
                             <i class="bi bi-arrow-left me-1"></i>
                             Avbryt
                         </a>
@@ -78,8 +132,7 @@
     </div>
 </div>
 
-@section Scripts
-{
+@section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
@@ -88,7 +141,7 @@
         function toggleMaxDeltakere() {
 
             const pamelding =
-                document.getElementById("HarPamelding");
+                document.getElementById("KreverPamelding");
 
             const maks =
                 document.getElementById("MaksAntallDeltakere");
@@ -101,7 +154,7 @@
         }
 
         document
-            .getElementById("HarPamelding")
+            .getElementById("KreverPamelding")
             .addEventListener("change", toggleMaxDeltakere);
 
         toggleMaxDeltakere();

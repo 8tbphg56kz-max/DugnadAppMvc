@@ -22,5 +22,7 @@ namespace DugnadAppMvc.Models
         public bool ErUtført { get; set; }
 
         public ICollection<Dugnadstime> Dugnadstimer { get; set; } = new List<Dugnadstime>();
+
+        public ICollection<DugnadBilde> Bilder { get; set; } = new List<DugnadBilde>();
     }
 }

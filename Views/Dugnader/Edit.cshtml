@@ -5,87 +5,234 @@
 }
 
 <div class="container" style="max-width: 1100px;">
-<h2>Rediger dugnad</h2>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+    <h2>Rediger dugnad</h2>
 
-    <div class="mb-3">
-            <label asp-for="Tittel" class="form-label felt-overskrift"></label>
-        <input asp-for="Tittel" class="form-control" />
-        <span asp-validation-for="Tittel" class="text-danger"></span>
-    </div>
+    <form asp-action="Edit"
+          method="post"
+          enctype="multipart/form-data">
 
-    <div class="mb-3">
-            <label asp-for="Beskrivelse" class="form-label felt-overskrift"></label>
-        <textarea asp-for="Beskrivelse" class="form-control" rows="4"></textarea>
-    </div>
+        <input type="hidden" asp-for="Id" />
 
-    <div class="mb-3">
-            <label asp-for="StartDato" class="fform-label felt-overskrift"></label>
-        <input asp-for="StartDato" type="date" class="form-control" />
-    </div>
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
 
-    <div class="mb-3">
-            <label asp-for="SluttDato" class="form-label felt-overskrift"></label>
-        <input asp-for="SluttDato" type="date" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label asp-for="Tittel"
+                   class="form-label felt-overskrift"></label>
 
-    <div class="form-check mb-3">
-        <input asp-for="KreverPamelding"
-               class="form-check-input"
-               id="HarPamelding" />
-            <label asp-for="KreverPamelding" class="form-check-label form-label felt-overskrift">
-            Krever påmelding
-        </label>
-    </div>
+            <input asp-for="Tittel"
+                   class="form-control" />
 
-    <div class="mb-3">
-            <label asp-for="MaksAntallDeltakere" class="form-label felt-overskrift">
-            Maks antall deltakere
-        </label>
+            <span asp-validation-for="Tittel"
+                  class="text-danger"></span>
+        </div>
 
-        <input asp-for="MaksAntallDeltakere"
-               class="form-control"
-               id="MaksAntallDeltakere" />
-    </div>
+        <div class="mb-3">
+            <label asp-for="Beskrivelse"
+                   class="form-label felt-overskrift"></label>
 
-    <div class="form-check mb-3">
-            <input asp-for="ErSynlig" class="form-check-input form-label felt-overskrift" />
-        <label asp-for="ErSynlig" class="form-check-label form-label felt-overskrift">
-            Synlig
-        </label>
-    </div>
+            <textarea asp-for="Beskrivelse"
+                      class="form-control"
+                      rows="4"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="StartDato"
+                   class="form-label felt-overskrift"></label>
+
+            <input asp-for="StartDato"
+                   type="date"
+                   class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="SluttDato"
+                   class="form-label felt-overskrift"></label>
+
+            <input asp-for="SluttDato"
+                   type="date"
+                   class="form-control" />
+        </div>
 
         <div class="form-check mb-3">
-            <input asp-for="ErUtført" class="form-check-input" />
-            <label asp-for="ErUtført" class="form-check-label form-label felt-overskrift">
+            <input asp-for="KreverPamelding"
+                   class="form-check-input"
+                   id="KreverPamelding" />
+
+            <label asp-for="KreverPamelding"
+                   class="form-check-label form-label felt-overskrift">
+                Krever påmelding
+            </label>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="MaksAntallDeltakere"
+                   class="form-label felt-overskrift">
+                Maks antall deltakere
+            </label>
+
+            <input asp-for="MaksAntallDeltakere"
+                   class="form-control"
+                   id="MaksAntallDeltakere" />
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="ErSynlig"
+                   class="form-check-input" />
+
+            <label asp-for="ErSynlig"
+                   class="form-check-label form-label felt-overskrift">
+                Synlig
+            </label>
+        </div>
+
+        <div class="form-check mb-4">
+            <input asp-for="ErUtført"
+                   class="form-check-input" />
+
+            <label asp-for="ErUtført"
+                   class="form-check-label form-label felt-overskrift">
                 Utført
             </label>
         </div>
 
-    <button type="submit" class="btn btn-primary">
-        Lagre
-    </button>
 
-    <a asp-action="Index" class="btn btn-secondary">
-        Avbryt
-    </a>
+        <!-- Eksisterende bilder -->
+        @if (Model.Bilder != null && Model.Bilder.Any())
+        {
+            <div class="mb-4">
 
-</form>
+                <h5 class="felt-overskrift mb-3">
+                    <i class="bi bi-images me-1"></i>
+                    Eksisterende bilder
+                </h5>
+
+                <div class="row g-3">
+
+                    @foreach (var bilde in Model.Bilder)
+                    {
+                        var bildeUrl =
+                            Url.Action(
+                                "Bilde",
+                                "Dugnader",
+                                new { id = bilde.Id });
+
+                        <div class="col-12 col-sm-6 col-md-4">
+
+                            <div class="card border-0 shadow-sm">
+
+                                <div class="card-body p-2">
+
+                                    <img src="@bildeUrl"
+                                         alt="@bilde.OriginaltFilnavn"
+                                         class="img-fluid rounded-3"
+                                         style="width: 100%; height: 180px; object-fit: cover;" />
+
+                                    <div class="small text-muted mt-2 text-truncate">
+                                        @bilde.OriginaltFilnavn
+                                    </div>
+
+                                    <button type="submit"
+                                            form="slett-bilde-@bilde.Id"
+                                            class="btn btn-outline-danger btn-sm w-100 mt-2">
+                                        <i class="bi bi-trash me-1"></i>
+                                        Slett bilde
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        }
+
+
+        <!-- Last opp nye bilder -->
+
+        <div class="mb-4">
+
+            <label for="bilder"
+                   class="form-label fw-semibold">
+                <i class="bi bi-camera me-1"></i>
+                Last opp bilder
+            </label>
+
+            <input type="file"
+                   name="bilder"
+                   id="bilder"
+                   class="form-control"
+                   accept=".jpg,.jpeg,.png,.webp"
+                   multiple />
+
+            <div class="form-text">
+                Maksimalt 5 bilder totalt per fellesdugnad.
+                JPG, JPEG, PNG eller WebP.
+                Maks 5 MB per bilde.
+            </div>
+
+        </div>
+
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                <i class="bi bi-check-circle me-1"></i>
+                Lagre
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i>
+                Avbryt
+            </a>
+
+        </div>
+
+    </form>
+
+
+    <!-- Separate skjemaer for sletting av bilder -->
+    @if (Model.Bilder != null)
+    {
+        @foreach (var bilde in Model.Bilder)
+        {
+            <form id="slett-bilde-@bilde.Id"
+                  asp-action="SlettBilde"
+                  method="post"
+                  onsubmit="return confirm('Er du sikker på at du vil slette dette bildet?');">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="id"
+                       value="@bilde.Id" />
+
+            </form>
+        }
+    }
+
 </div>
 
-@section Scripts
-{
+
+@section Scripts {
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
     <script>
+
         function toggleMaxDeltakere() {
 
             const pamelding =
-                document.getElementById("HarPamelding");
+                document.getElementById("KreverPamelding");
 
             const maks =
                 document.getElementById("MaksAntallDeltakere");
@@ -98,9 +245,10 @@
         }
 
         document
-            .getElementById("HarPamelding")
+            .getElementById("KreverPamelding")
             .addEventListener("change", toggleMaxDeltakere);
 
         toggleMaxDeltakere();
+
     </script>
 }
