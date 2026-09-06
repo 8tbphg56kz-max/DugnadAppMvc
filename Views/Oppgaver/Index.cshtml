@@ -176,22 +176,7 @@
                                             @item.Bilder.Count
                                         </span>
                                     }
-                                </strong>
-
-                                @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
-                                {
-                                    <div class="text-muted small">
-
-                                        @Html.Raw(
-                                            TextHelper.FormaterLinjeskift(
-                                                item.Beskrivelse.Length > 80
-                                                    ? item.Beskrivelse[..80] + "..."
-                                                    : item.Beskrivelse
-                                            )
-                                        )
-
-                                    </div>
-                                }
+                                </strong>                              
 
                             </td>
 
@@ -363,23 +348,7 @@
                                         </span>
                                     }
 
-                                </h5>
-
-                                @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
-                                {
-                                    <div class="text-muted small">
-
-                                        @Html.Raw(
-                                            TextHelper.FormaterLinjeskift(
-                                                item.Beskrivelse.Length > 120
-                                                    ? item.Beskrivelse[..120] + "..."
-                                                    : item.Beskrivelse
-                                            )
-                                        )
-
-                                    </div>
-                                }
-
+                                </h5>                                
                             </div>
 
 
