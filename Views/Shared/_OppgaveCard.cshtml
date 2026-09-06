@@ -6,53 +6,84 @@
 
         <div>
 
-            <h6 class="mb-1">@Model.Navn</h6>
+            <h6 class="mb-1">
+
+                @Model.Navn                
+
+            </h6>
+
 
             <small class="text-muted">
+
                 <i class="bi bi-calendar-event me-1"></i>
+
                 Frist: @Model.Frist.ToString("dd.MM.yy")
+
             </small>
+
 
             <div class="mt-2">
 
                 @if (Model.ErPameldt)
                 {
                     <small class="text-primary">
+
                         <i class="bi bi-person-check-fill me-1"></i>
+
                         Min oppgave
+
                     </small>
                 }
                 else if (Model.Pameldinger.Count >= Model.AntallPersoner)
                 {
                     <small class="text-danger">
+
                         <i class="bi bi-people-fill me-1"></i>
+
                         Fulltegnet
+
                     </small>
                 }
                 else
                 {
                     <small class="text-muted">
+
                         <i class="bi bi-people me-1"></i>
+
                         @Model.Pameldinger.Count av @Model.AntallPersoner påmeldt
+
                     </small>
                 }
 
-                <div class="mt-3">
+
+                <div class="mt-3 d-flex align-items-center gap-2">
+
                     <a asp-controller="Oppgaver"
                        asp-action="Vis"
                        asp-route-id="@Model.Id"
                        class="btn btn-outline-primary btn-sm">
+
                         <i class="bi bi-arrow-right-circle me-1"></i>
                         Detaljer
+
                     </a>
-                    </div>
+
+                    @if (Model.Bilder != null && Model.Bilder.Any())
+                    {
+                        <span class="text-muted"
+                              title="Oppgaven har @Model.Bilder.Count bilde@(Model.Bilder.Count == 1 ? "" : "r")">
+
+                            <i class="bi bi-images"></i>
+                            @Model.Bilder.Count
+
+                        </span>
+                    }
+
+                </div>
 
             </div>
-            
 
         </div>
-
-       
 
     </div>
 

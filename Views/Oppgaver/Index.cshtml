@@ -167,6 +167,15 @@
                                         @item.Navn
 
                                     </a>
+
+                                    @if (item.Bilder != null && item.Bilder.Any())
+                                    {
+                                        <span class="text-muted ms-2"
+                                              title="Oppgaven har @item.Bilder.Count bilde@(item.Bilder.Count == 1 ? "" : "r")">
+                                            <i class="bi bi-images"></i>
+                                            @item.Bilder.Count
+                                        </span>
+                                    }
                                 </strong>
 
                                 @if (!string.IsNullOrWhiteSpace(item.Beskrivelse))
@@ -335,7 +344,6 @@
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
 
                             <div class="flex-grow-1">
-
                                 <h5 class="card-title mb-1">
 
                                     <a asp-action="Edit"
@@ -345,6 +353,15 @@
                                         @item.Navn
 
                                     </a>
+
+                                    @if (item.Bilder != null && item.Bilder.Any())
+                                    {
+                                        <span class="text-muted ms-2"
+                                              title="Oppgaven har @item.Bilder.Count bilde@(item.Bilder.Count == 1 ? "" : "r")">
+                                            <i class="bi bi-images"></i>
+                                            @item.Bilder.Count
+                                        </span>
+                                    }
 
                                 </h5>
 

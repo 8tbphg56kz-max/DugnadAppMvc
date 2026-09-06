@@ -49,11 +49,12 @@ namespace DugnadAppMvc.Controllers
                 .CountAsync(o => !o.ErUtført);
 
             var oppgaver = await _context.Oppgaver
-                .Include(o => o.Pameldinger)
-                .Where(o => !o.ErUtført)
-                .OrderBy(o => o.Prioritet)
-                .ThenBy(o => o.Frist)
-                .ToListAsync();
+            .Include(o => o.Pameldinger)
+            .Include(o => o.Bilder)
+            .Where(o => !o.ErUtført)
+            .OrderBy(o => o.Prioritet)
+            .ThenBy(o => o.Frist)
+            .ToListAsync();
 
             if (currentUser != null)
             {

@@ -34,6 +34,7 @@ public class OppgaverController : Controller
     {
         var query = _context.Oppgaver
             .Include(o => o.Pameldinger)
+            .Include(o => o.Bilder)
             .AsQueryable();
 
         if (model.ErUtfort.HasValue)
