@@ -27,6 +27,8 @@ namespace DugnadAppMvc.Data
         public DbSet<ArsstatistikkBygg> ArsstatistikkBygg => Set<ArsstatistikkBygg>();
         public DbSet<OppgaveBilde> OppgaveBilder { get; set; }
         public DbSet<DugnadBilde> DugnadBilder { get; set; }
+        public DbSet<EpostVarsel> EpostVarsler { get; set; }
+          public DbSet<EpostVarselMottaker> EpostVarselMottakere { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -112,6 +114,37 @@ namespace DugnadAppMvc.Data
            .WithMany(d => d.Bilder)
            .HasForeignKey(b => b.DugnadId)
            .OnDelete(DeleteBehavior.Cascade);
+
+            // Epost -> Varsel
+            builder.Entity<EpostVarsel>()
+           .HasOne(e => e.Oppgave)
+           .WithMany(o => o.EpostVarsler)
+           .HasForeignKey(e => e.OppgaveId)
+           .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<EpostVarsel>()
+                .HasOne(e => e.Dugnad)
+                .WithMany()
+                .HasForeignKey(e => e.DugnadId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<EpostVarsel>()
+                .HasOne(e => e.SendtAvBruker)
+                .WithMany()
+                .HasForeignKey(e => e.SendtAvBrukerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<EpostVarselMottaker>()
+                .HasOne(m => m.EpostVarsel)
+                .WithMany(e => e.Mottakere)
+                .HasForeignKey(m => m.EpostVarselId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<EpostVarselMottaker>()
+                .HasOne(m => m.Beboer)
+                .WithMany()
+                .HasForeignKey(m => m.BeboerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

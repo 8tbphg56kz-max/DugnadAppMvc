@@ -1,0 +1,78 @@
+﻿@model DugnadAppMvc.Models.Oppgave
+
+@{
+    ViewData["Title"] = "Send e-post";
+    var antallMottakere = (int)ViewBag.AntallMottakere;
+}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+
+            <div class="card-body p-4">
+
+                <h3 class="mb-3">
+                    <i class="bi bi-envelope me-1"></i>
+                    Send e-post til beboerne
+                </h3>
+
+                <hr />
+
+                <p>
+                    Du er i ferd med å sende en e-post om oppgaven:
+                </p>
+
+                <div class="alert alert-info">
+
+                    <strong>@Model.Navn</strong>
+
+                    <div class="mt-2">
+                        Det vil bli sendt e-post til
+                        <strong>@antallMottakere beboere</strong>.
+                    </div>
+
+                </div>
+
+                <p class="text-muted">
+                    E-posten informerer beboerne om den nye oppgaven
+                    og inneholder en lenke til DugnadApp.
+                </p>
+
+                <div class="d-flex gap-2 mt-4">
+
+                    <a asp-action="Edit"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-outline-secondary">
+
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Tilbake
+
+                    </a>
+
+                    <form asp-action="SendEpostVarsel"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            <i class="bi bi-envelope me-1"></i>
+                            Send e-post
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

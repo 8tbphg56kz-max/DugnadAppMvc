@@ -1,6 +1,5 @@
 @model DugnadAppMvc.ViewModels.OppgaveIndexViewModel
 @using DugnadAppMvc.Models.Enums
-@using DugnadAppMvc.Helpers
 
 @{
     ViewData["Title"] = "Oppgaver";
@@ -144,7 +143,7 @@
                         <th>Status</th>
                         <th>Påmeldt</th>
                         <th>Timer</th>
-                        <th>Bekreftelse</th>
+                        <th>E-post</th>
                         <th></th>
                     </tr>
 
@@ -160,6 +159,7 @@
                             <td style="min-width: 180px;">
 
                                 <strong>
+
                                     <a asp-action="Edit"
                                        asp-route-id="@item.Id"
                                        class="text-decoration-none">
@@ -168,15 +168,19 @@
 
                                     </a>
 
-                                    @if (item.Bilder != null && item.Bilder.Any())
+                                    @if (item.Bilder != null &&
+                                         item.Bilder.Any())
                                     {
                                         <span class="text-muted ms-2"
                                               title="Oppgaven har @item.Bilder.Count bilde@(item.Bilder.Count == 1 ? "" : "r")">
+
                                             <i class="bi bi-images"></i>
                                             @item.Bilder.Count
+
                                         </span>
                                     }
-                                </strong>                              
+
+                                </strong>
 
                             </td>
 
@@ -244,7 +248,8 @@
                             <td>
 
                                 @{
-                                    var antallPameldte = item.Pameldinger.Count;
+                                    var antallPameldte =
+                                        item.Pameldinger.Count;
 
                                     var badgeClass =
                                         antallPameldte == 0
@@ -271,6 +276,33 @@
                                 @(item.KanRegistrereTimer ? "Ja" : "Nei")
                             </td>
 
+
+                            <!-- E-post -->
+                            <td>
+                                @if (item.EpostVarsler != null &&
+                                     item.EpostVarsler.Any(e =>
+                                         e.Status == DugnadAppMvc.Models.EpostVarselStatus.Sendt))
+                                {
+                                    <span class="text-success"
+                                          title="E-post sendt til beboerne">
+
+                                        <i class="bi bi-envelope-check-fill fs-5"></i>
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted"
+                                          title="E-post er ikke sendt">
+
+                                        <i class="bi bi-envelope fs-5"></i>
+
+                                    </span>
+                                }
+                            </td>
+
+
+                            <!-- Admin-knapper -->
                             <td class="text-nowrap">
 
                                 @if (User.HasAdminAccess())
@@ -329,6 +361,7 @@
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
 
                             <div class="flex-grow-1">
+
                                 <h5 class="card-title mb-1">
 
                                     <a asp-action="Edit"
@@ -339,16 +372,21 @@
 
                                     </a>
 
-                                    @if (item.Bilder != null && item.Bilder.Any())
+
+                                    @if (item.Bilder != null &&
+                                         item.Bilder.Any())
                                     {
                                         <span class="text-muted ms-2"
                                               title="Oppgaven har @item.Bilder.Count bilde@(item.Bilder.Count == 1 ? "" : "r")">
+
                                             <i class="bi bi-images"></i>
                                             @item.Bilder.Count
+
                                         </span>
                                     }
 
-                                </h5>                                
+                                </h5>
+
                             </div>
 
 
@@ -475,15 +513,39 @@
                         </div>
 
 
-                        <!-- Bekreftelse -->
-                        <div class="row py-2">
+                        <!-- E-post -->
+                        <div class="row border-bottom py-2">
 
                             <div class="col-5 text-muted fw-semibold">
-                                Bekreftelse
-                            </div>                           
+                                E-post
+                            </div>
+
+                            <div class="col-7">
+
+                                @if (item.EpostVarsler != null &&
+                                     item.EpostVarsler.Any(e =>
+                                         e.Status == DugnadAppMvc.Models.EpostVarselStatus.Sendt))
+                                {
+                                    <span class="text-success">
+
+                                        <i class="bi bi-envelope-check-fill me-1"></i>
+                                        Sendt
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+
+                                        <i class="bi bi-envelope me-1"></i>
+                                        Ikke sendt
+
+                                    </span>
+                                }
+
+                            </div>
 
                         </div>
-
 
                         <!-- Admin-knapper -->
                         @if (User.HasAdminAccess())

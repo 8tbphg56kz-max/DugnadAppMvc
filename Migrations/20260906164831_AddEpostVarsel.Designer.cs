@@ -3,6 +3,7 @@ using System;
 using DugnadAppMvc.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DugnadAppMvc.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906164831_AddEpostVarsel")]
+    partial class AddEpostVarsel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -215,9 +218,6 @@ namespace DugnadAppMvc.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IkkeMottaEpost")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("LeilighetId")
                         .HasColumnType("integer");
 
@@ -399,6 +399,15 @@ namespace DugnadAppMvc.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AntallFeilet")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AntallMottakere")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AntallSendt")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("DugnadId")
                         .HasColumnType("integer");
 
@@ -409,11 +418,8 @@ namespace DugnadAppMvc.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("SendtDato")
+                    b.Property<DateTime>("SendtDato")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -424,44 +430,6 @@ namespace DugnadAppMvc.Migrations
                     b.HasIndex("SendtAvBrukerId");
 
                     b.ToTable("EpostVarsler");
-                });
-
-            modelBuilder.Entity("DugnadAppMvc.Models.EpostVarselMottaker", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BeboerId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("EpostVarselId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Epostadresse")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Feilmelding")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<bool>("Sendt")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("SendtDato")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BeboerId");
-
-                    b.HasIndex("EpostVarselId");
-
-                    b.ToTable("EpostVarselMottakere");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Innstillinger", b =>
@@ -891,7 +859,7 @@ namespace DugnadAppMvc.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("DugnadAppMvc.Models.Oppgave", "Oppgave")
-                        .WithMany("EpostVarsler")
+                        .WithMany()
                         .HasForeignKey("OppgaveId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -906,25 +874,6 @@ namespace DugnadAppMvc.Migrations
                     b.Navigation("Oppgave");
 
                     b.Navigation("SendtAvBruker");
-                });
-
-            modelBuilder.Entity("DugnadAppMvc.Models.EpostVarselMottaker", b =>
-                {
-                    b.HasOne("DugnadAppMvc.Models.Beboer", "Beboer")
-                        .WithMany()
-                        .HasForeignKey("BeboerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DugnadAppMvc.Models.EpostVarsel", "EpostVarsel")
-                        .WithMany("Mottakere")
-                        .HasForeignKey("EpostVarselId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Beboer");
-
-                    b.Navigation("EpostVarsel");
                 });
 
             modelBuilder.Entity("DugnadAppMvc.Models.Oppgave", b =>
@@ -1054,11 +1003,6 @@ namespace DugnadAppMvc.Migrations
                     b.Navigation("Dugnadstimer");
                 });
 
-            modelBuilder.Entity("DugnadAppMvc.Models.EpostVarsel", b =>
-                {
-                    b.Navigation("Mottakere");
-                });
-
             modelBuilder.Entity("DugnadAppMvc.Models.Leilighet", b =>
                 {
                     b.Navigation("Beboere");
@@ -1067,8 +1011,6 @@ namespace DugnadAppMvc.Migrations
             modelBuilder.Entity("DugnadAppMvc.Models.Oppgave", b =>
                 {
                     b.Navigation("Bilder");
-
-                    b.Navigation("EpostVarsler");
 
                     b.Navigation("Pameldinger");
                 });

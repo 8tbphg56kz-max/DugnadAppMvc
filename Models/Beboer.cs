@@ -11,6 +11,8 @@ namespace DugnadAppMvc.Models
 
         public string Epost { get; set; } = "";
 
+        public bool IkkeMottaEpost { get; set; } = false;
+
         // Kobling til leilighet
         public int LeilighetId { get; set; }
 

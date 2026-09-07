@@ -38,6 +38,16 @@
                         <span asp-validation-for="Epost" class="text-danger"></span>
                     </div>
 
+                    <div class="form-check mb-3">
+                        <input asp-for="IkkeMottaEpost"
+                               class="form-check-input" />
+
+                        <label asp-for="IkkeMottaEpost"
+                               class="form-check-label">
+                            Ikke motta e-postvarsler fra DugnadApp
+                        </label>
+                    </div>
+
                     <div class="mb-4">
                         <label asp-for="LeilighetId" class="form-label"></label>
                         <select asp-for="LeilighetId"

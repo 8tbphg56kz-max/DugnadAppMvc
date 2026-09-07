@@ -79,6 +79,18 @@
                         </span>
                     }
 
+                    @if (Model.EpostVarsler != null &&
+                         Model.EpostVarsler.Any(e =>
+                             e.Status == DugnadAppMvc.Models.EpostVarselStatus.Sendt))
+                    {
+                        <span class="text-success"
+                              title="E-post er sendt til beboerne">
+
+                            <i class="bi bi-envelope-check-fill"></i>
+
+                        </span>
+                    }
+
                 </div>
 
             </div>

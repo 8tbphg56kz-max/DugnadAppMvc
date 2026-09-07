@@ -19,23 +19,27 @@ public class OppgaverController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly OppgaveBildeService _bildeService;
+    private readonly EpostVarselService _epostVarselService;
 
     public OppgaverController(
-        ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager,
-        OppgaveBildeService bildeService)
+    ApplicationDbContext context,
+    UserManager<ApplicationUser> userManager,
+    OppgaveBildeService bildeService,
+    EpostVarselService epostVarselService)
     {
         _context = context;
         _userManager = userManager;
         _bildeService = bildeService;
+        _epostVarselService = epostVarselService;
     }
 
     public async Task<IActionResult> Index(OppgaveIndexViewModel model)
     {
         var query = _context.Oppgaver
-            .Include(o => o.Pameldinger)
-            .Include(o => o.Bilder)
-            .AsQueryable();
+     .Include(o => o.Pameldinger)
+     .Include(o => o.Bilder)
+     .Include(o => o.EpostVarsler)
+     .AsQueryable();
 
         if (model.ErUtfort.HasValue)
         {
@@ -46,6 +50,13 @@ public class OppgaverController : Controller
             .OrderBy(o => o.Prioritet)
             .ThenBy(o => o.Frist)
             .ToListAsync();
+
+        var epostVarsler = await _context.EpostVarsler
+    .Include(e => e.Mottakere)
+    .Where(e => e.OppgaveId.HasValue)
+    .ToListAsync();
+
+        ViewBag.EpostVarsler = epostVarsler;
 
         return View(model);
     }
@@ -236,6 +247,7 @@ public class OppgaverController : Controller
     }
 
     [Authorize(Roles = IdentityRoles.BoardAccess)]
+    [HttpGet]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -251,6 +263,15 @@ public class OppgaverController : Controller
         {
             return NotFound();
         }
+
+        // Hent e-postvarsel for denne oppgaven
+        var epostVarsel = await _context.EpostVarsler
+            .AsNoTracking()
+            .Include(e => e.SendtAvBruker)
+            .Include(e => e.Mottakere)
+            .FirstOrDefaultAsync(e => e.OppgaveId == oppgave.Id);
+
+        ViewBag.EpostVarsel = epostVarsel;
 
         return View(oppgave);
     }
@@ -368,6 +389,7 @@ public class OppgaverController : Controller
     }
 
     [Authorize]
+    [HttpGet]
     public async Task<IActionResult> Vis(int id)
     {
         var currentUser = await _userManager.GetUserAsync(User);
@@ -375,22 +397,35 @@ public class OppgaverController : Controller
         if (currentUser == null)
             return Challenge();
 
-        var beboer = await _context.Beboere
-            .FirstOrDefaultAsync(b => b.ApplicationUserId == currentUser.Id);
-
-        if (beboer == null)
-            return NotFound();
-
         var oppgave = await _context.Oppgaver
-          .Include(o => o.Pameldinger)
-          .Include(o => o.Bilder)
-          .FirstOrDefaultAsync(o => o.Id == id);
+            .Include(o => o.Pameldinger)
+            .Include(o => o.Bilder)
+            .FirstOrDefaultAsync(o => o.Id == id);
 
         if (oppgave == null)
             return NotFound();
 
-        var pamelding = oppgave.Pameldinger
-    .FirstOrDefault(p => p.BeboerId == beboer.Id);
+        // Finn beboer dersom innlogget bruker er koblet til en beboer.
+        var beboer = await _context.Beboere
+            .FirstOrDefaultAsync(b =>
+                b.ApplicationUserId == currentUser.Id);
+
+        // Vanlige beboere må være koblet til en Beboer.
+        // Styret kan se oppgaven uten slik kobling.
+        if (beboer == null &&
+            !User.IsInRole(IdentityRoles.BoardAccess))
+        {
+            return NotFound();
+        }
+
+        OppgavePamelding? pamelding = null;
+
+        if (beboer != null)
+        {
+            pamelding = oppgave.Pameldinger
+                .FirstOrDefault(p =>
+                    p.BeboerId == beboer.Id);
+        }
 
         ViewBag.ErPameldt = pamelding != null;
         ViewBag.Pamelding = pamelding;
@@ -1081,5 +1116,81 @@ public class OppgaverController : Controller
         TempData["Success"] = "Bildet ble slettet.";
 
         return RedirectToAction(nameof(Edit), new { id = oppgaveId });
+    }
+
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+    [HttpGet]
+    public async Task<IActionResult> BekreftEpostVarsel(int id)
+    {
+        var oppgave = await _context.Oppgaver
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (oppgave == null)
+        {
+            return NotFound();
+        }
+
+        var epostVarsel = await _context.EpostVarsler
+            .FirstOrDefaultAsync(e => e.OppgaveId == id);
+
+        if (epostVarsel != null)
+        {
+            TempData["Error"] =
+                "Det er allerede sendt e-post om denne oppgaven.";
+
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+
+        var antallMottakere = await _context.Beboere
+        .CountAsync(b =>
+        !string.IsNullOrWhiteSpace(b.Epost) &&
+        !b.IkkeMottaEpost);
+
+        if (antallMottakere == 0)
+        {
+            TempData["Error"] =
+                "Det finnes ingen beboere med registrert e-postadresse.";
+
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+
+        ViewBag.AntallMottakere = antallMottakere;
+
+        return View(oppgave);
+    }
+
+    [Authorize(Roles = IdentityRoles.BoardAccess)]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SendEpostVarsel(int id)
+    {
+        var brukerId = User.FindFirstValue(
+            ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(brukerId))
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            await _epostVarselService.SendOppgaveVarselAsync(
+                id,
+                brukerId);
+
+            TempData["Success"] =
+                "E-postvarselet er sendt til beboerne.";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+        catch (Exception)
+        {
+            TempData["Error"] =
+                "Det oppstod en feil ved sending av e-postvarselet.";
+        }
+
+        return RedirectToAction(nameof(Edit), new { id });
     }
 }

@@ -3,6 +3,7 @@ using System;
 using DugnadAppMvc.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DugnadAppMvc.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906180628_LeggTilStatusForEpostVarsel")]
+    partial class LeggTilStatusForEpostVarsel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -215,9 +218,6 @@ namespace DugnadAppMvc.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IkkeMottaEpost")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("LeilighetId")
                         .HasColumnType("integer");
 
@@ -409,7 +409,7 @@ namespace DugnadAppMvc.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("SendtDato")
+                    b.Property<DateTime>("SendtDato")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
@@ -891,7 +891,7 @@ namespace DugnadAppMvc.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("DugnadAppMvc.Models.Oppgave", "Oppgave")
-                        .WithMany("EpostVarsler")
+                        .WithMany()
                         .HasForeignKey("OppgaveId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -1067,8 +1067,6 @@ namespace DugnadAppMvc.Migrations
             modelBuilder.Entity("DugnadAppMvc.Models.Oppgave", b =>
                 {
                     b.Navigation("Bilder");
-
-                    b.Navigation("EpostVarsler");
 
                     b.Navigation("Pameldinger");
                 });

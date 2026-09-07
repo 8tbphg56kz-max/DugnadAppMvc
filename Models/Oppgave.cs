@@ -80,5 +80,6 @@ namespace DugnadAppMvc.Models
             = new List<OppgavePamelding>();
 
         public ICollection<OppgaveBilde> Bilder { get; set; } = new List<OppgaveBilde>();
+        public ICollection<EpostVarsel> EpostVarsler { get; set; } = new List<EpostVarsel>();
     }
 }

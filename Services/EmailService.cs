@@ -60,10 +60,6 @@ Hvis knappen ikke fungerer, kan du kopiere denne lenken inn i nettleseren:
 {footerText}
 </p>
 
-<p style="color:#666;font-size:14px;">
-DugnadApp
-</p>
-
 </body>
 </html>
 """;
@@ -138,6 +134,36 @@ DugnadApp
         await SendAsync(
             email,
             "Tilbakestill passord",
+            body);
+    }
+
+    public async Task SendNewActivityEmailAsync(
+    string email,
+    string type,
+    string navn,
+    string datoTekst,
+    string link)
+    {
+        var title = type == "Oppgave"
+            ? "Ny dugnadsoppgave i DugnadApp"
+            : "Ny fellesdugnad i DugnadApp";
+
+        var introText = type == "Oppgave"
+            ? $"Styret har lagt ut en ny dugnadsoppgave: <strong>{navn}</strong>."
+            : $"Styret har lagt ut en ny fellesdugnad: <strong>{navn}</strong>.";
+
+        var body = BuildHtmlEmail(
+            title,
+            $"{introText}<br><br>{datoTekst}",
+            type == "Oppgave"
+                ? "Se oppgaven"
+                : "Se dugnaden",
+            link,
+            "Du får denne e-posten fordi styret har lagt ut informasjon i DugnadApp.");
+
+        await SendAsync(
+            email,
+            title,
             body);
     }
 }

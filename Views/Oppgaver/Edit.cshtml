@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Rediger oppgave";
+
     var eksisterendeAntallBilder = Model.Bilder?.Count ?? 0;
     var maksNyeBilder = Math.Max(0, 5 - eksisterendeAntallBilder);
 }
@@ -11,6 +12,7 @@
     <div class="col-12 col-md-10 col-lg-8">
 
         <div class="card shadow-sm border-0 rounded-4">
+
             <div class="card-body p-4">
 
                 <h3 class="mb-2 d-flex align-items-center gap-2">
@@ -22,6 +24,8 @@
                     Oppdater informasjon om oppgaven.
                 </p>
 
+
+                <!-- HOVEDSKJEMA -->
                 <form asp-action="Edit"
                       method="post"
                       enctype="multipart/form-data">
@@ -77,10 +81,8 @@
                         <div class="border rounded-4 p-4 mt-4">
 
                             <h5 class="fw-semibold mb-3">
-
                                 <i class="bi bi-images me-1"></i>
                                 Bilder
-
                             </h5>
 
 
@@ -334,7 +336,138 @@
                 </form>
 
 
-                <!-- Skjema for sletting av eksisterende bilder -->
+                <!-- E-POSTVARSLING -->
+                @{
+                    var epostVarsel =
+                        ViewBag.EpostVarsel
+                        as DugnadAppMvc.Models.EpostVarsel;
+                }
+
+                <div class="border rounded-4 p-4 mt-4">
+
+                    <h5 class="fw-semibold mb-3">
+                        <i class="bi bi-envelope me-1"></i>
+                        E-postvarsling
+                    </h5>
+
+
+                    @if (epostVarsel == null)
+                    {
+                        <p class="text-muted mb-3">
+                            Det er ikke sendt e-post om denne oppgaven.
+                        </p>
+
+                        <a asp-action="BekreftEpostVarsel"
+                           asp-route-id="@Model.Id"
+                           class="btn btn-outline-primary">
+
+                            <i class="bi bi-envelope me-1"></i>
+                            Send e-post til beboerne
+
+                        </a>
+                    }
+                    else if (epostVarsel.Status ==
+                             DugnadAppMvc.Models.EpostVarselStatus.Sendt)
+                    {
+                        <div class="mb-3">
+
+                            <button type="button"
+                                    class="btn btn-success"
+                                    disabled>
+
+                                <i class="bi bi-check-circle me-1"></i>
+                                E-post sendt
+
+                            </button>
+
+                        </div>
+
+
+                        <div class="small text-muted">
+
+                            <div>
+                                <strong>Sendt:</strong>
+                                @epostVarsel.SendtDato?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </div>
+
+                            <div>
+                                <strong>Sendt av:</strong>
+                                @epostVarsel.SendtAvBruker?.UserName
+                            </div>
+
+                            <div>
+                                <strong>Mottakere:</strong>
+                                @epostVarsel.Mottakere.Count
+                            </div>
+
+                        </div>
+                    }
+                    else if (epostVarsel.Status ==
+                             DugnadAppMvc.Models.EpostVarselStatus.DelvisSendt)
+                    {
+                        var antallSendt =
+                            epostVarsel.Mottakere.Count(m => m.Sendt);
+
+                        var antallFeilet =
+                            epostVarsel.Mottakere.Count(m => !m.Sendt);
+
+                        <div class="mb-3">
+
+                            <button type="button"
+                                    class="btn btn-warning"
+                                    disabled>
+
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                E-post delvis sendt
+
+                            </button>
+
+                        </div>
+
+                        <div class="small text-muted">
+
+                            <div>
+                                <strong>Sendt:</strong>
+                                @antallSendt
+                            </div>
+
+                            <div>
+                                <strong>Feilet:</strong>
+                                @antallFeilet
+                            </div>
+
+                            <div>
+                                <strong>Forsøkt sendt:</strong>
+                                @epostVarsel.SendtDato?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </div>
+
+                        </div>
+                    }
+                    else if (epostVarsel.Status ==
+                             DugnadAppMvc.Models.EpostVarselStatus.Sender)
+                    {
+                        <div class="mb-3">
+
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    disabled>
+
+                                <i class="bi bi-hourglass-split me-1"></i>
+                                E-postsending pågår
+
+                            </button>
+
+                        </div>
+
+                        <div class="small text-muted">
+                            E-postene behandles. Ikke start en ny utsendelse.
+                        </div>
+                    }
+
+                </div>
+
+
+                <!-- SKJEMA FOR SLETTING AV BILDER -->
                 @if (Model.Bilder != null)
                 {
                     @foreach (var bilde in Model.Bilder)
@@ -355,9 +488,11 @@
                 }
 
             </div>
+
         </div>
 
     </div>
+
 </div>
 
 
@@ -387,7 +522,7 @@
             let bilder = [];
 
 
-            bildeInput.addEventListener("change", function() {
+            bildeInput.addEventListener("change", function () {
 
                 const nyeBilder =
                     Array.from(this.files);
@@ -507,29 +642,28 @@
             // Før skjemaet sendes:
             // legg alle bildene vi har samlet
             // tilbake i input-feltet.
-            document.querySelector("form[asp-action='Edit']");
+            document
+                            .querySelector("form[asp-action='Edit']")
+                .addEventListener("submit", function () {
 
-            document.querySelector("form")
-                .addEventListener("submit", function() {
-
-                    const dataTransfer =
+                                const dataTransfer =
                         new DataTransfer();
 
 
-                    bilder.forEach(function(bilde) {
+                                bilder.forEach(function (bilde) {
 
-                        dataTransfer.items.add(bilde);
+                                    dataTransfer.items.add(bilde);
 
-                    });
+                                });
 
 
-                    bildeInput.files =
+                                bildeInput.files =
                         dataTransfer.files;
 
-                    bildeInput.name =
+                                bildeInput.name =
                         "bilder";
 
-                });
+                            });
 
         </script>
     }

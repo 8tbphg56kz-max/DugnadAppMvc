@@ -73,7 +73,8 @@ namespace DugnadAppMvc
             builder.Services.AddScoped<IDatabaseRestoreService, DatabaseRestoreService>();
             builder.Services.AddScoped<OppgaveBildeService>();
             builder.Services.AddScoped<DugnadBildeService>();
-
+            builder.Services.AddScoped<EpostVarselService>();
+        
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders =
