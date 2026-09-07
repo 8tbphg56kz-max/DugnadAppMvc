@@ -147,7 +147,7 @@ namespace DugnadAppMvc.Controllers
             {
                 foreach (var registrering in historikk)
                 {
-                    var kanEndres = registrering.Registrert > DateTime.UtcNow.AddHours(-1);
+                    var kanEndres = registrering.Registrert > DateTime.UtcNow.AddHours(-8);
 
                     registrering.KanRedigeres = kanEndres;
                     registrering.KanSlettes = kanEndres;
@@ -219,6 +219,9 @@ namespace DugnadAppMvc.Controllers
                 return NotFound();
             }
 
+            ModelState.Remove(nameof(model.BeboerId));
+            ModelState.Remove(nameof(model.Begrunnelse));
+
             if (!ModelState.IsValid)
             {
             
@@ -248,7 +251,7 @@ namespace DugnadAppMvc.Controllers
             if (!KanEndresEllerSlettes(dugnadstime))
             {
                 TempData["ErrorMessage"] =
-                    "Dugnadstimen kan ikke endres etter én time.";
+                    "Dugnadstimen kan ikke endres etter åtte timer.";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -289,7 +292,7 @@ namespace DugnadAppMvc.Controllers
             if (!KanEndresEllerSlettes(dugnadstime))
             {
                 TempData["ErrorMessage"] =
-                    "Dugnadstimen kan ikke slettes etter én time.";
+                    "Dugnadstimen kan ikke slettes etter åtte timer.";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -331,7 +334,7 @@ namespace DugnadAppMvc.Controllers
 
         private static bool KanEndresEllerSlettes(Timeforing timeforing)
         {
-            return timeforing.RegistrertDato > DateTime.UtcNow.AddHours(-1);
+            return timeforing.RegistrertDato > DateTime.UtcNow.AddHours(-8);
         }
     }
 }
