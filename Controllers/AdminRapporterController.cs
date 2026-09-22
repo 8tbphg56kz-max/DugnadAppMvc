@@ -102,7 +102,8 @@ namespace DugnadAppMvc.Controllers
         {
             var innstillinger = await _context.Innstillinger.FirstAsync();
 
-            var totaleTimerAlle = await _context.Timeforinger.SumAsync(x => x.AntallTimer);
+            var totaleTimerAlle = await _context.Timeforinger
+                .SumAsync(x => x.AntallTimer);
 
             var timeverdi = totaleTimerAlle == 0
                 ? 0
@@ -121,11 +122,15 @@ namespace DugnadAppMvc.Controllers
                 .Select(g => new RapportTimerPrBeboerViewModel
                 {
                     BeboerId = g.Key.BeboerId,
-                    Navn = g.Key.Fornavn + " " + g.Key.Etternavn,
+
+                    // Vis etternavn først
+                    Navn = g.Key.Etternavn + ", " + g.Key.Fornavn,
+
                     Leilighetsnummer = g.Key.Leilighetsnummer,
                     AntallRegistreringer = g.Count(),
                     TotaleTimer = g.Sum(x => x.AntallTimer),
                 })
+                // Sorter først på etternavn, deretter fornavn
                 .OrderBy(x => x.Navn)
                 .ToListAsync();
 

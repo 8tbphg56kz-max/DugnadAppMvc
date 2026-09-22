@@ -22,46 +22,60 @@
 
         <div class="list-group list-group-flush">
 
-            @foreach (var bruker in Model.VentendeKontoer)
-            {
-                <div class="list-group-item d-flex justify-content-between align-items-center">
+    @foreach (var bruker in Model.VentendeKontoer
+    .OrderBy(x => x.LastName)
+    .ThenBy(x => x.FirstName))
+{
+    <div class="list-group-item">
 
-                    <div>
-                        <strong>@bruker.FirstName @bruker.LastName</strong><br />
-                        <span class="text-muted">@bruker.Email</span>
-                    </div>
+        <div class="text-center">
 
-                    <form asp-action="Aktiver" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
+            <div class="mb-2">
+                <strong>@bruker.LastName, @bruker.FirstName</strong><br />
+                <span class="text-muted">@bruker.Email</span>
+            </div>
 
-                        <input type="hidden" name="id" value="@bruker.Id" />
+            <form asp-action="Aktiver"
+                  method="post"
+                  class="mb-2">
 
-                        <button type="submit" class="btn btn-success btn-sm">
-                            <i class="bi bi-check-circle me-1"></i>
-                            Fullfør aktivering
-                        </button>
-                    </form>
+                @Html.AntiForgeryToken()
 
-                    <form asp-action="SendNyAktiveringslenke"
-                          method="post"
-                          class="d-inline">
+                <input type="hidden"
+                       name="id"
+                       value="@bruker.Id" />
 
-                        @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="btn btn-success btn-sm">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Fullfør aktivering
+                </button>
 
-                        <input type="hidden"
-                               name="id"
-                               value="@bruker.Id" />
+            </form>
 
-                        <button class="btn btn-outline-primary btn-sm">
-                            <i class="bi bi-envelope me-1"></i>
-                            Send ny lenke
-                        </button>
-                    </form>
+            <form asp-action="SendNyAktiveringslenke"
+                  method="post">
 
-                </div>
-            }
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="id"
+                       value="@bruker.Id" />
+
+                <button type="submit"
+                        class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-envelope me-1"></i>
+                    Send ny lenke
+                </button>
+
+            </form>
 
         </div>
+
+    </div>
+}
+
+</div>
     </div>
 }
 else

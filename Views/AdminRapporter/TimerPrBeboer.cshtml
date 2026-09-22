@@ -15,11 +15,22 @@
         <h2 class="mb-0">Timer pr. beboer</h2>
 
         <div>
-            <a asp-action="TimerPrBeboerPdf"
-               class="btn btn-outline-danger me-2">
+            <button type="button"
+                    class="btn btn-outline-danger me-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#rapportModal">
+
                 <i class="bi bi-file-earmark-pdf me-1"></i>
-                Eksporter til PDF
-            </a>
+
+                <span class="d-none d-sm-inline">
+                    Eksporter til PDF
+                </span>
+
+                <span class="d-inline d-sm-none">
+                    PDF
+                </span>
+
+            </button>
 
             <a asp-action="Index"
                class="btn btn-outline-secondary">
@@ -28,6 +39,7 @@
         </div>
 
     </div>
+
 
     <div class="card shadow-sm">
 
@@ -42,13 +54,31 @@
                 <table class="table table-hover table-clickable mb-0 align-middle">
 
                     <thead class="table-light">
+
                         <tr>
-                            <th class="fw-semibold">Beboer</th>
-                            <th class="fw-semibold">Leilighet</th>
-                            <th class="text-end fw-semibold">Registreringer</th>
-                            <th class="text-end fw-semibold">Timer</th>
-                            <th class="text-end fw-semibold">Verdi</th>
+
+                            <th class="fw-semibold">
+                                Beboer
+                            </th>
+
+                            <th class="fw-semibold">
+                                Leilighet
+                            </th>
+
+                            <th class="text-end fw-semibold">
+                                Registreringer
+                            </th>
+
+                            <th class="text-end fw-semibold">
+                                Timer
+                            </th>
+
+                            <th class="text-end fw-semibold">
+                                Verdi
+                            </th>
+
                         </tr>
+
                     </thead>
 
                     <tbody>
@@ -83,6 +113,7 @@
                     </tbody>
 
                     <tfoot class="table-light fw-bold">
+
                         <tr>
 
                             <td>
@@ -104,9 +135,192 @@
                             </td>
 
                         </tr>
+
                     </tfoot>
 
                 </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Rapport-modal -->
+<div class="modal fade"
+     id="rapportModal"
+     tabindex="-1"
+     aria-labelledby="rapportModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title" id="rapportModalLabel">
+
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+
+                    Timer pr. beboer
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Lukk">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <div class="text-center mb-4">
+
+                    <h4 class="mb-1">
+                        Timer pr. beboer
+                    </h4>
+
+                    <div class="text-muted">
+                        Rapport
+                    </div>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-sm align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+                                    Beboer
+                                </th>
+
+                                <th>
+                                    Leilighet
+                                </th>
+
+                                <th class="text-end">
+                                    Registreringer
+                                </th>
+
+                                <th class="text-end">
+                                    Timer
+                                </th>
+
+                                <th class="text-end">
+                                    Verdi
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var rad in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @rad.Navn
+                                    </td>
+
+                                    <td>
+                                        @rad.Leilighetsnummer
+                                    </td>
+
+                                    <td class="text-end">
+                                        @rad.AntallRegistreringer
+                                    </td>
+
+                                    <td class="text-end">
+                                        @rad.TotaleTimer.ToString("N1")
+                                    </td>
+
+                                    <td class="text-end">
+                                        @rad.TotalVerdi.ToString("N0") kr
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+
+                        <tfoot class="table-light fw-bold">
+
+                            <tr>
+
+                                <td>
+                                    Totalt
+                                </td>
+
+                                <td></td>
+
+                                <td class="text-end">
+                                    @totaltAntallRegistreringer
+                                </td>
+
+                                <td class="text-end">
+                                    @totaleTimer.ToString("N1")
+                                </td>
+
+                                <td class="text-end">
+                                    @totalVerdi.ToString("N0") kr
+                                </td>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+
+                <div class="alert alert-light border mt-3 mb-0">
+
+                    <i class="bi bi-info-circle me-1"></i>
+
+                    Trykk på <strong>Last ned PDF</strong> for å lagre
+                    rapporten som PDF.
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <a asp-action="TimerPrBeboerPdf"
+                   class="btn btn-danger"
+                   download="timer-pr-beboer.pdf">
+
+                    <i class="bi bi-file-earmark-pdf me-1"></i>
+
+                    Last ned PDF
+
+                </a>
+
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+
+                    Lukk
+
+                </button>
 
             </div>
 

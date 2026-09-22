@@ -181,7 +181,8 @@ namespace DugnadAppMvc.Controllers
             // ---------------------------------------------------------
 
             model.Dugnadstimer = await query
-                .OrderByDescending(d => d.RegistrertDato)
+                .OrderBy(d => d.Beboer.Etternavn)
+                .ThenBy(d => d.Beboer.Fornavn)
                 .Select(d => new AdminTimeforingViewModel
                 {
                     Id = d.Id,

@@ -40,49 +40,49 @@
 
                 <tbody>
 
-                    @foreach (var item in Model)
-                    {
-                        <tr>
+    @foreach (var item in Model.OrderBy(x => x.Dugnad))
+    {
+        <tr>
 
-                            <td>
-                                @item.Dato.ToString("dd.MM.yyyy")
-                            </td>
+            <td>
+                @item.Dato.ToString("dd.MM.yyyy")
+            </td>
 
-                            <td>
-                                @item.Dugnad
-                            </td>
+            <td>
+                @item.Dugnad
+            </td>
 
-                            <td>
-                                @if (item.Type == "Dugnad")
-                                {
-                                    <span class="badge bg-primary">
-                                        Dugnad
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success">
-                                        Oppgave
-                                    </span>
-                                }
-                            </td>
+            <td>
+                @if (item.Type == "Dugnad")
+                {
+                    <span class="badge bg-primary">
+                        Dugnad
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-success">
+                        Oppgave
+                    </span>
+                }
+            </td>
 
-                            <td class="text-end">
-                                @item.Registreringer
-                            </td>
+            <td class="text-end">
+                @item.Registreringer
+            </td>
 
-                            <td class="text-end">
-                                @item.Timer.ToString("0.#")
-                            </td>
+            <td class="text-end">
+                @item.Timer.ToString("0.#")
+            </td>
 
-                            <td class="text-end">
-                                @item.Verdi.ToString("N0") kr
-                            </td>
+            <td class="text-end">
+                @item.Verdi.ToString("N0") kr
+            </td>
 
-                        </tr>
-                    }
+        </tr>
+    }
 
-                </tbody>
+</tbody>
 
                 <tfoot class="fw-semibold">
 
