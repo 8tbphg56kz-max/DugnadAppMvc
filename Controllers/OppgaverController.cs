@@ -47,9 +47,10 @@ public class OppgaverController : Controller
         }
 
         model.Oppgaver = await query
-            .OrderBy(o => o.Prioritet)
-            .ThenBy(o => o.Frist)
-            .ToListAsync();
+    .OrderBy(o => o.Prioritet)
+    .ThenBy(o => o.Frist.HasValue ? 0 : 1)
+    .ThenBy(o => o.Frist)
+    .ToListAsync();
 
         var epostVarsler = await _context.EpostVarsler
     .Include(e => e.Mottakere)
@@ -91,10 +92,13 @@ public class OppgaverController : Controller
                     oppgave.FraDato,
                     DateTimeKind.Utc);
 
-            oppgave.Frist =
-                DateTime.SpecifyKind(
-                    oppgave.Frist,
-                    DateTimeKind.Utc);
+            if (oppgave.Frist.HasValue)
+            {
+                oppgave.Frist =
+                    DateTime.SpecifyKind(
+                        oppgave.Frist.Value,
+                        DateTimeKind.Utc);
+            }
 
             oppgave.ErUtført = false;
             oppgave.Opprettet = DateTime.UtcNow;
@@ -162,10 +166,13 @@ public class OppgaverController : Controller
                     oppgave.FraDato,
                     DateTimeKind.Utc);
 
-            oppgave.Frist =
-                DateTime.SpecifyKind(
-                    oppgave.Frist,
-                    DateTimeKind.Utc);
+            if (oppgave.Frist.HasValue)
+            {
+                oppgave.Frist =
+                    DateTime.SpecifyKind(
+                        oppgave.Frist.Value,
+                        DateTimeKind.Utc);
+            }
 
             // Hent eksisterende oppgave slik at vi ikke overskriver
             // navigasjonsegenskaper eller andre data.

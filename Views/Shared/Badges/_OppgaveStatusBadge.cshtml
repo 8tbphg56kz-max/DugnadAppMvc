@@ -17,12 +17,12 @@ else if (Model.Frist < DateTime.Today)
 else if (Model.Frist <= DateTime.Today.AddDays(7))
 {
     <span class="badge bg-warning text-dark">
-        Frist @Model.Frist.ToString("dd.MM")
+        Frist @Model.Frist?.ToString("dd.MM")
     </span>
 }
 else
 {
     <span class="badge bg-primary">
-        Frist @Model.Frist.ToString("dd.MM")
+        Frist @Model.Frist?.ToString("dd.MM")
     </span>
 }

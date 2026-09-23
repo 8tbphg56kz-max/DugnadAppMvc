@@ -23,10 +23,9 @@ namespace DugnadAppMvc.Models
         [Display(Name = "Fra dato")]
         public DateTime FraDato { get; set; }
 
-        [Required(ErrorMessage = "Frist må angis.")]
         [DataType(DataType.Date)]
         [Display(Name = "Frist")]
-        public DateTime Frist { get; set; }
+        public DateTime? Frist { get; set; }
 
         [Range(1, 100, ErrorMessage = "Antall personer må være mellom 1 og 100.")]
         [Display(Name = "Antall personer")]
@@ -62,7 +61,7 @@ namespace DugnadAppMvc.Models
         public IEnumerable<ValidationResult> Validate(
             ValidationContext validationContext)
         {
-            if (Frist < FraDato)
+            if (Frist.HasValue && Frist.Value < FraDato)
             {
                 yield return new ValidationResult(
                     "Frist kan ikke være tidligere enn fra dato.",

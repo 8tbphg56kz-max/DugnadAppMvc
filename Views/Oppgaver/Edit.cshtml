@@ -190,20 +190,23 @@
 
                             <div class="col-md-6">
 
-                                <label asp-for="Frist"
-                                       class="form-label fw-semibold">
-                                </label>
+    <label asp-for="Frist"
+           class="form-label fw-semibold">
+    </label>
 
-                                <input asp-for="Frist"
-                                       type="date"
-                                       class="form-control" />
+    <input asp-for="Frist"
+           type="date"
+           class="form-control" />
 
-                                <span asp-validation-for="Frist"
-                                      class="text-danger small">
-                                </span>
+    <div class="form-text">
+        La feltet stå tomt dersom oppgaven ikke har noen frist.
+    </div>
 
-                            </div>
+    <span asp-validation-for="Frist"
+          class="text-danger">
+    </span>
 
+</div>                 
                         </div>
 
 

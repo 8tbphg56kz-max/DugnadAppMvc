@@ -34,10 +34,13 @@
 
                 <div class="row mb-3">
 
-                    <div class="col-md-6">
-                        <strong>📅 Frist</strong><br />
-                        @Model.Frist.ToString("dd.MM.yyyy")
-                    </div>
+                    @if (Model.Frist.HasValue)
+{
+    <div class="col-md-6">
+        <strong>📅 Frist</strong><br />
+        @Model.Frist.Value.ToString("dd.MM.yyyy")
+    </div>
+}
 
                     <div class="col-md-6">
                         <strong>👥 Deltakere</strong><br />

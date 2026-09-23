@@ -13,13 +13,13 @@
             </h6>
 
 
-            <small class="text-muted">
-
-                <i class="bi bi-calendar-event me-1"></i>
-
-                Frist: @Model.Frist.ToString("dd.MM.yy")
-
-            </small>
+            @if (Model.Frist.HasValue)
+{
+    <small class="text-muted">
+        <i class="bi bi-calendar-event me-1"></i>
+        Frist: @Model.Frist.Value.ToString("dd.MM.yy")
+    </small>
+}
 
 
             <div class="mt-2">
