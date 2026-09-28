@@ -11,7 +11,7 @@
     sender vi deg en e-post med en lenke for å opprette passord.
 </p>
 
-<form asp-action="RequestActivation" method="post">
+<form asp-action="RequestActivation" method="post" id="activationForm">
 
     <div class="mb-3">
         <label asp-for="Email" class="form-label"></label>
@@ -19,7 +19,8 @@
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary" id="sendButton">
+        <i class="bi bi-envelope me-2"></i>
         Send e-post
     </button>
 
@@ -28,4 +29,15 @@
 @section Scripts
 {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById("activationForm").addEventListener("submit", function () {
+            const button = document.getElementById("sendButton");
+
+            button.disabled = true;
+            button.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+                'Sender e-post ...';
+        });
+    </script>
 }
