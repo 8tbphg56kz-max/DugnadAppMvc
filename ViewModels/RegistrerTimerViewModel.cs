@@ -18,5 +18,6 @@ namespace DugnadAppMvc.ViewModels
         [Display(Name = "Kommentar")]
         [StringLength(500)]
         public string? Kommentar { get; set; }
+        public bool KreverKommentarVedTimeforing { get; set; }
     }
 }

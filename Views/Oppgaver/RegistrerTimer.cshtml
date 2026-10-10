@@ -34,12 +34,24 @@
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Kommentar" class="form-label felt-overskrift">Kommentar(Valgfritt)</label>
-                        <textarea asp-for="Kommentar"
-                                  rows="3"
-                                  class="form-control"></textarea>
-                        <span asp-validation-for="Kommentar" class="text-danger"></span>
-                    </div>
+    <label asp-for="Kommentar" class="form-label felt-overskrift">
+        Kommentar
+        @if (Model.KreverKommentarVedTimeforing)
+        {
+            <span class="text-danger">*</span>
+        }
+        else
+        {
+            <span class="text-muted">(Valgfritt)</span>
+        }
+    </label>
+
+    <textarea asp-for="Kommentar"
+          rows="3"
+          class="form-control"></textarea>    
+
+    <span asp-validation-for="Kommentar" class="text-danger"></span>
+</div>
 
                     <button class="btn btn-primary">
                         Lagre timer

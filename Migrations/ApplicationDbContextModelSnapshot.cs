@@ -532,6 +532,9 @@ namespace DugnadAppMvc.Migrations
                     b.Property<bool>("KanUtføresFlereGanger")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("KreverKommentarVedTimeforing")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Navn")
                         .IsRequired()
                         .HasMaxLength(100)

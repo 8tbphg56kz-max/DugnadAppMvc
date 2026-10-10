@@ -333,13 +333,107 @@ namespace DugnadAppMvc.Controllers
                 {
                     var oppgaveId = int.Parse(model.Aktivitet[2..]);
 
-                    timeforing.OppgaveId = oppgaveId;
+                    var oppgave = await _context.Oppgaver
+                        .FirstOrDefaultAsync(o => o.Id == oppgaveId);
 
-                    aktivitetNavn = await _context.Oppgaver
-                        .Where(o => o.Id == oppgaveId)
-                        .Select(o => o.Navn)
-                        .FirstOrDefaultAsync()
-                        ?? "Ukjent oppgave";
+                    if (oppgave == null)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.Aktivitet),
+                            "Den valgte oppgaven finnes ikke.");
+
+                        await transaction.RollbackAsync();
+
+                        model.Aktiviteter = new List<SelectListItem>();
+
+                        model.Aktiviteter.AddRange(
+                            _context.Dugnader
+                                .Where(d => d.ErSynlig)
+                                .OrderBy(d => d.StartDato)
+                                .Select(d => new SelectListItem
+                                {
+                                    Value = $"D-{d.Id}",
+                                    Text = $"📅 {d.Tittel}"
+                                })
+                                .ToList());
+
+                        model.Aktiviteter.AddRange(
+                            _context.Oppgaver
+                                .OrderBy(o => o.Navn)
+                                .Select(o => new SelectListItem
+                                {
+                                    Value = $"O-{o.Id}",
+                                    Text = $"🛠 {o.Navn}"
+                                })
+                                .ToList());
+
+                        model.Beboere = _context.Beboere
+                            .OrderBy(b => b.Etternavn)
+                            .ThenBy(b => b.Fornavn)
+                            .Select(b => new SelectListItem
+                            {
+                                Value = b.Id.ToString(),
+                                Text = b.Etternavn + ", " + b.Fornavn
+                            })
+                            .ToList();
+
+                        model.TimerAlternativer = TimerAlternativerHelper.Hent();
+
+                        return View(model);
+                    }
+
+                    if (oppgave.KreverKommentarVedTimeforing &&
+                        string.IsNullOrWhiteSpace(model.Kommentar))
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.Kommentar),
+                            "Du må skrive en kommentar for denne oppgaven.");
+                    }
+
+                    if (!ModelState.IsValid)
+                    {
+                        await transaction.RollbackAsync();
+
+                        model.Aktiviteter = new List<SelectListItem>();
+
+                        model.Aktiviteter.AddRange(
+                            _context.Dugnader
+                                .Where(d => d.ErSynlig)
+                                .OrderBy(d => d.StartDato)
+                                .Select(d => new SelectListItem
+                                {
+                                    Value = $"D-{d.Id}",
+                                    Text = $"📅 {d.Tittel}"
+                                })
+                                .ToList());
+
+                        model.Aktiviteter.AddRange(
+                            _context.Oppgaver
+                                .OrderBy(o => o.Navn)
+                                .Select(o => new SelectListItem
+                                {
+                                    Value = $"O-{o.Id}",
+                                    Text = $"🛠 {o.Navn}"
+                                })
+                                .ToList());
+
+                        model.Beboere = _context.Beboere
+                            .OrderBy(b => b.Etternavn)
+                            .ThenBy(b => b.Fornavn)
+                            .Select(b => new SelectListItem
+                            {
+                                Value = b.Id.ToString(),
+                                Text = b.Etternavn + ", " + b.Fornavn
+                            })
+                            .ToList();
+
+                        model.TimerAlternativer = TimerAlternativerHelper.Hent();
+
+                        return View(model);
+                    }
+
+                    timeforing.OppgaveId = oppgave.Id;
+                    aktivitetNavn = oppgave.Navn;
                 }
                 else
                 {

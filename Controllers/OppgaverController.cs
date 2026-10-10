@@ -82,7 +82,7 @@ public class OppgaverController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-    [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave,
+    [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,KreverKommentarVedTimeforing,Utstyr,UtstyrPlassering,Prioritet")] Oppgave oppgave,
     List<IFormFile>? bilder)
     {
         if (ModelState.IsValid)
@@ -142,7 +142,7 @@ public class OppgaverController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(
      int? id,
-     [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave,
+     [Bind("Id,Navn,Beskrivelse,FraDato,Frist,AntallPersoner,KanRegistrereTimer,KanUtføresFlereGanger,KreverKommentarVedTimeforing,Utstyr,UtstyrPlassering,Prioritet,ErUtført")] Oppgave oppgave,
      List<IFormFile>? bilder)
     {
         if (id != oppgave.Id)
@@ -187,11 +187,9 @@ public class OppgaverController : Controller
 
             eksisterendeOppgave.Navn = oppgave.Navn;
             eksisterendeOppgave.Beskrivelse = oppgave.Beskrivelse;
-            eksisterendeOppgave.FraDato = oppgave.FraDato;
-            eksisterendeOppgave.Frist = oppgave.Frist;
-            eksisterendeOppgave.AntallPersoner = oppgave.AntallPersoner;
             eksisterendeOppgave.KanRegistrereTimer = oppgave.KanRegistrereTimer;
             eksisterendeOppgave.KanUtføresFlereGanger = oppgave.KanUtføresFlereGanger;
+            eksisterendeOppgave.KreverKommentarVedTimeforing = oppgave.KreverKommentarVedTimeforing;
             eksisterendeOppgave.Utstyr = oppgave.Utstyr;
             eksisterendeOppgave.UtstyrPlassering = oppgave.UtstyrPlassering;
             eksisterendeOppgave.Prioritet = oppgave.Prioritet;
@@ -502,7 +500,7 @@ public class OppgaverController : Controller
 
         TempData["Success"] = "Du er nå påmeldt oppgaven.";
 
-        return RedirectToAction(nameof(Vis), new { id });
+        return RedirectToAction("Index", "Dashboard");
     }
 
     [Authorize]
@@ -671,6 +669,7 @@ public class OppgaverController : Controller
         {
             OppgaveId = oppgave.Id,
             OppgaveNavn = oppgave.Navn,
+            KreverKommentarVedTimeforing = oppgave.KreverKommentarVedTimeforing,
             TimerAlternativer = TimerAlternativerHelper.Hent()
         };
 
@@ -722,6 +721,24 @@ public class OppgaverController : Controller
             return NotFound();
 
         var oppgave = pamelding.Oppgave;
+
+        // Kontroller om oppgaven krever kommentar ved timeføring.
+        if (oppgave.KreverKommentarVedTimeforing &&
+            string.IsNullOrWhiteSpace(model.Kommentar))
+        {
+            ModelState.AddModelError(
+                nameof(model.Kommentar),
+                "Du må beskrive hva som er utført.");
+
+            model.TimerAlternativer = TimerAlternativerHelper.Hent();
+
+            model.OppgaveId = oppgave.Id;
+            model.OppgaveNavn = oppgave.Navn;
+            model.KreverKommentarVedTimeforing =
+                oppgave.KreverKommentarVedTimeforing;
+
+            return View(model);
+        }
 
         // Gjentakende oppgave:
         // Påmeldingen skal bestå, og hver registrering

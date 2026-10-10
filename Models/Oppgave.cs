@@ -37,6 +37,9 @@ namespace DugnadAppMvc.Models
         [Display(Name = "Kan utføres flere ganger")]
         public bool KanUtføresFlereGanger { get; set; } = false;
 
+        [Display(Name = "Krev kommentar ved timeføring")]
+        public bool KreverKommentarVedTimeforing { get; set; } = false;
+
         [StringLength(500, ErrorMessage = "Utstyr kan ikke være lengre enn 500 tegn.")]
         [Display(Name = "Utstyr")]
         public string? Utstyr { get; set; }
