@@ -7,6 +7,7 @@ using DugnadAppMvc.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 [Authorize(Roles = IdentityRoles.AdminAccess)]
 public class ArsAvslutningController : Controller
@@ -14,15 +15,18 @@ public class ArsAvslutningController : Controller
     private readonly ApplicationDbContext _context;
     private readonly IDatabaseBackupService _backupService;
     private readonly DugnadTimerPdfService _pdfService;
+    private readonly ILogger<ArsAvslutningController> _logger;
 
     public ArsAvslutningController(
         ApplicationDbContext context,
         IDatabaseBackupService backupService,
-        DugnadTimerPdfService pdfService)
+        DugnadTimerPdfService pdfService,
+        ILogger<ArsAvslutningController> logger)
     {
         _context = context;
         _backupService = backupService;
         _pdfService = pdfService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -40,7 +44,7 @@ public class ArsAvslutningController : Controller
                 Path.Combine("/app/backups", pdfFilnavn);
 
             var pdfResult =
-    await _pdfService.GeneratePdfAsync(pdfFilbane);
+                await _pdfService.GeneratePdfAsync(pdfFilbane);
 
             if (!System.IO.File.Exists(pdfResult))
             {
@@ -70,13 +74,17 @@ public class ArsAvslutningController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(
+                ex,
+                "Feil ved opprettelse av backup og PDF-rapport.");
+
             ViewBag.Success = false;
             ViewBag.Message = ex.Message;
 
             return View();
         }
     }
-   
+
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -114,7 +122,7 @@ public class ArsAvslutningController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(
-    ArsAvslutningViewModel model)
+        ArsAvslutningViewModel model)
     {
         if (!model.UtbetalingForetatt)
         {
@@ -161,7 +169,7 @@ public class ArsAvslutningController : Controller
         }
 
         // -------------------------------------------------
-        // Finn dugnadsåret
+        // FINN DUGNADSÅRET
         // -------------------------------------------------
 
         var aar = GetDugnadsStartAar();
@@ -178,7 +186,7 @@ public class ArsAvslutningController : Controller
         }
 
         // -------------------------------------------------
-        // Kontroller at årsstatistikken ikke allerede finnes
+        // KONTROLLER AT ÅRSSTATISTIKKEN IKKE ALLEREDE FINNES
         // -------------------------------------------------
 
         var eksisterendeStatistikk =
@@ -226,7 +234,6 @@ public class ArsAvslutningController : Controller
                     .Select(t => (decimal?)t.AntallTimer)
                     .SumAsync() ?? 0m;
 
-
             // -------------------------------------------------
             // LAGRE HOVEDSTATISTIKK
             // -------------------------------------------------
@@ -249,7 +256,6 @@ public class ArsAvslutningController : Controller
             };
 
             _context.Arsstatistikker.Add(arsstatistikk);
-
 
             // -------------------------------------------------
             // HENT LEILIGHETER
@@ -284,7 +290,6 @@ public class ArsAvslutningController : Controller
             var totaltAntallLeiligheter =
                 leiligheterPerBygg.Values.Sum();
 
-
             // -------------------------------------------------
             // HENT TIMEFØRINGER MED LEILIGHET
             // -------------------------------------------------
@@ -295,7 +300,6 @@ public class ArsAvslutningController : Controller
                         .ThenInclude(b => b.Leilighet)
                     .AsNoTracking()
                     .ToListAsync();
-
 
             // -------------------------------------------------
             // SUMMER TIMER PER BYGG
@@ -319,7 +323,6 @@ public class ArsAvslutningController : Controller
                     .ToDictionary(
                         g => g.Key,
                         g => g.Sum(t => t.AntallTimer));
-
 
             // -------------------------------------------------
             // LAGRE BYGGSTATISTIKK
@@ -387,7 +390,6 @@ public class ArsAvslutningController : Controller
             _context.ArsstatistikkBygg.AddRange(
                 arsstatistikkBygg);
 
-
             // -------------------------------------------------
             // SLETT TIMEFØRINGER
             // -------------------------------------------------
@@ -397,7 +399,6 @@ public class ArsAvslutningController : Controller
 
             _context.Timeforinger.RemoveRange(
                 timeforinger);
-
 
             // -------------------------------------------------
             // SLETT OPPGAVEPÅMELDINGER
@@ -410,7 +411,6 @@ public class ArsAvslutningController : Controller
             _context.OppgavePameldinger.RemoveRange(
                 pameldinger);
 
-
             // -------------------------------------------------
             // SLETT OPPGAVER
             // -------------------------------------------------
@@ -421,7 +421,6 @@ public class ArsAvslutningController : Controller
             _context.Oppgaver.RemoveRange(
                 oppgaver);
 
-
             // -------------------------------------------------
             // SLETT DUGNADER
             // -------------------------------------------------
@@ -431,7 +430,6 @@ public class ArsAvslutningController : Controller
 
             _context.Dugnader.RemoveRange(
                 dugnader);
-
 
             // -------------------------------------------------
             // SLETT ENDRINGSLOGGER
@@ -444,7 +442,6 @@ public class ArsAvslutningController : Controller
             _context.Endringslogger.RemoveRange(
                 endringslogger);
 
-
             // -------------------------------------------------
             // LAGRE ALT
             // -------------------------------------------------
@@ -452,7 +449,6 @@ public class ArsAvslutningController : Controller
             await _context.SaveChangesAsync();
 
             await transaction.CommitAsync();
-
 
             TempData["Success"] =
                 $"Årsavslutning for dugnadsåret " +
@@ -462,17 +458,26 @@ public class ArsAvslutningController : Controller
 
             return RedirectToAction(nameof(Index));
         }
-        catch
+        catch (Exception ex)
         {
+            // Skriv den faktiske feilen til applikasjonsloggen.
+            _logger.LogError(
+                ex,
+                "Feil under årsavslutning for dugnadsåret {Aar}",
+                aar);
+
+            // Rull tilbake transaksjonen.
             await transaction.RollbackAsync();
 
             TempData["Error"] =
                 "Det oppstod en feil under årsavslutningen. " +
-                "Ingen registreringer eller årsstatistikk ble lagret.";
+                "Ingen registreringer eller årsstatistikk ble lagret. " +
+                "Se applikasjonsloggen for detaljer.";
 
             return RedirectToAction(nameof(Index));
         }
     }
+
     private static int GetDugnadsStartAar()
     {
         var now = DateTime.Now;
@@ -480,6 +485,7 @@ public class ArsAvslutningController : Controller
         // Dugnadsåret går fra desember til november.
         // Januar–november 2026 = dugnadsåret 2025/2026.
         // Desember 2026 = nytt dugnadsår 2026/2027.
+
         return now.Month >= 12
             ? now.Year
             : now.Year - 1;
@@ -496,12 +502,15 @@ public class ArsAvslutningController : Controller
         // Tillat kun selve filnavnet – ikke mapper/stier
         filnavn = Path.GetFileName(filnavn);
 
-        if (!filnavn.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+        if (!filnavn.EndsWith(
+            ".pdf",
+            StringComparison.OrdinalIgnoreCase))
         {
             return NotFound();
         }
 
-        var filbane = Path.Combine("/app/backups", filnavn);
+        var filbane =
+            Path.Combine("/app/backups", filnavn);
 
         if (!System.IO.File.Exists(filbane))
         {
