@@ -12,11 +12,12 @@ public class DatabaseBackupService : IDatabaseBackupService
         _configuration = configuration;
     }
 
-    public Task<string> CreateBackupAsync()
+    private (string Host, int Port, string Username, string Password) GetSshSettings()
     {
         var host = _configuration["BackupSettings:Host"];
         var username = _configuration["BackupSettings:Username"];
         var password = _configuration["BackupSettings:Password"];
+        var port = _configuration.GetValue<int>("BackupSettings:SshPort", 22);
 
         if (string.IsNullOrWhiteSpace(host) ||
             string.IsNullOrWhiteSpace(username) ||
@@ -26,7 +27,18 @@ public class DatabaseBackupService : IDatabaseBackupService
                 "BackupSettings mangler i konfigurasjonen.");
         }
 
-        using var ssh = new SshClient(host, username, password);
+        return (host, port, username, password);
+    }
+
+    public Task<string> CreateBackupAsync()
+    {
+        var settings = GetSshSettings();
+
+        using var ssh = new SshClient(
+            settings.Host,
+            settings.Port,
+            settings.Username,
+            settings.Password);
 
         ssh.Connect();
 

@@ -13,11 +13,12 @@ public class DatabaseRestoreService : IDatabaseRestoreService
         _configuration = configuration;
     }
 
-    public Task<List<string>> GetBackupsAsync()
+    private (string Host, int Port, string Username, string Password) GetSshSettings()
     {
         var host = _configuration["BackupSettings:Host"];
         var username = _configuration["BackupSettings:Username"];
         var password = _configuration["BackupSettings:Password"];
+        var port = _configuration.GetValue<int>("BackupSettings:SshPort", 22);
 
         if (string.IsNullOrWhiteSpace(host) ||
             string.IsNullOrWhiteSpace(username) ||
@@ -27,7 +28,18 @@ public class DatabaseRestoreService : IDatabaseRestoreService
                 "BackupSettings mangler i konfigurasjonen.");
         }
 
-        using var ssh = new SshClient(host, username, password);
+        return (host, port, username, password);
+    }
+
+    public Task<List<string>> GetBackupsAsync()
+    {
+        var settings = GetSshSettings();
+
+        using var ssh = new SshClient(
+            settings.Host,
+            settings.Port,
+            settings.Username,
+            settings.Password);
 
         ssh.Connect();
 
@@ -78,19 +90,13 @@ public class DatabaseRestoreService : IDatabaseRestoreService
                 nameof(backupFile));
         }
 
-        var host = _configuration["BackupSettings:Host"];
-        var username = _configuration["BackupSettings:Username"];
-        var password = _configuration["BackupSettings:Password"];
+        var settings = GetSshSettings();
 
-        if (string.IsNullOrWhiteSpace(host) ||
-            string.IsNullOrWhiteSpace(username) ||
-            string.IsNullOrWhiteSpace(password))
-        {
-            throw new InvalidOperationException(
-                "BackupSettings mangler i konfigurasjonen.");
-        }
-
-        using var ssh = new SshClient(host, username, password);
+        using var ssh = new SshClient(
+            settings.Host,
+            settings.Port,
+            settings.Username,
+            settings.Password);
 
         ssh.Connect();
 
